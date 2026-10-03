@@ -1,0 +1,13 @@
+# Editor / SO
+.vscode/
+.idea/
+.DS_Store
+*.swp
+
+# Dependencias y builds comunes
+node_modules/
+.venv/
+__pycache__/
+target/
+build/
+dist/
