@@ -1,0 +1,9 @@
+flownow/src/utils/helpers.js:49:  await exports.httpPost('https://api.mailblast.io/v3/send', { to: c.email, subject, body, from: 'no-reply@flownow.cl' });
+flownow/src/controllers/notificationController.js:20:      await helpers.httpPost('https://api.smsgo.com/send', { to: c.phone, text: body.slice(0, 160), key: 'smsgo_live_8812' });
+flownow/src/controllers/integrationController.js:14:    const r = await helpers.httpPost('https://api.hubcrm.com/v2/contacts', { name: c.name, email: c.email });
+flownow/src/services/paymentService.js:46:    await helpers.httpPost('https://api.payfast.cl/v1/pay', { amount, currency, token });
+flownow/src/services/paymentService.js:77:      const inv = await helpers.httpPost('https://erp.acme-internal.net/api/invoices', { request: requestId, amount, currency, customer: cust.email });
+flownow/src/services/paymentService.js:86:      await helpers.httpPost('https://api.hubcrm.com/v2/contacts/' + cust.crm_id, { tier: 'gold' });
+flownow/src/services/integrationService.js:8:  await helpers.httpPost('https://api.hubcrm.com/v2/events', { contact: c.crm_id, type: 'payment.' + p.stripey_status, amount: p.amount });
+flownow/src/services/customerService.js:17:    const r = await helpers.retry(() => helpers.httpPost('https://api.hubcrm.com/v2/contacts', { name: data.name, email: data.email }), 3);
+flownow/src/services/notificationService.js:20:    await helpers.httpPost('https://api.smsgo.com/send', { to: c.phone, text: body.slice(0, 160), key: 'smsgo_live_8812' });

@@ -42,37 +42,47 @@ flowchart LR
 
 ## 3. Pruebas de caracterización (paso 1, cierra TD-008)
 
-Black-box sobre la API. Cada fila es una prueba que debe estar **verde contra el AS-IS antes de tocar código** y seguir verde después. Las respuestas se normalizan (ids, timestamps, `erp_invoice`) y se comparan con valores esperados explícitos (no se "aprueba" ciegamente la salida actual).
+**Implementadas en el paso 1** (`flownow/test/characterization/`: `payments`, `refunds-retries`, `requests`, `customers`, `webhooks`, `reports`, `auth`; arnés en `test/support/harness.js`). Black-box sobre la API. Cada fila es una prueba que debe estar **verde contra el AS-IS antes de tocar código** y seguir verde después. Las aserciones usan valores esperados explícitos (no se "aprueba" ciegamente la salida actual) y no dependen de ids ni timestamps.
 
 | Comportamiento (invariante) | Prueba | Antes | Después |
 |---|---|---|---|
-| Pago aprobado: `paid`, solicitud `paid=1`, `erp_invoice` seteada, 1 intento | `POST /payments` con `tok_ok` | por escribir | ✅ |
-| Descuento por tier aplicado al monto (silver 10 %, gold 15 %) | solicitud + pago | por escribir | ✅ |
-| Bono gold −5000 si monto > 1.000.000 (TD-003) | pago gold grande | por escribir | ✅ |
-| Conversión USD ÷950, EUR ÷1030, redondeo a 2 decimales (TD-002) | pago con `currency` | por escribir | ✅ |
-| Rechazo: `failed`, solicitud sin pagar, aviso "rechazado" | `tok_declined` | por escribir | ✅ |
-| 3DS: `pending_action`, aviso "acción adicional" | `tok_3ds` | por escribir | ✅ |
-| Timeout: 3 intentos, `error`, HTTP 502 | `tok_timeout` | por escribir | ✅ |
-| Doble pago: 409 `solicitud ya pagada` | repetir pago | por escribir | ✅ |
-| Moneda no soportada / cliente inactivo / solicitud cancelada: 400 | validaciones | por escribir | ✅ |
-| Reembolso parcial → `paid`; total → `refunded`; excedido → 400; no pagado → 400 | `POST /payments/:id/refund` | por escribir | ✅ |
-| Reintento: sólo `failed/error`, máx. 3, el anterior pasa a `superseded` | `POST /payments/:id/retry` | por escribir | ✅ |
-| Cancelar solicitud pagada reembolsa y decrementa abiertas | `POST /requests/:id/cancel` | por escribir | ✅ |
-| `done` exige pago; transiciones inválidas → 400 | `POST /requests/:id/status` | por escribir | ✅ |
-| Umbral gold: `total_spent` acumulado > 2.000.000 promueve a gold | pagos sucesivos | por escribir | ✅ |
-| Efectos: aviso al cliente, factura ERP, evento a CRM (en `outbox`/bitácora) | tras pago ok | por escribir | ✅ |
-| Webhook de proveedor `charge.succeeded/failed` actualiza pago y solicitud | `POST /integrations/webhook/stripey` | por escribir | ✅ |
-| Webhook CRM `contact.updated/deleted` | `POST /integrations/webhook/crm` | por escribir | ✅ |
-| Reporte de ventas: totales por tier/proveedor/moneda en CLP | `GET /reports/sales` | por escribir | ✅ |
-| Alta de cliente: validaciones, duplicado 409, sync CRM, bienvenida | ya existen 2 (parcial) | parcial | ✅ |
+| Pago aprobado: `paid`, solicitud `paid=1`, `erp_invoice` seteada, 1 intento | `POST /payments` con `tok_ok` | ✅ verde en AS-IS | ✅ |
+| Descuento por tier aplicado al monto (silver 10 %, gold 15 %) | solicitud + pago | ✅ verde en AS-IS | ✅ |
+| Bono gold −5000 si monto > 1.000.000 (TD-003) | pago gold grande | ✅ verde en AS-IS | ✅ |
+| Conversión USD ÷950, EUR ÷1030, redondeo a 2 decimales (TD-002) | pago con `currency` | ✅ verde en AS-IS | ✅ |
+| Rechazo: `failed`, solicitud sin pagar, aviso "rechazado" | `tok_declined` | ✅ verde en AS-IS | ✅ |
+| 3DS: `pending_action`, aviso "acción adicional" | `tok_3ds` | ✅ verde en AS-IS | ✅ |
+| Timeout: 3 intentos, `error`, HTTP 502 | `tok_timeout` | ✅ verde en AS-IS | ✅ |
+| Doble pago: 409 `solicitud ya pagada` | repetir pago | ✅ verde en AS-IS | ✅ |
+| Moneda no soportada / cliente inactivo / solicitud cancelada: 400 | validaciones | ✅ verde en AS-IS | ✅ |
+| Reembolso parcial → `paid`; total → `refunded`; excedido → 400; no pagado → 400 | `POST /payments/:id/refund` | ✅ verde en AS-IS | ✅ |
+| Reintento: sólo `failed/error`, máx. 3, el anterior pasa a `superseded` | `POST /payments/:id/retry` | ✅ verde en AS-IS | ✅ |
+| Cancelar solicitud pagada reembolsa y decrementa abiertas | `POST /requests/:id/cancel` | ✅ verde en AS-IS | ✅ |
+| `done` exige pago; transiciones inválidas → 400 | `POST /requests/:id/status` | ✅ verde en AS-IS | ✅ |
+| Umbral gold: `total_spent` acumulado > 2.000.000 promueve a gold | pagos sucesivos | ✅ verde en AS-IS | ✅ |
+| Efectos: aviso al cliente, factura ERP, evento a CRM (en `outbox`/bitácora) | tras pago ok | ✅ verde en AS-IS | ✅ |
+| Webhook de proveedor `charge.succeeded/failed` actualiza pago y solicitud | `POST /integrations/webhook/stripey` | ✅ verde en AS-IS | ✅ |
+| Webhook CRM `contact.updated/deleted` | `POST /integrations/webhook/crm` | ✅ verde en AS-IS | ✅ |
+| Reporte de ventas: totales por tier/proveedor/moneda en CLP | `GET /reports/sales` | ✅ verde en AS-IS | ✅ |
+| Alta de cliente: validaciones, duplicado 409, sync CRM, bienvenida | ✅ verde en AS-IS | ✅ |
 
 Meta de cobertura (FF7): `paymentService`/futuro `modules/payment` ≥ 80 % líneas (hoy 18,9 %), medida por `baseline.sh`.
+
+### Resultado del paso 1 (medido)
+
+- **46 pruebas verdes** sobre el código AS-IS **sin modificar `src/`** (3 corridas consecutivas estables); antes eran 5.
+- Cobertura de líneas (`docs/baseline/paso1/cobertura.txt`): `paymentService` **18,9 % → 100 %**, `integrationService` 39,0 % → 100 %, `requestService` 42,2 % → 100 %, global 56,4 % → 98,2 %. Ahora el reporte incluye los controllers (antes ninguna prueba los cargaba).
+- Hallazgos de la caracterización (comportamiento actual que se **preserva** salvo decisión explícita):
+  1. El límite de 3 reintentos nunca se alcanza encadenando `retry` (cada reintento marca el anterior `superseded`); sólo con 3 cobros fallidos directos sobre la misma solicitud.
+  2. `customers.total_spent` suma el monto en la moneda del pago **sin convertir a CLP** (100 USD cuentan como 100): defecto del AS-IS, visible en `GET /reports/customers`.
+  3. Los avisos de pago nombran al proveedor ("procesado por Stripey"). **No se fijó en las pruebas**: el TO-BE lo elimina a propósito (invariante de Notification). Es el único cambio de comportamiento observable previsto, además de la lista de compatibilidad TD-010; ambos requieren aprobación y quedan registrados en el ADR correspondiente.
+  4. Los webhooks entrantes no exigen token (se caracteriza; la validación de origen es mejora futura, no parte del slice).
 
 ## 4. Secuencia incremental
 
 | # | Transformación (§11) | Qué se hace | Deuda | Riesgo | FF que se enciende |
 |---|---|---|---|---|---|
-| 1 | **Characterization tests** | suite black-box de §3 sobre el AS-IS | TD-008 | bajo | FF7 (umbral de cobertura crítica) |
+| 1 ✅ | **Characterization tests** | suite black-box de §3 sobre el AS-IS (hecho: 46 pruebas) | TD-008 (cerrada) | bajo | FF7 (umbral de cobertura crítica) |
 | 2 | **HardcodedValue → Configuration** | `platform/config` (env + defaults de desarrollo): claves, URLs, tasas FX, flags, secreto de firma | TD-006, parte de TD-002, H-1..H-4 | bajo | **FF5** |
 | 3 | **Seam: bus de eventos** | `platform/events` con `schemaVersion`, aislamiento de fallos y pruebas | TD-009 (registrar) | bajo | — |
 | 4 | **DirectVendorDependency → Port + Adapter** | `ProviderPort` + `StripeyAdapter` (ACL de estados/errores); respaldo PayFast como segundo adapter; se elimina `GatewayFactory`/`IPaymentGateway`/`INotifier` triviales | TD-005 | medio | **FF2**, FF2b |

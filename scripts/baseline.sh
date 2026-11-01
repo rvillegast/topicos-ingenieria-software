@@ -54,7 +54,7 @@ npx --yes jscpd@5.4.2 "$code" --min-tokens 25 --min-lines 3 --ignore "**/vendor/
 node "$here/data-access.js" "$code" > "$out/acceso-datos.csv"
 
 # 7. Pruebas y cobertura
-( cd "$src" && node --test --experimental-test-coverage --test-coverage-include="src/**/*.js" --test-coverage-exclude="src/vendor/**" --no-warnings "test/*.test.js" ) > "$out/cobertura.txt" 2>&1 || true
+( cd "$src" && node --test --experimental-test-coverage --test-coverage-include="src/**/*.js" --test-coverage-exclude="src/vendor/**" --no-warnings "test/**/*.test.js" ) > "$out/cobertura.txt" 2>&1 || true
 
 # 8. Referencias a proveedores externos (escenario: cambiar de proveedor)
 {
