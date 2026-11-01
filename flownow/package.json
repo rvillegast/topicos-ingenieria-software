@@ -1,0 +1,14 @@
+{
+  "name": "flownow",
+  "version": "0.6.3",
+  "description": "FlowNow - plataforma de clientes, solicitudes, pagos, notificaciones, integraciones y reportes (caso DecidArch, estado AS-IS deteriorado a propósito)",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test --no-warnings \"test/*.test.js\""
+  },
+  "license": "UNLICENSED",
+  "dependencies": {
+    "express": "^5.3.0"
+  }
+}

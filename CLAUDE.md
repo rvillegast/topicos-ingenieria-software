@@ -86,6 +86,9 @@ Descomposición por Parnas **20 %** · Cohesión/acoplamiento/complejidad 15 % �
 ## Contexto del curso
 
 - Equipos de 3–4 estudiantes, 2 semanas, 10–14 h por equipo.
-- Tecnologías libres según el repositorio entregado por el docente (aún no presente en este directorio). Cuando llegue, documentar aquí: stack, comandos de build/test, herramientas de análisis elegidas para cada fitness function (ver `ci/README.md`).
+- Tecnologías libres según el repositorio entregado por el docente. Mientras no llegue, `flownow/` contiene una versión AS-IS construida a mano con los síntomas de §14.2 (ver `flownow/README.md`).
+- **Stack de `flownow/`:** Node.js ≥ 22 (probado en 24) · Express 5 · SQLite (`node:sqlite`) · `node:test`. Proveedores externos simulados (sin red).
+- **Comandos** (desde `flownow/`): `npm install` · `npm start` (:3000) · `npm test`. SATD: `scripts/satd-scan.sh flownow/src`.
+- Herramientas de fitness functions para este stack (por definir): dependency-cruiser (FF1/FF2), Semgrep (FF2/FF3/FF5), `satd-scan.sh --gate` (FF4). Ver `ci/README.md`.
 - El uso de IA está permitido y esperado, pero debe quedar **trazabilidad** de cómo fue controlada por intención arquitectónica (guardar los prompts/intents usados).
 - Defensa oral: ver preguntas en §20 (secreto principal por módulo, dependencia aún riesgosa, deuda aceptada, patrón rechazado, cómo evitar que un agente reintroduzca el problema, etc.).
