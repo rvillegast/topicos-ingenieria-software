@@ -1,9 +1,9 @@
-[flownow] cliente sincronizado con hubcrm crm_9844
-✔ crea un cliente (1.543208ms)
-✔ rechaza email inválido (0.602625ms)
-✔ formatMoney CLP (7.518041ms)
-✔ validateEmail (0.131791ms)
-✔ tierDiscount (0.057583ms)
+[flownow] cliente sincronizado con hubcrm crm_8044
+✔ crea un cliente (1.58625ms)
+✔ rechaza email inválido (0.627916ms)
+✔ formatMoney CLP (7.414875ms)
+✔ validateEmail (0.118ms)
+✔ tierDiscount (0.056417ms)
 ℹ tests 5
 ℹ suites 0
 ℹ pass 5
@@ -11,7 +11,7 @@
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 46.989875
+ℹ duration_ms 47.2155
 ℹ start of coverage report
 ℹ ------------------------------------------------------------------------------
 ℹ file                      | line % | branch % | funcs % | uncovered lines

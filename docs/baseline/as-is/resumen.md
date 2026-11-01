@@ -1,8 +1,8 @@
 # Resumen de línea base (generado por `scripts/summarize.js`; no editar a mano)
 
 ```
-fecha: 2026-11-01T20:07:54-03:00
-commit: 6e0b3b18f490b915a511e56a1e7bd9ebe4dd146c
+fecha: 2026-11-01T20:11:22-03:00
+commit: 7b63efc6898508bc89fbf35c9d5e4fce9f1ece7f
 node: v24.18.0
 dependency-cruiser: 18.7.0 · jscpd: 5.4.2 · lizard: 1.24.3
 ```
@@ -75,6 +75,16 @@ NLOC por archivo (top 5): services/paymentService.js (90), services/reportServic
 | smsgo | 2 | 4 |
 | payfast | 1 | 3 |
 | acme-internal | 2 | 2 |
+
+## Impacto de escenarios de cambio (heurística por patrón; ver docs/escenarios/)
+
+| Escenario | Archivos | Módulos (por nombre) | Módulos |
+|---|---|---|---|
+| S1 | 12 | 5 | integration notification payment reporting shared |
+| S2 | 7 | 3 | notification request shared |
+| S3 | 13 | 7 | customer integration notification payment reporting request shared |
+| S4 | 9 | 5 | customer integration notification payment shared |
+| S5 | 7 | 4 | customer payment reporting shared |
 
 ## Pruebas y cobertura (node:test)
 

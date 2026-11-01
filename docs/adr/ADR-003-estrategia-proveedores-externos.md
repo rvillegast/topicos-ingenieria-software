@@ -1,12 +1,12 @@
-# ADR-003: Estrategia para proveedores externos
+# ADR-003: Estrategia para proveedores externos (Adapter / ACL)
 
 Status: Propuesto
-Context:
-Architectural concern:
-Decision:
-Alternatives considered:
-Consequences:
-Trade-offs:
-Evidence / fitness function:
-Affected modules:
-Date:
+Context: Los nombres, URLs y tipos de proveedor están dispersos: Stripey en 11 archivos (51 ocurrencias; incluso columnas `stripey_*` y textos al cliente), HubCRM en 6, SmsGo en 2, ERP en 2, MailBlast en 1, PayFast inline como `WORKAROUND`. `IPaymentGateway`/`GatewayFactory`/`INotifier` tienen una sola implementación y no ocultan nada (el servicio igual compara `e.type === 'Stripey…'`).
+Architectural concern: lock-in conceptual (§8), Interoperability, Evolvability: ¿necesitamos adapter / ACL?
+Decision: Cada proveedor vive **sólo** en un adapter dentro del módulo que lo posee: Stripey/PayFast en `payment/adapters`, MailBlast/SmsGo en `notification/adapters`, HubCRM/ERP en `integration/adapters`. El adapter implementa un **puerto neutro** (`ProviderPort`, `ChannelPort`, `CrmPort`, `ErpPort`) y actúa como ACL: traduce estados, errores y DTOs al vocabulario interno (`ProviderOutcome`: `captured|declined|action_required|unavailable`). Selección y credenciales por configuración. Los eventos y el esquema no llevan nombres ni tipos del proveedor (adiós `stripey_status`).
+Alternatives considered: (a) Factory genérica con `switch` (la actual): sin variabilidad y viola OCP. (b) Sin puerto, llamar el SDK desde el dominio: S1 sigue costando N archivos. (c) Módulo "Providers" central: junta secretos que cambian por razones distintas.
+Consequences: S1, S2 y S4 se acotan a un adapter (+ configuración). Pruebas con fakes de puerto, sin red. Cada puerto se justifica por una **segunda variante real o por frontera/prueba**: `ProviderPort` (Stripey + respaldo PayFast), `ChannelPort` (email + SMS + futuro WhatsApp), `CrmPort`/`ErpPort` (frontera y prueba; sin segunda variante hoy: se acepta como frontera).
+Trade-offs: La API HTTP de pagos conserva los campos legacy `stripey_*` en **un** presentador de compatibilidad (TD-010, allowlist explícita de FF2b) hasta versionar la API. Una indirección por proveedor; se rechaza crear puertos para funciones sin proveedor externo (`formatMoney`, `hash`).
+Evidence / fitness function: FF2 (dependency-cruiser: sólo `adapters/<proveedor>` importa su SDK) + FF2b (Semgrep: nombres de proveedor fuera de adapters) + FF5 (sin URLs/claves). Métrica: archivos que nombran al proveedor (S1: 12 → meta 1 módulo).
+Affected modules: Payment, Notification, Integration, Reporting.
+Date: 2026-11-01

@@ -496,7 +496,7 @@
     }
   ],
   "statistics": {
-    "detectionDate": "2026-11-01T23:07:55.510Z",
+    "detectionDate": "2026-11-01T23:11:24.122Z",
     "formats": {
       "javascript": {
         "clones": 13,

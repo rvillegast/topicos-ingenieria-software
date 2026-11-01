@@ -75,7 +75,7 @@ Descomposición por Parnas **20 %** · Cohesión/acoplamiento/complejidad 15 % �
 
 - `PLAN.md`: plan de trabajo por fases.
 - `flownow/`: código del caso (AS-IS sintético en Node/Express; reemplazable por el repo del docente).
-- `docs/E1…E8-*.md`: entregables. `docs/modules/`: una ficha de módulo por módulo (Anexo A). `docs/adr/`: ADR-001 a 005. `docs/intents/`: intents y prompts usados con IA, para la trazabilidad.
+- `docs/E1…E8-*.md`: entregables. `docs/modules/`: una ficha de módulo por módulo (Anexo A). `docs/adr/`: ADR-001 a 006. `docs/00-guia-de-diseno.md`: índice del diseño completo (C4, TO-BE, CI/CD, trazabilidad). `docs/escenarios/`: definición de los escenarios de cambio. `docs/intents/`: intents y prompts usados con IA, para la trazabilidad.
 - `docs/baseline/{as-is,to-be}/`: salida de los scripts. No se edita a mano.
 - `scripts/baseline.sh <código> <salida>`: genera la línea base. Los pasos 4–7 (dependencias, complejidad, acceso a datos, cobertura) quedan por completar según el stack.
 - `scripts/satd-scan.sh [--gate] <ruta>`: genera el CSV de deuda autoadmitida. Con `--gate` falla si encuentra alguna sin gestionar (FF4).

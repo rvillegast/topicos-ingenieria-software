@@ -1,13 +1,17 @@
 # ci/
 
-Reglas de arquitectura y configuración del quality gate. Se completa cuando se conozca el stack de FlowNow.
+Reglas de arquitectura y configuración del quality gate. Diseño completo en [`docs/E4-fitness-functions.md`](../docs/E4-fitness-functions.md).
 
-| FF | Regla | Opciones según stack | Archivo |
-|---|---|---|---|
-| FF1 | Sin ciclos entre módulos | JS/TS: dependency-cruiser · Java: ArchUnit/jQAssistant · Python: import-linter · .NET: NetArchTest | |
-| FF2 | Tipos del proveedor no salen del adapter | ArchUnit · dependency-cruiser · Semgrep | |
-| FF3 | Sólo el owner escribe sus tablas | Semgrep · ArchUnit | |
-| FF4 | Sin SATD no gestionada | `scripts/satd-scan.sh --gate` | ✅ |
-| FF5 | Sin URLs/secretos hard-coded | Semgrep · gitleaks | |
+| FF | Regla | Herramienta | Archivo | Estado |
+|---|---|---|---|---|
+| FF1 | Sin ciclos entre módulos | dependency-cruiser 18.7.0 | `dependency-cruiser.cjs` | ✅ base (`no-circular`) |
+| FF2 | Tipos/SDK del proveedor no salen del adapter | dependency-cruiser | `dependency-cruiser.cjs` | diseñada |
+| FF2b | Nombres de proveedor sólo en adapters | Semgrep | `semgrep/provider-names.yml` | diseñada |
+| FF3 | Sólo el owner lee/escribe sus tablas | script Node + `ownership.json` | `rules/table-ownership.js` | diseñada |
+| FF4 | Sin SATD no gestionada | `scripts/satd-scan.sh --gate` + `rules/ledger-consistency.js` | `../scripts/` | ✅ base (`--gate`) |
+| FF5 | Sin URLs/secretos hard-coded | Semgrep + gitleaks | `semgrep/no-hardcoded.yml` | diseñada |
+| FF6 | Dependencias prohibidas / sólo vía `contract/` | dependency-cruiser | `dependency-cruiser.cjs` | diseñada |
+| FF7 | Pruebas críticas y cobertura | `node:test` + `rules/coverage-threshold.js` | `rules/` | diseñada |
+| FF8 | La complejidad no aumenta | lizard + ratchet | `lizard-ratchet.json` | diseñada |
 
-Pipeline: `Static Analysis → Architecture Rules → SATD Gate → Tests → Quality Gate`. Cualquier fallo bloquea el merge.
+Pipeline: `Static Analysis → Architecture Rules → SATD Gate → Tests → Quality Gate`. Cualquier fallo bloquea el merge. Cada regla debe demostrarse **fallando** (`prove-rules-fail.sh`).

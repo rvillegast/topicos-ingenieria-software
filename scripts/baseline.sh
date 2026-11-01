@@ -67,6 +67,9 @@ node "$here/data-access.js" "$code" > "$out/acceso-datos.csv"
 } > "$out/proveedores.csv"
 grep -rIioE "${excl_dirs[@]}" "${excl_files[@]}" -e 'stripey|hubcrm|mailblast|smsgo|payfast|acme-internal' "$code" | sort | uniq -c > "$out/proveedores-por-archivo.txt" || true
 
+# 9. Impacto de los escenarios de cambio (docs/escenarios/escenarios.json)
+node "$here/change-impact.js" "$code" > "$out/escenarios.csv"
+
 # Resumen legible a partir de los datos crudos
 node "$here/summarize.js" "$out" > "$out/resumen.md"
 

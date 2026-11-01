@@ -73,6 +73,11 @@ h('Referencias a proveedores externos');
 out.push('| Proveedor | Archivos | Ocurrencias |\n|---|---|---|');
 for (const l of csv('proveedores.csv')) out.push('| ' + l.split(',').join(' | ') + ' |');
 
+// Escenarios
+h('Impacto de escenarios de cambio (heurística por patrón; ver docs/escenarios/)');
+out.push('| Escenario | Archivos | Módulos (por nombre) | Módulos |\n|---|---|---|---|');
+for (const l of csv('escenarios.csv')) { const m = l.match(/^(\w+),(\d+),(\d+),"([^"]*)"/); out.push(`| ${m[1]} | ${m[2]} | ${m[3]} | ${m[4]} |`); }
+
 // Cobertura
 const cov = read('cobertura.txt').split('\n').filter((l) => /\|/.test(l));
 const all = cov.find((l) => /all files/.test(l));

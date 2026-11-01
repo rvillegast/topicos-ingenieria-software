@@ -1,0 +1,32 @@
+[
+  {
+    "id": "S1",
+    "nombre": "Cambiar el proveedor de pagos",
+    "cambio": "Reemplazar Stripey por otro proveedor (nuevo SDK, nuevos estados, nuevos errores).",
+    "patron": "stripey|payfast|charges\\.create|refunds\\.create|GatewayFactory|IPaymentGateway"
+  },
+  {
+    "id": "S2",
+    "nombre": "Agregar un canal de notificación (WhatsApp)",
+    "cambio": "Sumar un canal nuevo con su proveedor, sin tocar las reglas de negocio que disparan avisos.",
+    "patron": "sendEmail|smsgo|mailblast|enableSms|ENABLE_SMS|INotifier|EmailNotifier|'email'|'sms'"
+  },
+  {
+    "id": "S3",
+    "nombre": "Cambiar el modelo de Customer",
+    "cambio": "Por ejemplo, separar nombre en nombre/apellido y agregar identificador tributario.",
+    "patron": "(FROM|JOIN|INTO|UPDATE)\\s+customers\\b|total_spent|open_requests|crm_id"
+  },
+  {
+    "id": "S4",
+    "nombre": "Incorporar una nueva integración externa",
+    "cambio": "Por ejemplo, un segundo ERP o un sistema de contabilidad que reciba facturas y clientes.",
+    "patron": "hubcrm|acme-internal|httpPost|integration_logs"
+  },
+  {
+    "id": "S5",
+    "nombre": "Separar reporting de los datos transaccionales",
+    "cambio": "Mover los reportes a un almacén de lectura propio, sin consultar las tablas operativas.",
+    "patron": "toCsv|SUM\\(|byTier|byProvider|byStatus|dashboard|summary|[Rr]eport"
+  }
+]
