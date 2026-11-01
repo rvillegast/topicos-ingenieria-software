@@ -27,7 +27,7 @@ Login: `POST /auth/login` con `admin@flownow.cl` / `admin123` → token Bearer. 
 | Interfaces sin variabilidad | `IPaymentGateway`+`GatewayFactory` (1 implementación), `INotifier` (1 implementación) |
 | SOLID inconsistente | interfaces rituales junto a `processPayment` monolítico (SRP/OCP/DIP violados); `services` que conocen `db` y HTTP |
 | Sin frontera para APIs de terceros | `stripey_status`/`stripey_charge_id` en el esquema y en el texto al cliente, `e.type === 'Stripey…'` en el service, reportes por `provider` |
-| TODO/FIXME/HACK/TEMP/WORKAROUND | 8 marcadores, ninguno con ticket (`scripts/satd-scan.sh flownow/src`) |
+| TODO/FIXME/HACK/TEMP/WORKAROUND | 8 marcadores, ninguno con ticket (`scripts/satd-scan.sh flownow/src flownow/test`) |
 | Pruebas insuficientes | sólo utilitarios y alta de clientes; **cero** pruebas de pagos, reembolsos, webhooks, cancelación o reportes |
 
 ## Probar la API con cURL

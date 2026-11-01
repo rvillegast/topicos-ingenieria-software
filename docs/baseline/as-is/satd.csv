@@ -1,0 +1,9 @@
+file,line,tag,managed,ticket,text
+"flownow/src/config.js",7,TODO,no,,"stripeyKey: 'sk_live_51HxFlowNowPROD0000abc', // TODO: mover a un secret manager"
+"flownow/src/services/paymentService.js",32,HACK,no,,"if (cust.tier === 'gold' && amount > 1000000) amount = amount - 5000; // HACK: bono comercial acordado por teléfono con ventas"
+"flownow/src/services/paymentService.js",33,TEMP,no,,"if (currency === 'USD') amount = amount / 950; // TEMP: tipo de cambio fijo hasta integrar servicio de FX"
+"flownow/src/services/paymentService.js",45,WORKAROUND,no,,"// WORKAROUND: proveedor de respaldo ""payfast"" cuando Stripey cae; sin pruebas ni contrato"
+"flownow/src/services/paymentService.js",81,TODO,no,,"helpers.log('ERP caído, factura pendiente', 'erp'); // TODO: cola de reintentos para facturas"
+"flownow/src/services/customerService.js",21,FIXME,no,,"helpers.log('falló sync hubcrm: ' + e.message, 'hubcrm'); // FIXME: reintentar luego, hoy se pierde el contacto"
+"flownow/src/services/reportService.js",16,TEMP,no,,"if (x.currency === 'USD') clp = x.amount * 950; // TEMP: mismo tipo de cambio fijo que en pagos"
+"flownow/test/helpers.test.js",8,TODO,no,,"// TODO: agregar pruebas de pagos, reembolsos y webhooks (hoy no hay ninguna)"

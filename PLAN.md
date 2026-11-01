@@ -48,12 +48,12 @@ ci/                               # pipeline + reglas (Semgrep, dependency-cruis
 
 ### Fase 1. Línea base reproducible (§15 paso 1) · ~2,5 h · B + D
 
-- [ ] `scripts/baseline.sh`: grafo de dependencias, ciclos, complejidad por archivo y función, duplicación, cobertura actual.
-- [ ] `scripts/satd-scan.sh`: buscar `TODO|FIXME|HACK|TEMP|WORKAROUND`, exportar a CSV y clasificar (diseño, defecto, documentación, requisitos, pruebas).
-- [ ] Inventario de valores fijos en el código: URLs, nombres de proveedores, flags, secretos.
-- [ ] Mapa de acceso a datos: qué componente lee o escribe cada tabla. De ahí sale el ownership actual.
-- [ ] Puntos de integración con terceros.
-- [ ] Guardar la salida en `docs/baseline/as-is/`, sin editarla a mano.
+- [x] `scripts/baseline.sh`: grafo de dependencias, ciclos, complejidad por archivo y función, duplicación, cobertura actual.
+- [x] `scripts/satd-scan.sh`: buscar `TODO|FIXME|HACK|TEMP|WORKAROUND`, exportar a CSV y clasificar (diseño, defecto, documentación, requisitos, pruebas).
+- [x] Inventario de valores fijos en el código: URLs, nombres de proveedores, flags, secretos.
+- [x] Mapa de acceso a datos: qué componente lee o escribe cada tabla. De ahí sale el ownership actual.
+- [x] Puntos de integración con terceros.
+- [x] Guardar la salida en `docs/baseline/as-is/`, sin editarla a mano.
 
 **Listo cuando:** cualquier integrante puede volver a correr el script y obtiene los mismos números.
 

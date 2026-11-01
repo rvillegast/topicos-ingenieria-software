@@ -1,0 +1,39 @@
+[flownow] cliente sincronizado con hubcrm crm_9844
+✔ crea un cliente (1.543208ms)
+✔ rechaza email inválido (0.602625ms)
+✔ formatMoney CLP (7.518041ms)
+✔ validateEmail (0.131791ms)
+✔ tierDiscount (0.057583ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 46.989875
+ℹ start of coverage report
+ℹ ------------------------------------------------------------------------------
+ℹ file                      | line % | branch % | funcs % | uncovered lines
+ℹ ------------------------------------------------------------------------------
+ℹ src                       |        |          |         | 
+ℹ  config.js                | 100.00 |   100.00 |  100.00 | 
+ℹ  db.js                    | 100.00 |   100.00 |  100.00 | 
+ℹ  services                 |        |          |         | 
+ℹ   customerService.js      |  85.11 |    64.71 |   57.14 | 21-22 37-41
+ℹ   integrationService.js   |  39.02 |   100.00 |    0.00 | 6-9 14-25 30-38
+ℹ   interfaces              |        |          |         | 
+ℹ    EmailNotifier.js       | 100.00 |   100.00 |  100.00 | 
+ℹ    GatewayFactory.js      | 100.00 |   100.00 |  100.00 | 
+ℹ    INotifier.js           | 100.00 |   100.00 |    0.00 | 
+ℹ    IPaymentGateway.js     | 100.00 |   100.00 |    0.00 | 
+ℹ    StripeyGateway.js      |  73.33 |   100.00 |   33.33 | 9-10 12-13
+ℹ   notificationService.js  |  59.46 |   100.00 |   25.00 | 16-22 26-32 36
+ℹ   paymentService.js       |  18.92 |   100.00 |    0.00 | 12-14 21-97 101-110
+ℹ   requestService.js       |  42.22 |   100.00 |   20.00 | 11-25 29-32 38-44
+ℹ  utils                    |        |          |         | 
+ℹ   helpers.js              |  89.66 |    57.89 |   61.54 | 9-10 39 55-57
+ℹ ------------------------------------------------------------------------------
+ℹ all files                 |  56.42 |    73.08 |   36.96 | 
+ℹ ------------------------------------------------------------------------------
+ℹ end of coverage report
