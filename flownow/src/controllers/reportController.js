@@ -1,5 +1,5 @@
 const reportService = require('../services/reportService');
-const config = require('../config');
+const config = require('../platform/config');
 const db = require('../db');
 const helpers = require('../utils/helpers');
 
@@ -21,7 +21,7 @@ exports.requests = (req, res) => {
 
 // Dashboard calculado en el controller leyendo todas las tablas
 exports.dashboard = (req, res) => {
-  if (!config.useNewReports) return res.json({ legacy: true });
+  if (!config.flags.useNewReports) return res.json({ legacy: true });
   const customers = db.prepare('SELECT COUNT(*) n FROM customers').get().n;
   const open = db.prepare("SELECT COUNT(*) n FROM requests WHERE status NOT IN ('done','cancelled')").get().n;
   const paid = db.prepare("SELECT SUM(amount) s FROM payments WHERE status = 'paid' AND currency = 'CLP'").get().s || 0;

@@ -1,5 +1,5 @@
 const db = require('../db');
-const config = require('../config');
+const config = require('../platform/config');
 const helpers = require('../utils/helpers');
 const GatewayFactory = require('./interfaces/GatewayFactory');
 const requestService = require('./requestService');
@@ -29,9 +29,8 @@ exports.processPayment = async (requestId, token, currency) => {
 
   let amount = r.amount;
   if (r.discount > 0) amount = amount - amount * r.discount;
-  if (cust.tier === 'gold' && amount > 1000000) amount = amount - 5000; // HACK: bono comercial acordado por teléfono con ventas
-  if (currency === 'USD') amount = amount / 950; // TEMP: tipo de cambio fijo hasta integrar servicio de FX
-  else if (currency === 'EUR') amount = amount / 1030;
+  if (cust.tier === 'gold' && amount > 1000000) amount = amount - 5000; // HACK(TD-003): bono comercial acordado por teléfono con ventas
+  if (currency !== 'CLP') amount = amount / config.fx.rates[currency]; // TEMP(TD-002): tasa fija hasta integrar un servicio de FX
   amount = Math.round(amount * 100) / 100;
 
   const info = db.prepare('INSERT INTO payments (request_id, customer_id, amount, currency, status, provider, created_at) VALUES (?,?,?,?,?,?,?)')
@@ -41,9 +40,9 @@ exports.processPayment = async (requestId, token, currency) => {
   let charge = null;
   let attempts = 0;
   let lastError = null;
-  if (process.env.USE_BACKUP_PROVIDER === '1') {
-    // WORKAROUND: proveedor de respaldo "payfast" cuando Stripey cae; sin pruebas ni contrato
-    await helpers.httpPost('https://api.payfast.cl/v1/pay', { amount, currency, token });
+  if (config.flags.useBackupProvider) {
+    // WORKAROUND(TD-005): proveedor de respaldo "payfast" cuando Stripey cae; sin pruebas ni contrato
+    await helpers.httpPost(config.providers.payfast.payUrl, { amount, currency, token });
     charge = { id: 'pf_' + Date.now(), status: 'succeeded' };
     db.prepare("UPDATE payments SET provider = 'payfast' WHERE id = ?").run(pid);
   } else {
@@ -74,16 +73,16 @@ exports.processPayment = async (requestId, token, currency) => {
     db.prepare('UPDATE customers SET total_spent = total_spent + ? WHERE id = ?').run(amount, cust.id);
     // factura en ERP
     try {
-      const inv = await helpers.httpPost('https://erp.acme-internal.net/api/invoices', { request: requestId, amount, currency, customer: cust.email });
+      const inv = await helpers.httpPost(`${config.providers.erp.baseUrl}/invoices`, { request: requestId, amount, currency, customer: cust.email });
       db.prepare('UPDATE requests SET erp_invoice = ? WHERE id = ?').run(inv.invoice, requestId);
       helpers.log('factura ERP ' + inv.invoice, 'erp');
     } catch (e) {
-      helpers.log('ERP caído, factura pendiente', 'erp'); // TODO: cola de reintentos para facturas
+      helpers.log('ERP caído, factura pendiente', 'erp'); // TODO(TD-004): cola de reintentos para facturas
     }
     // actualiza el CRM si el cliente superó el umbral
     if (cust.total_spent + amount > 2000000 && cust.tier !== 'gold') {
       db.prepare("UPDATE customers SET tier = 'gold' WHERE id = ?").run(cust.id);
-      await helpers.httpPost('https://api.hubcrm.com/v2/contacts/' + cust.crm_id, { tier: 'gold' });
+      await helpers.httpPost(`${config.providers.hubcrm.baseUrl}/contacts/${cust.crm_id}`, { tier: 'gold' });
     }
   } else if (charge.status === 'failed') {
     db.prepare("UPDATE payments SET status = 'failed', stripey_charge_id = ?, stripey_status = ? WHERE id = ?").run(charge.id, charge.status, pid);

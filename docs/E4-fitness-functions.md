@@ -25,8 +25,8 @@ flowchart LR
 | **FF2** | El SDK/tipos del proveedor de pagos no salen de su adapter | ADR-003 | dependency-cruiser (`not-to-sdk-outside-adapter`) | `ci/dependency-cruiser.cjs` | sólo `modules/payment/adapters/**` puede importar `vendor/stripey-sdk` | `notification` importa `stripey-sdk` |
 | **FF2b** | Nombres de proveedor no aparecen fuera de adapters | ADR-003 | Semgrep (`pattern-regex`) | `ci/semgrep/provider-names.yml` | `stripey|payfast|hubcrm|mailblast|smsgo|acme` fuera de `adapters/**`, `platform/config` y `payment/http/legacy-presenter` (TD-010); **0** | escribir `'stripey'` en `request` |
 | **FF3** | Sólo el owner lee/escribe sus tablas | ADR-001, ADR-002 | script Node `ci/rules/table-ownership.js` (reutiliza `scripts/data-access.js`) + `ci/ownership.json` | `ci/rules/`, `ci/ownership.json` | tablas `<módulo>_*` sólo mencionadas bajo `modules/<módulo>/`; **ratchet** para lo aún no migrado (`ci/ownership-ratchet.json`: puede bajar, no subir) | `notification` ejecuta `SELECT … FROM payment_payments` |
-| **FF4** | Sin SATD no gestionada en código nuevo/intervenido | ADR-005 | `scripts/satd-scan.sh --gate` + `ci/rules/ledger-consistency.js` | `scripts/`, `ci/rules/` ✅ base | **0**; cada `TD-xxx` citado existe en el ledger con owner, fecha y verificación | agregar `// TODO arreglar` sin ticket |
-| **FF5** | Sin URLs/secretos/valores de ambiente hard-coded | ADR-005 | Semgrep + gitleaks | `ci/semgrep/no-hardcoded.yml` | **0** fuera de `platform/config` (defaults de desarrollo) y `test/`; gitleaks sobre el historial del PR | `const KEY = 'sk_live_…'` o `fetch('https://api.x.com')` |
+| **FF4** | Sin SATD no gestionada en código nuevo/intervenido | ADR-005 | `scripts/satd-scan.sh --gate` + `ci/rules/ledger-consistency.js` | `scripts/`, `ci/rules/` ✅ **implementada** (paso 2) | **0**; cada `TD-xxx` citado existe en el ledger con owner, fecha y verificación | agregar `// TODO arreglar` sin ticket |
+| **FF5** | Sin URLs/secretos/valores de ambiente hard-coded | ADR-005 | script portable `ci/rules/no-hardcoded.js` (regex; equivalente a una regla Semgrep, §12) + gitleaks para el historial (pendiente) | `ci/rules/no-hardcoded.js` ✅ **implementada** (paso 2) | **0** fuera de `platform/config` (defaults de desarrollo) y `test/`; gitleaks sobre el historial del PR | `const KEY = 'sk_live_…'` o `fetch('https://api.x.com')` |
 | **FF6** | Dependencias prohibidas bloquean el merge | ADR-004 | dependency-cruiser (`only-via-contract`, `payment-is-leaf`, `no-sql-in-http`) | `ci/dependency-cruiser.cjs` | entre módulos sólo se importa `modules/<m>/contract`; Payment no importa módulos; `http/` no importa `db`; **0** violaciones | `request` importa `payment/domain/PaymentLifecycle` |
 | **FF7** | Pruebas críticas y contratos siguen pasando | §11, E3 | `node:test` con cobertura + `ci/rules/coverage-threshold.js` | `ci/rules/` | caracterización + contrato verdes; cobertura de `modules/payment` ≥ 80 % líneas | borrar una prueba de Payment o romper un schema de evento |
 | **FF8** | La complejidad no aumenta | §8 | lizard 1.24.3 + ratchet | `ci/lizard-ratchet.json` | CCN máx. del alcance intervenido ≤ 10; en el resto no puede subir (AS-IS máx.: 26) | función nueva con CCN > 10 |
@@ -62,6 +62,17 @@ rules:
     paths:
       exclude: ['**/adapters/**', 'src/platform/config*', 'src/modules/payment/http/legacy-presenter.js', 'test/**', 'docs/**']
 ```
+
+### 2.2. Estado de implementación y demostración de fallo
+
+| Regla | Estado | Evidencia |
+|---|---|---|
+| FF4 | ✅ implementada | `ci/rules/rules.test.js`: falla con marcador sin ticket, TD inexistente, TD cerrado y entradas sin owner/fecha/verificación; pasa con el estado actual (0 sin gestionar, 10 entradas coherentes) |
+| FF5 | ✅ implementada | `ci/rules/rules.test.js`: falla ante URL, clave `sk_live`, secreto, tipo de cambio y correo literales; pasa con `platform/config.js` como único permitido. Sobre el código previo al paso 2 detecta **22** violaciones; hoy **0** |
+| FF1 | base (`no-circular`) | 6 ciclos hoy; se enciende como ratchet y bloqueante al paso 11 |
+| FF2, FF2b, FF3, FF6, FF7, FF8 | diseñadas | pasos 4, 7, 9 de E3 |
+
+Ejecución local de todo lo disponible: `ci/run-rules.sh` (mismo orden que el pipeline). Las demostraciones de fallo corren con `node --test "ci/rules/*.test.js"`.
 
 ## 3. Pipeline de CI (§12.1)
 
@@ -113,7 +124,8 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 24, cache: npm, cache-dependency-path: flownow/package-lock.json }
       - run: cd flownow && npm ci && node --check src/server.js
-      - run: pip install -r ci/requirements.txt && semgrep scan --config ci/semgrep --error flownow/src   # FF2b, FF5
+      - run: node ci/rules/no-hardcoded.js flownow/src                                                 # FF5
+      - run: pip install -r ci/requirements.txt && semgrep scan --config ci/semgrep --error flownow/src   # FF2b (cuando exista)
       - uses: gitleaks/gitleaks-action@v2                                                              # FF5 (historial)
       - run: ci/rules/lizard-ratchet.sh flownow/src                                                    # FF8
   architecture:

@@ -1,5 +1,6 @@
 const db = require('../db');
 const helpers = require('../utils/helpers');
+const config = require('../platform/config');
 const paymentService = require('../services/paymentService');
 
 exports.pay = async (req, res) => {
@@ -30,7 +31,7 @@ exports.summary = (req, res) => {
   const rows = db.prepare("SELECT amount, currency, status FROM payments").all();
   let total = 0, failed = 0;
   for (const x of rows) {
-    if (x.status === 'paid') total += x.currency === 'USD' ? x.amount * 950 : x.currency === 'EUR' ? x.amount * 1030 : x.amount;
+    if (x.status === 'paid') total += x.amount * (config.fx.rates[x.currency] || 1);
     if (x.status === 'failed') failed++;
   }
   res.json({ total, totalFormatted: helpers.formatMoney(total, 'CLP'), failed, provider: 'stripey' });

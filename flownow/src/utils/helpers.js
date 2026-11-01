@@ -1,8 +1,7 @@
 // Utilitarios generales de FlowNow
 const crypto = require('crypto');
 const db = require('../db');
-
-const SECRET = 'flownow-secret-2024';
+const config = require('../platform/config');
 
 exports.formatMoney = (n, cur) => {
   if (cur === 'CLP') return '$' + Math.round(n).toLocaleString('es-CL');
@@ -13,7 +12,7 @@ exports.formatMoney = (n, cur) => {
 exports.validateEmail = (e) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e || '');
 exports.validatePhone = (p) => /^\+?\d{8,15}$/.test((p || '').replace(/\s/g, ''));
 exports.now = () => new Date().toISOString();
-exports.hash = (s) => crypto.createHash('sha1').update(s + SECRET).digest('hex');
+exports.hash = (s) => crypto.createHash('sha1').update(s + config.security.tokenSecret).digest('hex');
 exports.signToken = (u) => Buffer.from(JSON.stringify({ id: u.id, role: u.role, sig: exports.hash(u.email) })).toString('base64');
 exports.parseToken = (t) => { try { return JSON.parse(Buffer.from(t, 'base64').toString()); } catch (e) { return null; } };
 
@@ -27,8 +26,8 @@ exports.log = (msg, system) => {
 exports.outbox = [];
 exports.httpPost = async (url, body) => {
   exports.outbox.push({ url, body });
-  if (url.includes('hubcrm.com')) return { ok: true, id: 'crm_' + Math.floor(Math.random() * 99999) };
-  if (url.includes('erp.acme-internal.net')) return { ok: true, invoice: 'INV-' + Date.now() };
+  if (url.startsWith(config.providers.hubcrm.baseUrl)) return { ok: true, id: 'crm_' + Math.floor(Math.random() * 99999) };
+  if (url.startsWith(config.providers.erp.baseUrl)) return { ok: true, invoice: 'INV-' + Date.now() };
   return { ok: true };
 };
 
@@ -46,7 +45,7 @@ exports.tierDiscount = (tier) => (tier === 'gold' ? 0.15 : tier === 'silver' ? 0
 exports.sendEmail = async (customerId, subject, body) => {
   const c = db.prepare('SELECT email FROM customers WHERE id = ?').get(customerId);
   if (!c) return false;
-  await exports.httpPost('https://api.mailblast.io/v3/send', { to: c.email, subject, body, from: 'no-reply@flownow.cl' });
+  await exports.httpPost(config.providers.mailblast.sendUrl, { to: c.email, subject, body, from: config.providers.mailblast.from });
   db.prepare('INSERT INTO notifications (customer_id, channel, subject, body, status, created_at) VALUES (?,?,?,?,?,?)').run(customerId, 'email', subject, body, 'sent', exports.now());
   return true;
 };

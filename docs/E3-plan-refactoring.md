@@ -83,7 +83,7 @@ Meta de cobertura (FF7): `paymentService`/futuro `modules/payment` ≥ 80 % lín
 | # | Transformación (§11) | Qué se hace | Deuda | Riesgo | FF que se enciende |
 |---|---|---|---|---|---|
 | 1 ✅ | **Characterization tests** | suite black-box de §3 sobre el AS-IS (hecho: 46 pruebas) | TD-008 (cerrada) | bajo | FF7 (umbral de cobertura crítica) |
-| 2 | **HardcodedValue → Configuration** | `platform/config` (env + defaults de desarrollo): claves, URLs, tasas FX, flags, secreto de firma | TD-006, parte de TD-002, H-1..H-4 | bajo | **FF5** |
+| 2 ✅ | **HardcodedValue → Configuration** | `platform/config` (env + defaults de desarrollo): claves, URLs, tasas FX, flags, secreto de firma | TD-006, parte de TD-002, H-1..H-4 | bajo | **FF5** |
 | 3 | **Seam: bus de eventos** | `platform/events` con `schemaVersion`, aislamiento de fallos y pruebas | TD-009 (registrar) | bajo | — |
 | 4 | **DirectVendorDependency → Port + Adapter** | `ProviderPort` + `StripeyAdapter` (ACL de estados/errores); respaldo PayFast como segundo adapter; se elimina `GatewayFactory`/`IPaymentGateway`/`INotifier` triviales | TD-005 | medio | **FF2**, FF2b |
 | 5 | **LargeMethod → ExtractClass** | `processPayment` → `PaymentLifecycle` + `ChargeRetryPolicy` + `FxPolicy` (funciones puras con pruebas unitarias) | TD-002 | medio | umbral de complejidad (CCN ≤ 10 en el módulo) |
@@ -128,6 +128,21 @@ flowchart TB
   end
   ANTES --> DESPUES
 ```
+
+### 4.2. Resultado del paso 2 (medido)
+
+`HardcodedValue → Configuration`: nuevo `src/platform/config.js` (lectura perezosa de variables de entorno, defaults **no secretos** sólo para desarrollo, claves obligatorias con `NODE_ENV=production`). Se retiró `src/config.js` y se eliminaron del resto del código las URLs de proveedores, claves, secreto de firma, credencial admin, remitente de correo y tasas FX.
+
+| Indicador | Antes del paso 2 | Después | Cómo se midió |
+|---|---|---|---|
+| FF5 (valores fijos en `src/`) | **22 violaciones** (9 URL, 6 FX, 3 clave, 3 correo, 1 secreto) | **0** | `node ci/rules/no-hardcoded.js` sobre `git archive 3a3eb9f` y sobre el árbol actual |
+| SATD sin gestionar | 7 | **0** (los 6 marcadores restantes citan su `TD-xxx`; el de `config.js` se resolvió y se retiró) | `scripts/satd-scan.sh --gate` + `ci/rules/ledger-consistency.js` |
+| Pruebas | 46 | **50** verdes (4 nuevas de `config`); la suite de caracterización pasa **sin cambios** | `npm test` |
+| Cobertura global | 98,2 % | 98,3 % | `docs/baseline/paso2/` |
+
+Las 5 líneas con URLs y 4 con "posibles secretos" que aún muestra `baseline.sh` están **sólo** en `platform/config.js` (el único lugar permitido). Verificado además: con `NODE_ENV=production` y sin variables, la app **no arranca** (falla con "Falta la variable de entorno …"); con las variables, `admin123` deja de funcionar y sólo entra la contraseña configurada.
+
+Efecto de comportamiento: ninguno con la configuración por defecto (la suite de caracterización lo demuestra). El secreto de firma por defecto cambió (`dev-only-token-secret`), lo que sólo invalida tokens ya emitidos.
 
 ## 5. Estimación y reparto (supuesto: 10–14 h del equipo, §16.3)
 

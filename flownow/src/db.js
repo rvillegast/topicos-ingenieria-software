@@ -1,5 +1,5 @@
 const { DatabaseSync } = require('node:sqlite');
-const config = require('./config');
+const config = require('./platform/config');
 
 // Conexión global compartida: todos los controllers y services la importan directo.
 const db = new DatabaseSync(config.dbFile);

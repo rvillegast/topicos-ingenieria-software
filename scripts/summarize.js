@@ -66,6 +66,7 @@ const lines = (f) => read(f).trim().split('\n').filter(Boolean).length;
 h('Valores hard-coded y SATD');
 out.push(`- Líneas con URLs: **${lines('urls.txt')}** · líneas con posibles secretos: **${lines('posibles-secretos.txt')}**`);
 out.push(`- ${read('satd-resumen.txt').trim()}`);
+if (fs.existsSync(path.join(dir, 'ff5-hardcoded.txt'))) out.push(`- ${read('ff5-hardcoded.txt').trim().split('\n').pop()} (regla FF5, \`ci/rules/no-hardcoded.js\`)`);
 const satd = csv('satd.csv'); out.push(`- Marcadores SATD totales: **${satd.length}**`);
 
 // Proveedores

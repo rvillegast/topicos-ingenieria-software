@@ -1,0 +1,641 @@
+{
+  "duplicates": [
+    {
+      "firstFile": {
+        "end": 5,
+        "endLoc": {
+          "column": 8,
+          "line": 5,
+          "position": 129
+        },
+        "name": "controllers/authController.js",
+        "start": 1,
+        "startLoc": {
+          "column": 0,
+          "line": 1,
+          "position": 0
+        }
+      },
+      "format": "javascript",
+      "fragment": "const db = require('../db');\nconst helpers = require('../utils/helpers');\nconst config = require('../platform/config');\n\nexports.seedAdmin = () => {",
+      "isNew": false,
+      "kind": "exact",
+      "lines": 5,
+      "secondFile": {
+        "end": 6,
+        "endLoc": {
+          "column": 8,
+          "line": 6,
+          "position": 199
+        },
+        "name": "controllers/integrationController.js",
+        "start": 2,
+        "startLoc": {
+          "column": 0,
+          "line": 2,
+          "position": 70
+        }
+      },
+      "tokens": 26
+    },
+    {
+      "firstFile": {
+        "end": 6,
+        "endLoc": {
+          "column": 34,
+          "line": 6,
+          "position": 212
+        },
+        "name": "controllers/customerController.js",
+        "start": 2,
+        "startLoc": {
+          "column": 42,
+          "line": 2,
+          "position": 71
+        }
+      },
+      "format": "javascript",
+      "fragment": "const helpers = require('../utils/helpers');\nconst customerService = require('../services/customerService');\n\nexports.create = async (req, res) => {\n  try { res.status(201).json(await customerService.create(req.body)); }",
+      "isNew": false,
+      "kind": "exact",
+      "lines": 5,
+      "secondFile": {
+        "end": 7,
+        "endLoc": {
+          "column": 34,
+          "line": 7,
+          "position": 274
+        },
+        "name": "controllers/requestController.js",
+        "start": 3,
+        "startLoc": {
+          "column": 59,
+          "line": 3,
+          "position": 133
+        }
+      },
+      "tokens": 34
+    },
+    {
+      "firstFile": {
+        "end": 9,
+        "endLoc": {
+          "column": 8,
+          "line": 9,
+          "position": 333
+        },
+        "name": "controllers/customerController.js",
+        "start": 6,
+        "startLoc": {
+          "column": 66,
+          "line": 6,
+          "position": 244
+        }
+      },
+      "format": "javascript",
+      "fragment": "  try { res.status(201).json(await customerService.create(req.body)); }\n  catch (e) { res.status(e.status || 500).json({ error: e.message }); }\n};\nexports.list = (req, res) => res.json(customerService.list());",
+      "isNew": false,
+      "kind": "exact",
+      "lines": 4,
+      "secondFile": {
+        "end": 11,
+        "endLoc": {
+          "column": 8,
+          "line": 11,
+          "position": 554
+        },
+        "name": "controllers/customerController.js",
+        "start": 10,
+        "startLoc": {
+          "column": 79,
+          "line": 10,
+          "position": 467
+        }
+      },
+      "tokens": 36
+    },
+    {
+      "firstFile": {
+        "end": 9,
+        "endLoc": {
+          "column": 8,
+          "line": 9,
+          "position": 333
+        },
+        "name": "controllers/customerController.js",
+        "start": 6,
+        "startLoc": {
+          "column": 58,
+          "line": 6,
+          "position": 236
+        }
+      },
+      "format": "javascript",
+      "fragment": "  try { res.status(201).json(await customerService.create(req.body)); }\n  catch (e) { res.status(e.status || 500).json({ error: e.message }); }\n};\nexports.list = (req, res) => res.json(customerService.list());",
+      "isNew": false,
+      "kind": "exact",
+      "lines": 4,
+      "secondFile": {
+        "end": 14,
+        "endLoc": {
+          "column": 8,
+          "line": 14,
+          "position": 811
+        },
+        "name": "controllers/customerController.js",
+        "start": 11,
+        "startLoc": {
+          "column": 87,
+          "line": 11,
+          "position": 633
+        }
+      },
+      "tokens": 39
+    },
+    {
+      "firstFile": {
+        "end": 9,
+        "endLoc": {
+          "column": 38,
+          "line": 9,
+          "position": 363
+        },
+        "name": "controllers/customerController.js",
+        "start": 6,
+        "startLoc": {
+          "column": 66,
+          "line": 6,
+          "position": 244
+        }
+      },
+      "format": "javascript",
+      "fragment": "  try { res.status(201).json(await customerService.create(req.body)); }\n  catch (e) { res.status(e.status || 500).json({ error: e.message }); }\n};\nexports.list = (req, res) => res.json(customerService.list());",
+      "isNew": false,
+      "kind": "exact",
+      "lines": 4,
+      "secondFile": {
+        "end": 10,
+        "endLoc": {
+          "column": 38,
+          "line": 10,
+          "position": 458
+        },
+        "name": "controllers/paymentController.js",
+        "start": 7,
+        "startLoc": {
+          "column": 120,
+          "line": 7,
+          "position": 339
+        }
+      },
+      "tokens": 48
+    },
+    {
+      "firstFile": {
+        "end": 9,
+        "endLoc": {
+          "column": 8,
+          "line": 9,
+          "position": 333
+        },
+        "name": "controllers/customerController.js",
+        "start": 6,
+        "startLoc": {
+          "column": 66,
+          "line": 6,
+          "position": 244
+        }
+      },
+      "format": "javascript",
+      "fragment": "  try { res.status(201).json(await customerService.create(req.body)); }\n  catch (e) { res.status(e.status || 500).json({ error: e.message }); }\n};\nexports.list = (req, res) => res.json(customerService.list());",
+      "isNew": false,
+      "kind": "exact",
+      "lines": 4,
+      "secondFile": {
+        "end": 18,
+        "endLoc": {
+          "column": 8,
+          "line": 18,
+          "position": 915
+        },
+        "name": "controllers/paymentController.js",
+        "start": 13,
+        "startLoc": {
+          "column": 76,
+          "line": 13,
+          "position": 754
+        }
+      },
+      "tokens": 36
+    },
+    {
+      "firstFile": {
+        "end": 9,
+        "endLoc": {
+          "column": 38,
+          "line": 9,
+          "position": 363
+        },
+        "name": "controllers/customerController.js",
+        "start": 6,
+        "startLoc": {
+          "column": 50,
+          "line": 6,
+          "position": 228
+        }
+      },
+      "format": "javascript",
+      "fragment": "  try { res.status(201).json(await customerService.create(req.body)); }\n  catch (e) { res.status(e.status || 500).json({ error: e.message }); }\n};\nexports.list = (req, res) => res.json(customerService.list());",
+      "isNew": false,
+      "kind": "exact",
+      "lines": 4,
+      "secondFile": {
+        "end": 10,
+        "endLoc": {
+          "column": 38,
+          "line": 10,
+          "position": 424
+        },
+        "name": "controllers/requestController.js",
+        "start": 7,
+        "startLoc": {
+          "column": 49,
+          "line": 7,
+          "position": 289
+        }
+      },
+      "tokens": 54
+    },
+    {
+      "firstFile": {
+        "end": 9,
+        "endLoc": {
+          "column": 8,
+          "line": 9,
+          "position": 333
+        },
+        "name": "controllers/customerController.js",
+        "start": 6,
+        "startLoc": {
+          "column": 66,
+          "line": 6,
+          "position": 244
+        }
+      },
+      "format": "javascript",
+      "fragment": "  try { res.status(201).json(await customerService.create(req.body)); }\n  catch (e) { res.status(e.status || 500).json({ error: e.message }); }\n};\nexports.list = (req, res) => res.json(customerService.list());",
+      "isNew": false,
+      "kind": "exact",
+      "lines": 4,
+      "secondFile": {
+        "end": 15,
+        "endLoc": {
+          "column": 8,
+          "line": 15,
+          "position": 907
+        },
+        "name": "controllers/requestController.js",
+        "start": 12,
+        "startLoc": {
+          "column": 113,
+          "line": 12,
+          "position": 718
+        }
+      },
+      "tokens": 36
+    },
+    {
+      "firstFile": {
+        "end": 4,
+        "endLoc": {
+          "column": 5,
+          "line": 4,
+          "position": 125
+        },
+        "name": "controllers/notificationController.js",
+        "start": 1,
+        "startLoc": {
+          "column": 0,
+          "line": 1,
+          "position": 0
+        }
+      },
+      "format": "javascript",
+      "fragment": "const db = require('../db');\nconst config = require('../platform/config');\nconst helpers = require('../utils/helpers');\nconst notificationService = require('../services/notificationService');",
+      "isNew": false,
+      "kind": "exact",
+      "lines": 4,
+      "secondFile": {
+        "end": 4,
+        "endLoc": {
+          "column": 5,
+          "line": 4,
+          "position": 125
+        },
+        "name": "services/notificationService.js",
+        "start": 1,
+        "startLoc": {
+          "column": 0,
+          "line": 1,
+          "position": 0
+        }
+      },
+      "tokens": 25
+    },
+    {
+      "firstFile": {
+        "end": 4,
+        "endLoc": {
+          "column": 5,
+          "line": 4,
+          "position": 125
+        },
+        "name": "controllers/notificationController.js",
+        "start": 1,
+        "startLoc": {
+          "column": 0,
+          "line": 1,
+          "position": 0
+        }
+      },
+      "format": "javascript",
+      "fragment": "const db = require('../db');\nconst config = require('../platform/config');\nconst helpers = require('../utils/helpers');\nconst notificationService = require('../services/notificationService');",
+      "isNew": false,
+      "kind": "exact",
+      "lines": 4,
+      "secondFile": {
+        "end": 4,
+        "endLoc": {
+          "column": 5,
+          "line": 4,
+          "position": 125
+        },
+        "name": "services/paymentService.js",
+        "start": 1,
+        "startLoc": {
+          "column": 0,
+          "line": 1,
+          "position": 0
+        }
+      },
+      "tokens": 25
+    },
+    {
+      "firstFile": {
+        "end": 4,
+        "endLoc": {
+          "column": 5,
+          "line": 4,
+          "position": 125
+        },
+        "name": "controllers/paymentController.js",
+        "start": 1,
+        "startLoc": {
+          "column": 0,
+          "line": 1,
+          "position": 0
+        }
+      },
+      "format": "javascript",
+      "fragment": "const db = require('../db');\nconst helpers = require('../utils/helpers');\nconst config = require('../platform/config');\nconst paymentService = require('../services/paymentService');",
+      "isNew": false,
+      "kind": "exact",
+      "lines": 4,
+      "secondFile": {
+        "end": 4,
+        "endLoc": {
+          "column": 5,
+          "line": 4,
+          "position": 125
+        },
+        "name": "services/customerService.js",
+        "start": 1,
+        "startLoc": {
+          "column": 0,
+          "line": 1,
+          "position": 0
+        }
+      },
+      "tokens": 25
+    },
+    {
+      "firstFile": {
+        "end": 4,
+        "endLoc": {
+          "column": 31,
+          "line": 4,
+          "position": 151
+        },
+        "name": "controllers/paymentController.js",
+        "start": 1,
+        "startLoc": {
+          "column": 0,
+          "line": 1,
+          "position": 0
+        }
+      },
+      "format": "javascript",
+      "fragment": "const db = require('../db');\nconst helpers = require('../utils/helpers');\nconst config = require('../platform/config');\nconst paymentService = require('../services/paymentService');",
+      "isNew": false,
+      "kind": "exact",
+      "lines": 4,
+      "secondFile": {
+        "end": 4,
+        "endLoc": {
+          "column": 31,
+          "line": 4,
+          "position": 151
+        },
+        "name": "services/integrationService.js",
+        "start": 1,
+        "startLoc": {
+          "column": 0,
+          "line": 1,
+          "position": 0
+        }
+      },
+      "tokens": 29
+    },
+    {
+      "firstFile": {
+        "end": 10,
+        "endLoc": {
+          "column": 8,
+          "line": 10,
+          "position": 428
+        },
+        "name": "controllers/paymentController.js",
+        "start": 7,
+        "startLoc": {
+          "column": 111,
+          "line": 7,
+          "position": 330
+        }
+      },
+      "format": "javascript",
+      "fragment": "  try { res.status(201).json(await paymentService.processPayment(+req.body.request_id, req.body.token, req.body.currency)); }\n  catch (e) { res.status(e.status || 500).json({ error: e.message }); }\n};\nexports.list = (req, res) => res.json(paymentService.list());",
+      "isNew": false,
+      "kind": "exact",
+      "lines": 4,
+      "secondFile": {
+        "end": 30,
+        "endLoc": {
+          "column": 8,
+          "line": 30,
+          "position": 1800
+        },
+        "name": "controllers/paymentController.js",
+        "start": 25,
+        "startLoc": {
+          "column": 96,
+          "line": 25,
+          "position": 1617
+        }
+      },
+      "tokens": 38
+    },
+    {
+      "firstFile": {
+        "end": 11,
+        "endLoc": {
+          "column": 8,
+          "line": 11,
+          "position": 403
+        },
+        "name": "controllers/reportController.js",
+        "start": 7,
+        "startLoc": {
+          "column": 70,
+          "line": 7,
+          "position": 283
+        }
+      },
+      "format": "javascript",
+      "fragment": "  const out = reportService.salesReport(req.query.from, req.query.to, req.query.format);\n  if (req.query.format === 'csv') return res.type('text/csv').send(out);\n  res.json(out);\n};\nexports.customers = (req, res) => {",
+      "isNew": false,
+      "kind": "exact",
+      "lines": 5,
+      "secondFile": {
+        "end": 16,
+        "endLoc": {
+          "column": 8,
+          "line": 16,
+          "position": 595
+        },
+        "name": "controllers/reportController.js",
+        "start": 12,
+        "startLoc": {
+          "column": 44,
+          "line": 12,
+          "position": 475
+        }
+      },
+      "tokens": 41
+    },
+    {
+      "firstFile": {
+        "end": 16,
+        "endLoc": {
+          "column": 8,
+          "line": 16,
+          "position": 595
+        },
+        "name": "controllers/reportController.js",
+        "start": 12,
+        "startLoc": {
+          "column": 43,
+          "line": 12,
+          "position": 474
+        }
+      },
+      "format": "javascript",
+      "fragment": "  const out = reportService.customersReport(req.query.format);\n  if (req.query.format === 'csv') return res.type('text/csv').send(out);\n  res.json(out);\n};\nexports.requests = (req, res) => {",
+      "isNew": false,
+      "kind": "exact",
+      "lines": 5,
+      "secondFile": {
+        "end": 23,
+        "endLoc": {
+          "column": 8,
+          "line": 23,
+          "position": 851
+        },
+        "name": "controllers/reportController.js",
+        "start": 17,
+        "startLoc": {
+          "column": 42,
+          "line": 17,
+          "position": 664
+        }
+      },
+      "tokens": 42
+    },
+    {
+      "firstFile": {
+        "end": 6,
+        "endLoc": {
+          "column": 5,
+          "line": 6,
+          "position": 231
+        },
+        "name": "services/notificationService.js",
+        "start": 2,
+        "startLoc": {
+          "column": 43,
+          "line": 2,
+          "position": 72
+        }
+      },
+      "format": "javascript",
+      "fragment": "const config = require('../platform/config');\nconst helpers = require('../utils/helpers');\nconst customerService = require('./customerService');\nconst paymentService = require('./paymentService');\nconst EmailNotifier = require('./interfaces/EmailNotifier');",
+      "isNew": false,
+      "kind": "exact",
+      "lines": 5,
+      "secondFile": {
+        "end": 5,
+        "endLoc": {
+          "column": 5,
+          "line": 5,
+          "position": 185
+        },
+        "name": "services/requestService.js",
+        "start": 1,
+        "startLoc": {
+          "column": 26,
+          "line": 1,
+          "position": 26
+        }
+      },
+      "tokens": 27
+    }
+  ],
+  "statistics": {
+    "detectionDate": "2026-11-01T23:43:15.481Z",
+    "formats": {
+      "javascript": {
+        "clones": 16,
+        "duplicatedLines": 69,
+        "duplicatedTokens": 561,
+        "lines": 756,
+        "newClones": 0,
+        "newDuplicatedLines": 0,
+        "percentage": 9.126984126984127,
+        "percentageTokens": 6.614006130629568,
+        "sources": 21,
+        "tokens": 8482
+      }
+    },
+    "total": {
+      "clones": 16,
+      "duplicatedLines": 69,
+      "duplicatedTokens": 561,
+      "lines": 756,
+      "newClones": 0,
+      "newDuplicatedLines": 0,
+      "percentage": 9.126984126984127,
+      "percentageTokens": 6.614006130629568,
+      "sources": 21,
+      "tokens": 8482
+    }
+  }
+}

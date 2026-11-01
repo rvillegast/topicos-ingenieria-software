@@ -1,5 +1,6 @@
 const db = require('../db');
 const helpers = require('../utils/helpers');
+const config = require('../platform/config');
 const requestService = require('./requestService');
 const notificationService = require('./notificationService');
 
@@ -14,11 +15,11 @@ exports.create = async (data) => {
   const id = Number(info.lastInsertRowid);
   // sincroniza con el CRM (HubCRM) al crear
   try {
-    const r = await helpers.retry(() => helpers.httpPost('https://api.hubcrm.com/v2/contacts', { name: data.name, email: data.email }), 3);
+    const r = await helpers.retry(() => helpers.httpPost(`${config.providers.hubcrm.baseUrl}/contacts`, { name: data.name, email: data.email }), 3);
     db.prepare('UPDATE customers SET crm_id = ? WHERE id = ?').run(r.id, id);
     helpers.log('cliente sincronizado con hubcrm ' + r.id, 'hubcrm');
   } catch (e) {
-    helpers.log('falló sync hubcrm: ' + e.message, 'hubcrm'); // FIXME: reintentar luego, hoy se pierde el contacto
+    helpers.log('falló sync hubcrm: ' + e.message, 'hubcrm'); // FIXME(TD-001): reintentar luego, hoy se pierde el contacto
   }
   await notificationService.notifyWelcome(id);
   return exports.get(id);

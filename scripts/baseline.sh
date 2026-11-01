@@ -70,6 +70,9 @@ grep -rIioE "${excl_dirs[@]}" "${excl_files[@]}" -e 'stripey|hubcrm|mailblast|sm
 # 9. Impacto de los escenarios de cambio (docs/escenarios/escenarios.json)
 node "$here/change-impact.js" "$code" > "$out/escenarios.csv"
 
+# 10. FF5: valores fijos (misma regla que el pipeline)
+node "$root/ci/rules/no-hardcoded.js" "$code" > "$out/ff5-hardcoded.txt" 2>&1 || true
+
 # Resumen legible a partir de los datos crudos
 node "$here/summarize.js" "$out" > "$out/resumen.md"
 

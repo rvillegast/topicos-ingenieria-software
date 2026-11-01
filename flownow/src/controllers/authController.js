@@ -1,9 +1,10 @@
 const db = require('../db');
 const helpers = require('../utils/helpers');
+const config = require('../platform/config');
 
 exports.seedAdmin = () => {
-  if (!db.prepare('SELECT id FROM users WHERE email = ?').get('admin@flownow.cl'))
-    db.prepare('INSERT INTO users (email, password, role) VALUES (?,?,?)').run('admin@flownow.cl', helpers.hash('admin123'), 'admin');
+  if (!db.prepare('SELECT id FROM users WHERE email = ?').get(config.security.adminEmail))
+    db.prepare('INSERT INTO users (email, password, role) VALUES (?,?,?)').run(config.security.adminEmail, helpers.hash(config.security.adminPassword), 'admin');
 };
 
 exports.login = (req, res) => {

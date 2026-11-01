@@ -1,5 +1,5 @@
 const express = require('express');
-const config = require('./config');
+const config = require('./platform/config');
 const auth = require('./controllers/authController');
 const customers = require('./controllers/customerController');
 const requests = require('./controllers/requestController');

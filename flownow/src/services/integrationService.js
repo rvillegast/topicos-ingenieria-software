@@ -1,11 +1,12 @@
 const db = require('../db');
 const helpers = require('../utils/helpers');
+const config = require('../platform/config');
 const paymentService = require('./paymentService');
 
 exports.pushPaymentToWebhooks = async (paymentId) => {
   const p = paymentService.get(paymentId);
   const c = db.prepare('SELECT crm_id, email FROM customers WHERE id = ?').get(p.customer_id);
-  await helpers.httpPost('https://api.hubcrm.com/v2/events', { contact: c.crm_id, type: 'payment.' + p.stripey_status, amount: p.amount });
+  await helpers.httpPost(`${config.providers.hubcrm.baseUrl}/events`, { contact: c.crm_id, type: 'payment.' + p.stripey_status, amount: p.amount });
   helpers.log('evento de pago enviado a hubcrm', 'hubcrm');
 };
 

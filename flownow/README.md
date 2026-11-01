@@ -10,6 +10,8 @@ npm start          # :3000   (PORT, DB_FILE, ENABLE_SMS=1, USE_BACKUP_PROVIDER=1
 npm test
 ```
 
+**Configuración** (`src/platform/config.js`): todo sale de variables de entorno; sin ellas rigen defaults de desarrollo no secretos. Con `NODE_ENV=production` son **obligatorias** `STRIPEY_API_KEY`, `TOKEN_SECRET`, `ADMIN_PASSWORD` y `SMSGO_API_KEY`. Opcionales: `PORT`, `DB_FILE`, `ADMIN_EMAIL`, `ENABLE_SMS`, `USE_BACKUP_PROVIDER`, `USE_NEW_REPORTS`, `FX_USD`, `FX_EUR`, `HUBCRM_BASE_URL`, `ERP_BASE_URL`, `PAYFAST_PAY_URL`, `MAILBLAST_SEND_URL`, `MAIL_FROM`, `SMSGO_SEND_URL`.
+
 Login: `POST /auth/login` con `admin@flownow.cl` / `admin123` → token Bearer. Tokens de pago simulados: `tok_ok`, `tok_declined`, `tok_3ds`, `tok_timeout`.
 
 ## Síntomas sembrados (§14.2) y dónde verlos
@@ -19,15 +21,15 @@ Login: `POST /auth/login` con `admin@flownow.cl` / `admin123` → token Bearer. 
 | Lógica de negocio en controladores | `controllers/requestController.js` (`bulkCreate`, `cancel`), `customerController.merge`, `paymentController.retry`, `notificationController.broadcast`, `reportController.dashboard` |
 | Clases/métodos enormes | `paymentService.processPayment` (~90 líneas, 8 responsabilidades), `reportService.salesReport` |
 | Utilitarios mezclados | `utils/helpers.js` (formato, auth/tokens, HTTP, retry, email + SQL, CSV, descuentos) |
-| Valores hard-coded | secreto de firma, API keys (`config.js`, `notificationService`), tipos de cambio 950/1030, umbrales, `limit 10`, remitente |
-| URLs, proveedores y flags dispersos | `api.hubcrm.com`, `erp.acme-internal.net`, `api.mailblast.io`, `api.smsgo.com`, `api.payfast.cl`; `USE_BACKUP_PROVIDER`, `ENABLE_SMS`, `useNewReports` |
+| Valores hard-coded | *(resuelto en el paso 2 del refactoring: ahora en `platform/config.js`)* — quedan umbrales de negocio (H-4) |
+| URLs, proveedores y flags dispersos | *(URLs/flags ya centralizados en `platform/config.js`)* `api.hubcrm.com`, `erp.acme-internal.net`, `api.mailblast.io`, `api.smsgo.com`, `api.payfast.cl`; `USE_BACKUP_PROVIDER`, `ENABLE_SMS`, `useNewReports` |
 | Acceso directo a tablas desde varios componentes | `db` global importado por controllers, services y helpers; `payments`, `customers` y `requests` se escriben desde 4+ lugares |
 | Dependencias circulares | `customerService ↔ requestService ↔ paymentService ↔ notificationService ↔ customerService`; `paymentService ↔ integrationService` |
 | Duplicación | descuento por tier y prioridad (service y `bulkCreate`), conversión de moneda, reportes y export CSV, envío SMS |
 | Interfaces sin variabilidad | `IPaymentGateway`+`GatewayFactory` (1 implementación), `INotifier` (1 implementación) |
 | SOLID inconsistente | interfaces rituales junto a `processPayment` monolítico (SRP/OCP/DIP violados); `services` que conocen `db` y HTTP |
 | Sin frontera para APIs de terceros | `stripey_status`/`stripey_charge_id` en el esquema y en el texto al cliente, `e.type === 'Stripey…'` en el service, reportes por `provider` |
-| TODO/FIXME/HACK/TEMP/WORKAROUND | 8 marcadores, ninguno con ticket (`scripts/satd-scan.sh flownow/src flownow/test`) |
+| TODO/FIXME/HACK/TEMP/WORKAROUND | 8 marcadores sin ticket en el AS-IS; tras los pasos 1–2 los restantes citan su `TD-xxx` (`scripts/satd-scan.sh --gate flownow/src flownow/test`) |
 | Pruebas insuficientes | sólo utilitarios y alta de clientes; **cero** pruebas de pagos, reembolsos, webhooks, cancelación o reportes |
 
 ## Probar la API con cURL

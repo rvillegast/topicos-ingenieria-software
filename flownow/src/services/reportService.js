@@ -1,5 +1,5 @@
 const db = require('../db');
-const config = require('../config');
+const config = require('../platform/config');
 const helpers = require('../utils/helpers');
 
 // Reporte de ventas: una sola función hace consulta, cálculo, formato y exportación
@@ -12,14 +12,13 @@ exports.salesReport = (from, to, format) => {
   const byTier = {}; const byProvider = {}; const byCurrency = {};
   for (const x of rows) {
     if (x.status === 'paid' || x.status === 'refunded') {
-      let clp = x.amount;
-      if (x.currency === 'USD') clp = x.amount * 950; // TEMP: mismo tipo de cambio fijo que en pagos
-      else if (x.currency === 'EUR') clp = x.amount * 1030;
+      const rate = config.fx.rates[x.currency] || 1; // TEMP(TD-007): misma tasa fija que en pagos; debe venir del evento de Payment
+      const clp = x.amount * rate;
       total += clp; paidCount++;
       byTier[x.tier] = (byTier[x.tier] || 0) + clp;
       byProvider[x.provider] = (byProvider[x.provider] || 0) + clp;
       byCurrency[x.currency] = (byCurrency[x.currency] || 0) + x.amount;
-      refunded += x.refunded_amount * (x.currency === 'USD' ? 950 : x.currency === 'EUR' ? 1030 : 1);
+      refunded += x.refunded_amount * rate;
     } else if (x.status === 'failed' || x.status === 'error') failedCount++;
   }
   if (format === 'csv') return helpers.toCsv(rows);
