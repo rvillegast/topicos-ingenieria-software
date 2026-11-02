@@ -23,7 +23,7 @@ flowchart LR
 |---|---|---|---|---|---|---|
 | **FF1** | No existen ciclos entre módulos | ADR-004, ADR-006 | dependency-cruiser 18.7.0 (`no-circular`) | `ci/dependency-cruiser.cjs` ✅ base | todo `src/`; **0** ciclos (AS-IS: 6). Ratchet desde el paso 1 (no puede superar 6) y bloqueante en 0 desde el paso 11 | `payment` requiere `request`, y `request` requiere `payment` |
 | **FF2** | El SDK/tipos del proveedor de pagos no salen de su adapter | ADR-003 | dependency-cruiser (`not-to-sdk-outside-adapter`) | `ci/dependency-cruiser.cjs` | sólo `modules/payment/adapters/**` puede importar `vendor/stripey-sdk` | `notification` importa `stripey-sdk` |
-| **FF2b** | Nombres de proveedor no aparecen fuera de adapters | ADR-003 | Semgrep (`pattern-regex`) | `ci/semgrep/provider-names.yml` | `stripey|payfast|hubcrm|mailblast|smsgo|acme` fuera de `adapters/**`, `platform/config` y `payment/http/legacy-presenter` (TD-010); **0** | escribir `'stripey'` en `request` |
+| **FF2b** | Nombres de proveedor no aparecen fuera de adapters | ADR-003 | script portable con ratchet (equivalente a la regla Semgrep del borrador) | `ci/rules/provider-names.js`, `ci/ratchets.json` | `stripey|payfast|hubcrm|mailblast|smsgo|acme` fuera de `adapters/**`, `platform/config` y `payment/http/legacy-presenter` (TD-010); **0** | escribir `'stripey'` en `request` |
 | **FF3** | Sólo el owner lee/escribe sus tablas | ADR-001, ADR-002 | script Node `ci/rules/table-ownership.js` (reutiliza `scripts/data-access.js`) + `ci/ownership.json` | `ci/rules/`, `ci/ownership.json` | tablas `<módulo>_*` sólo mencionadas bajo `modules/<módulo>/`; **ratchet** para lo aún no migrado (`ci/ownership-ratchet.json`: puede bajar, no subir) | `notification` ejecuta `SELECT … FROM payment_payments` |
 | **FF4** | Sin SATD no gestionada en código nuevo/intervenido | ADR-005 | `scripts/satd-scan.sh --gate` + `ci/rules/ledger-consistency.js` | `scripts/`, `ci/rules/` ✅ **implementada** (paso 2) | **0**; cada `TD-xxx` citado existe en el ledger con owner, fecha y verificación | agregar `// TODO arreglar` sin ticket |
 | **FF5** | Sin URLs/secretos/valores de ambiente hard-coded | ADR-005 | script portable `ci/rules/no-hardcoded.js` (regex; equivalente a una regla Semgrep, §12) + gitleaks para el historial (pendiente) | `ci/rules/no-hardcoded.js` ✅ **implementada** (paso 2) | **0** fuera de `platform/config` (defaults de desarrollo) y `test/`; gitleaks sobre el historial del PR | `const KEY = 'sk_live_…'` o `fetch('https://api.x.com')` |
@@ -69,8 +69,10 @@ rules:
 |---|---|---|
 | FF4 | ✅ implementada | `ci/rules/rules.test.js`: falla con marcador sin ticket, TD inexistente, TD cerrado y entradas sin owner/fecha/verificación; pasa con el estado actual (0 sin gestionar, 10 entradas coherentes) |
 | FF5 | ✅ implementada | `ci/rules/rules.test.js`: falla ante URL, clave `sk_live`, secreto, tipo de cambio y correo literales; pasa con `platform/config.js` como único permitido. Sobre el código previo al paso 2 detecta **22** violaciones; hoy **0** |
-| FF1 | base (`no-circular`) | 6 ciclos hoy; se enciende como ratchet y bloqueante al paso 11 |
-| FF2, FF2b, FF3, FF6, FF7, FF8 | diseñadas | pasos 4, 7, 9 de E3 |
+| FF1 | ✅ con ratchet (paso 4) | `ci/rules/arch.js`: los ciclos no pueden subir de 6; si bajan, obliga a fijar el avance; bloqueante en 0 al paso 11. `rules.test.js` demuestra que falla ante un ciclo nuevo |
+| FF2 | ✅ implementada (paso 4) | regla `not-to-sdk-outside-adapter`; sobre el código previo al paso 4 detecta la violación (`StripeyGateway.js`); hoy 0. Demostración de fallo en `rules.test.js` |
+| FF2b | ✅ con ratchet (paso 4) | `ci/rules/provider-names.js`: lista legada en `ci/ratchets.json` (8 archivos) que sólo puede encoger |
+| FF3, FF6, FF7, FF8 | diseñadas | pasos 7 y 9 de E3 |
 
 Ejecución local de todo lo disponible: `ci/run-rules.sh` (mismo orden que el pipeline). Las demostraciones de fallo corren con `node --test "ci/rules/*.test.js"`.
 

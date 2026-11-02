@@ -26,9 +26,9 @@ Login: `POST /auth/login` con `admin@flownow.cl` / `admin123` → token Bearer. 
 | Acceso directo a tablas desde varios componentes | `db` global importado por controllers, services y helpers; `payments`, `customers` y `requests` se escriben desde 4+ lugares |
 | Dependencias circulares | `customerService ↔ requestService ↔ paymentService ↔ notificationService ↔ customerService`; `paymentService ↔ integrationService` |
 | Duplicación | descuento por tier y prioridad (service y `bulkCreate`), conversión de moneda, reportes y export CSV, envío SMS |
-| Interfaces sin variabilidad | `IPaymentGateway`+`GatewayFactory` (1 implementación), `INotifier` (1 implementación) |
+| Interfaces sin variabilidad | *(eliminadas en el paso 4: `IPaymentGateway`, `GatewayFactory`, `INotifier`; el puerto de pagos que las reemplaza tiene dos adapters reales)* |
 | SOLID inconsistente | interfaces rituales junto a `processPayment` monolítico (SRP/OCP/DIP violados); `services` que conocen `db` y HTTP |
-| Sin frontera para APIs de terceros | `stripey_status`/`stripey_charge_id` en el esquema y en el texto al cliente, `e.type === 'Stripey…'` en el service, reportes por `provider` |
+| Sin frontera para APIs de terceros | *(paso 4: el SDK y los errores de pagos ya están tras `modules/payment/adapters`)* aún quedan `stripey_status`/`stripey_charge_id` en el esquema y en los textos al cliente, y reportes por `provider` |
 | TODO/FIXME/HACK/TEMP/WORKAROUND | 8 marcadores sin ticket en el AS-IS; tras los pasos 1–2 los restantes citan su `TD-xxx` (`scripts/satd-scan.sh --gate flownow/src flownow/test`) |
 | Pruebas insuficientes | sólo utilitarios y alta de clientes; **cero** pruebas de pagos, reembolsos, webhooks, cancelación o reportes |
 
