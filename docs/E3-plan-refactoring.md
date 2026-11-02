@@ -86,7 +86,7 @@ Meta de cobertura (FF7): `paymentService`/futuro `modules/payment` ≥ 80 % lín
 | 2 ✅ | **HardcodedValue → Configuration** | `platform/config` (env + defaults de desarrollo): claves, URLs, tasas FX, flags, secreto de firma | TD-006, parte de TD-002, H-1..H-4 | bajo | **FF5** |
 | 3 ✅ | **Seam: bus de eventos** | `platform/events` con `schemaVersion`, aislamiento de fallos y pruebas | TD-009 (registrar) | bajo | — |
 | 4 ✅ | **DirectVendorDependency → Port + Adapter** | `ProviderPort` + `StripeyAdapter` (ACL de estados/errores); respaldo PayFast como segundo adapter; se elimina `GatewayFactory`/`IPaymentGateway`/`INotifier` triviales | TD-005 | medio | **FF2**, FF2b |
-| 5 | **LargeMethod → ExtractClass** | `processPayment` → `PaymentLifecycle` + `ChargeRetryPolicy` + `FxPolicy` (funciones puras con pruebas unitarias) | TD-002 | medio | umbral de complejidad (CCN ≤ 10 en el módulo) |
+| 5 ✅ | **LargeMethod → ExtractClass** | `processPayment` → `PaymentLifecycle` + `ChargeRetryPolicy` + `FxPolicy` (funciones puras con pruebas unitarias) | TD-002 | medio | umbral de complejidad (CCN ≤ 10 en el módulo) |
 | 6 | **SharedDataMutation → OwnershipBoundary (eventos)** | Payment publica `PaymentCaptured/Failed/Refunded`; **Request** marca `paid` y **Customer** actualiza `totalSpent`/tier por suscripción; Payment deja de escribir `requests`/`customers`. *Rompe el ciclo Request↔Payment* | — | **alto** | — |
 | 7 | **Ownership de tabla** | `PaymentRepository` única vía a `payment_payments` (renombre `payments` → `payment_payments`, `stripey_*` → `provider_*`); presentador HTTP de compatibilidad para los campos legacy | TD-010 | medio | **FF3** (ratchet: `payment_*`, `customer_*`) |
 | 8 | **Efectos laterales por eventos** | Notification e Integration suscritos al pago (aviso; factura ERP; evento CRM); se retiran las llamadas directas. *Rompe Payment↔Notification y Payment↔Integration* | TD-004 | medio | — |
@@ -174,6 +174,32 @@ Efecto de comportamiento: ninguno con la configuración por defecto (la suite de
 **Honestidad sobre S1:** el escenario "cambiar de proveedor" **aún no mejora** en la heurística (12 archivos antes y después), porque las columnas `stripey_*`, los avisos y el webhook siguen en el AS-IS hasta los pasos 7 y 8. Lo que ya cambió es la **frontera**: ningún archivo fuera del adapter importa el SDK ni interpreta sus estados o errores, y FF2 lo impide en CI.
 
 **Único cambio de comportamiento observable:** la ruta de respaldo PayFast ahora pasa por el mismo bucle de cobro y registra `attempts = 1` (antes 0), y un error de red de PayFast se trata como falla del proveedor (502) en lugar de excepción sin controlar. La prueba de caracterización quedó fijada antes del cambio y se actualizó con el motivo.
+
+### 4.5. Resultado del paso 5 (medido)
+
+`LargeMethod → ExtractClass` sobre `processPayment`. Nuevas piezas puras en `src/modules/payment/domain/` (no tocan base ni proveedor):
+
+| Pieza | Razón de cambio | Contenido |
+|---|---|---|
+| `fx-policy` (FxPolicy) | tipo de cambio y monedas aceptadas | `isSupported`, `fromClp`, `toClp`, `round2` |
+| `charge-retry-policy` (ChargeRetryPolicy) | cuántos reintentos y ante qué fallas | `chargeWithRetry` (reintenta sólo `ProviderUnavailableError`, máx. 3) |
+| `payment-lifecycle` (PaymentLifecycle) | estados e invariantes del pago | `statusFor`, `assertPayable`, `planRefund`, `isRetryable` |
+| `amount-due` | política comercial **(temporal: es de Request, se mueve en el paso 9)** | descuento por tier y bono gold (TD-003) |
+
+`paymentService.processPayment` queda como orquestador de pasos con una sola razón de cambio cada uno (`loadPayable`, `insertPending`, `recordOutcome`, `failUnreachable`, `settleCaptured`). `paymentController` y `reportService` reutilizan `FxPolicy` (ya no repiten la conversión 950/1030).
+
+| Indicador | Antes (paso 4) | Después | Cómo se midió |
+|---|---|---|---|
+| `processPayment` | 64 NLOC · CCN **23** | **17 NLOC · CCN 4** | lizard (`docs/baseline/paso5/complejidad.csv`) |
+| Función más compleja de Payment | CCN 23 | **CCN 6** (`chargeWithRetry`, `assertPayable`) | ídem |
+| CCN máximo del sistema | 26 (AS-IS) | **14** (`salesReport`, fuera del slice) | `resumen.md` |
+| Funciones con CCN > 10 | 3 | 3 (`salesReport` 14, `bulkCreate` 12 y `events.publish` 12*) | `resumen.md` |
+| Duplicación | 7,68 % | **6,69 %** | jscpd |
+| Pruebas | 72 | **92** verdes (20 unitarias de dominio, sin base ni red) | `npm test` |
+
+\* `events.publish` (CCN 12) es código nuevo del paso 3 con validaciones de argumentos; FF8 exigirá ≤ 10 en el alcance intervenido, así que queda como ajuste pendiente de ese paso (partir `publish` en `validate` + `deliver`).
+
+**Sin cambio de comportamiento:** la suite de caracterización (63 pruebas del flujo HTTP) pasa **sin modificaciones**. Se preservaron el orden de validación, el orden de las escrituras y el log de reintentos (que también se emite tras el último intento fallido).
 
 ## 5. Estimación y reparto (supuesto: 10–14 h del equipo, §16.3)
 

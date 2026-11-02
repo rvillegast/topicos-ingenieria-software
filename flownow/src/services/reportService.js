@@ -1,5 +1,5 @@
 const db = require('../db');
-const config = require('../platform/config');
+const fx = require('../modules/payment/domain/fx-policy');
 const helpers = require('../utils/helpers');
 
 // Reporte de ventas: una sola función hace consulta, cálculo, formato y exportación
@@ -12,13 +12,13 @@ exports.salesReport = (from, to, format) => {
   const byTier = {}; const byProvider = {}; const byCurrency = {};
   for (const x of rows) {
     if (x.status === 'paid' || x.status === 'refunded') {
-      const rate = config.fx.rates[x.currency] || 1; // TEMP(TD-007): misma tasa fija que en pagos; debe venir del evento de Payment
-      const clp = x.amount * rate;
+      // TEMP(TD-007): convierte con la política de Payment; debe venir como monto base en el evento de pago (paso 12)
+      const clp = fx.toClp(x.amount, x.currency);
       total += clp; paidCount++;
       byTier[x.tier] = (byTier[x.tier] || 0) + clp;
       byProvider[x.provider] = (byProvider[x.provider] || 0) + clp;
       byCurrency[x.currency] = (byCurrency[x.currency] || 0) + x.amount;
-      refunded += x.refunded_amount * rate;
+      refunded += fx.toClp(x.refunded_amount, x.currency);
     } else if (x.status === 'failed' || x.status === 'error') failedCount++;
   }
   if (format === 'csv') return helpers.toCsv(rows);

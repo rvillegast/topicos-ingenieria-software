@@ -1,6 +1,7 @@
 const db = require('../db');
 const helpers = require('../utils/helpers');
-const config = require('../platform/config');
+const fx = require('../modules/payment/domain/fx-policy');
+const lifecycle = require('../modules/payment/domain/payment-lifecycle');
 const paymentService = require('../services/paymentService');
 
 exports.pay = async (req, res) => {
@@ -18,9 +19,9 @@ exports.refund = async (req, res) => {
 exports.retry = async (req, res) => {
   const p = db.prepare('SELECT * FROM payments WHERE id = ?').get(+req.params.id);
   if (!p) return res.status(404).json({ error: 'no existe' });
-  if (p.status !== 'failed' && p.status !== 'error') return res.status(400).json({ error: 'sólo pagos fallidos' });
+  if (!lifecycle.isRetryable(p)) return res.status(400).json({ error: 'sólo pagos fallidos' });
   const count = db.prepare("SELECT COUNT(*) n FROM payments WHERE request_id = ? AND status IN ('failed','error')").get(p.request_id).n;
-  if (count >= 3) return res.status(429).json({ error: 'máximo 3 reintentos con Stripey' });
+  if (count >= lifecycle.MAX_FAILED_PER_REQUEST) return res.status(429).json({ error: 'máximo 3 reintentos con Stripey' });
   db.prepare("UPDATE payments SET status = 'superseded' WHERE id = ?").run(p.id);
   try { res.status(201).json(await paymentService.processPayment(p.request_id, req.body.token, p.currency)); }
   catch (e) { res.status(e.status || 500).json({ error: e.message }); }
@@ -31,7 +32,7 @@ exports.summary = (req, res) => {
   const rows = db.prepare("SELECT amount, currency, status FROM payments").all();
   let total = 0, failed = 0;
   for (const x of rows) {
-    if (x.status === 'paid') total += x.amount * (config.fx.rates[x.currency] || 1);
+    if (x.status === 'paid') total += fx.toClp(x.amount, x.currency);
     if (x.status === 'failed') failed++;
   }
   res.json({ total, totalFormatted: helpers.formatMoney(total, 'CLP'), failed, provider: 'stripey' });

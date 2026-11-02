@@ -2,7 +2,10 @@ const db = require('../db');
 const config = require('../platform/config');
 const helpers = require('../utils/helpers');
 const providers = require('../modules/payment/providers');
-const { ProviderUnavailableError } = require('../modules/payment/providers/errors');
+const lifecycle = require('../modules/payment/domain/payment-lifecycle');
+const fx = require('../modules/payment/domain/fx-policy');
+const { amountDue } = require('../modules/payment/domain/amount-due');
+const { chargeWithRetry } = require('../modules/payment/domain/charge-retry-policy');
 const requestService = require('./requestService');
 const notificationService = require('./notificationService');
 const integrationService = require('./integrationService');
@@ -15,89 +18,78 @@ exports.get = (id) => {
 exports.listForRequest = (rid) => db.prepare('SELECT * FROM payments WHERE request_id = ? ORDER BY id').all(rid);
 exports.list = () => db.prepare('SELECT * FROM payments ORDER BY id DESC').all();
 
-// Procesa un pago completo: validación, descuento, cobro, reintentos, estados, ERP, CRM, notificación
-exports.processPayment = async (requestId, token, currency) => {
-  const r = db.prepare('SELECT * FROM requests WHERE id = ?').get(requestId);
-  if (!r) throw Object.assign(new Error('solicitud no encontrada'), { status: 404 });
-  if (r.paid) throw Object.assign(new Error('solicitud ya pagada'), { status: 409 });
-  if (r.status === 'cancelled') throw Object.assign(new Error('solicitud cancelada'), { status: 400 });
-  const cust = db.prepare('SELECT * FROM customers WHERE id = ?').get(r.customer_id);
-  if (cust.status !== 'active') throw Object.assign(new Error('cliente inactivo'), { status: 400 });
-  currency = currency || 'CLP';
-  if (['CLP', 'USD', 'EUR'].indexOf(currency) === -1) throw Object.assign(new Error('moneda no soportada'), { status: 400 });
+// --- Pasos de processPayment (cada uno con una sola razón de cambio) ---
 
-  let amount = r.amount;
-  if (r.discount > 0) amount = amount - amount * r.discount;
-  if (cust.tier === 'gold' && amount > 1000000) amount = amount - 5000; // HACK(TD-003): bono comercial acordado por teléfono con ventas
-  if (currency !== 'CLP') amount = amount / config.fx.rates[currency]; // TEMP(TD-002): tasa fija hasta integrar un servicio de FX
-  amount = Math.round(amount * 100) / 100;
+const loadPayable = (requestId, currency) => {
+  const request = db.prepare('SELECT * FROM requests WHERE id = ?').get(requestId);
+  const customer = request && db.prepare('SELECT * FROM customers WHERE id = ?').get(request.customer_id);
+  lifecycle.assertPayable({ request, customer, currency });
+  return { request, customer };
+};
+
+const insertPending = (request, customer, amount, currency, providerName) =>
+  Number(db.prepare('INSERT INTO payments (request_id, customer_id, amount, currency, status, provider, created_at) VALUES (?,?,?,?,?,?,?)')
+    .run(request.id, customer.id, amount, currency, 'pending', providerName, helpers.now()).lastInsertRowid);
+
+// Persiste el resultado del cobro (columnas stripey_* heredadas: se renombran en el paso 7, TD-010).
+const recordOutcome = (pid, charge) => {
+  const status = lifecycle.statusFor(charge.status);
+  if (status === 'unknown') db.prepare("UPDATE payments SET status = 'unknown', stripey_status = ? WHERE id = ?").run(charge.providerStatus, pid);
+  else db.prepare('UPDATE payments SET status = ?, stripey_charge_id = ?, stripey_status = ? WHERE id = ?').run(status, charge.providerRef, charge.providerStatus, pid);
+};
+
+const failUnreachable = async (pid, providerName, lastError) => {
+  db.prepare("UPDATE payments SET status = 'error', stripey_status = 'error' WHERE id = ?").run(pid);
+  helpers.log('pago ' + pid + ' falló: ' + (lastError && lastError.message), providerName);
+  await notificationService.notifyPaymentResult(pid);
+  throw Object.assign(new Error('no se pudo contactar al proveedor de pagos'), { status: 502 });
+};
+
+// Efectos de un cobro capturado: marca la solicitud, suma el gasto, factura en el ERP y promueve a gold.
+// (Se reparten por eventos en los pasos 6 y 8 del plan.)
+const settleCaptured = async (request, customer, amount, currency) => {
+  db.prepare('UPDATE requests SET paid = 1 WHERE id = ?').run(request.id);
+  db.prepare('UPDATE customers SET total_spent = total_spent + ? WHERE id = ?').run(amount, customer.id);
+  try {
+    const inv = await helpers.httpPost(`${config.providers.erp.baseUrl}/invoices`, { request: request.id, amount, currency, customer: customer.email });
+    db.prepare('UPDATE requests SET erp_invoice = ? WHERE id = ?').run(inv.invoice, request.id);
+    helpers.log('factura ERP ' + inv.invoice, 'erp');
+  } catch (e) {
+    helpers.log('ERP caído, factura pendiente', 'erp'); // TODO(TD-004): cola de reintentos para facturas
+  }
+  if (customer.total_spent + amount > 2000000 && customer.tier !== 'gold') {
+    db.prepare("UPDATE customers SET tier = 'gold' WHERE id = ?").run(customer.id);
+    await helpers.httpPost(`${config.providers.hubcrm.baseUrl}/contacts/${customer.crm_id}`, { tier: 'gold' });
+  }
+};
+
+// Orquesta el cobro: validar -> calcular monto -> cobrar con reintentos -> registrar -> efectos -> avisar.
+exports.processPayment = async (requestId, token, currency) => {
+  currency = currency || 'CLP';
+  const { request, customer } = loadPayable(requestId, currency);
+  const amount = fx.round2(fx.fromClp(amountDue({ amount: request.amount, discount: request.discount, tier: customer.tier }), currency));
 
   const provider = providers.active();
-  const info = db.prepare('INSERT INTO payments (request_id, customer_id, amount, currency, status, provider, created_at) VALUES (?,?,?,?,?,?,?)')
-    .run(requestId, cust.id, amount, currency, 'pending', provider.name, helpers.now());
-  const pid = Number(info.lastInsertRowid);
-
-  // Cobro vía el puerto del proveedor: el dominio sólo ve resultados y errores neutros.
-  let charge = null;
-  let attempts = 0;
-  let lastError = null;
-  while (attempts < 3 && !charge) {
-    attempts++;
-    try {
-      charge = await provider.charge({ amount, currency, token, metadata: { request_id: requestId, customer_id: cust.id } });
-    } catch (e) {
-      lastError = e;
-      if (e instanceof ProviderUnavailableError) { helpers.log('reintento ' + provider.name + ' ' + attempts); continue; }
-      break;
-    }
-  }
+  const pid = insertPending(request, customer, amount, currency, provider.name);
+  const { charge, attempts, lastError } = await chargeWithRetry(
+    provider, { amount, currency, token, metadata: { request_id: request.id, customer_id: customer.id } },
+    (n) => helpers.log('reintento ' + provider.name + ' ' + n));
   db.prepare('UPDATE payments SET attempts = ? WHERE id = ?').run(attempts, pid);
+  if (!charge) return failUnreachable(pid, provider.name, lastError);
 
-  if (!charge) {
-    db.prepare("UPDATE payments SET status = 'error', stripey_status = 'error' WHERE id = ?").run(pid);
-    helpers.log('pago ' + pid + ' falló: ' + (lastError && lastError.message), provider.name);
-    await notificationService.notifyPaymentResult(pid);
-    throw Object.assign(new Error('no se pudo contactar al proveedor de pagos'), { status: 502 });
-  }
-
-  if (charge.status === 'captured') {
-    db.prepare("UPDATE payments SET status = 'paid', stripey_charge_id = ?, stripey_status = ? WHERE id = ?").run(charge.providerRef, charge.providerStatus, pid);
-    db.prepare('UPDATE requests SET paid = 1 WHERE id = ?').run(requestId);
-    db.prepare('UPDATE customers SET total_spent = total_spent + ? WHERE id = ?').run(amount, cust.id);
-    // factura en ERP
-    try {
-      const inv = await helpers.httpPost(`${config.providers.erp.baseUrl}/invoices`, { request: requestId, amount, currency, customer: cust.email });
-      db.prepare('UPDATE requests SET erp_invoice = ? WHERE id = ?').run(inv.invoice, requestId);
-      helpers.log('factura ERP ' + inv.invoice, 'erp');
-    } catch (e) {
-      helpers.log('ERP caído, factura pendiente', 'erp'); // TODO(TD-004): cola de reintentos para facturas
-    }
-    // actualiza el CRM si el cliente superó el umbral
-    if (cust.total_spent + amount > 2000000 && cust.tier !== 'gold') {
-      db.prepare("UPDATE customers SET tier = 'gold' WHERE id = ?").run(cust.id);
-      await helpers.httpPost(`${config.providers.hubcrm.baseUrl}/contacts/${cust.crm_id}`, { tier: 'gold' });
-    }
-  } else if (charge.status === 'declined') {
-    db.prepare("UPDATE payments SET status = 'failed', stripey_charge_id = ?, stripey_status = ? WHERE id = ?").run(charge.providerRef, charge.providerStatus, pid);
-  } else if (charge.status === 'action_required') {
-    db.prepare("UPDATE payments SET status = 'pending_action', stripey_charge_id = ?, stripey_status = ? WHERE id = ?").run(charge.providerRef, charge.providerStatus, pid);
-  } else {
-    db.prepare("UPDATE payments SET status = 'unknown', stripey_status = ? WHERE id = ?").run(charge.providerStatus, pid);
-  }
+  recordOutcome(pid, charge);
+  if (charge.status === 'captured') await settleCaptured(request, customer, amount, currency);
   await notificationService.notifyPaymentResult(pid);
   await integrationService.pushPaymentToWebhooks(pid);
-  return Object.assign(exports.get(pid), { request: requestService.get(requestId) });
+  return Object.assign(exports.get(pid), { request: requestService.get(request.id) });
 };
 
 exports.refund = async (paymentId, amount) => {
   const p = exports.get(paymentId);
-  if (p.status !== 'paid') throw Object.assign(new Error('sólo se reembolsan pagos pagados'), { status: 400 });
-  amount = amount || p.amount;
-  if (amount + p.refunded_amount > p.amount) throw Object.assign(new Error('excede el monto pagado'), { status: 400 });
-  const re = await providers.forRefund().refund({ providerRef: p.stripey_charge_id, amount });
+  const plan = lifecycle.planRefund(p, amount);
+  const re = await providers.forRefund().refund({ providerRef: p.stripey_charge_id, amount: plan.amount });
   if (!re.ok) throw Object.assign(new Error('refund rechazado por el proveedor'), { status: 502 });
-  const total = p.refunded_amount + amount;
-  db.prepare('UPDATE payments SET refunded_amount = ?, status = ? WHERE id = ?').run(total, total >= p.amount ? 'refunded' : 'paid', paymentId);
-  db.prepare('UPDATE customers SET total_spent = total_spent - ? WHERE id = ?').run(amount, p.customer_id);
+  db.prepare('UPDATE payments SET refunded_amount = ?, status = ? WHERE id = ?').run(plan.total, plan.status, paymentId);
+  db.prepare('UPDATE customers SET total_spent = total_spent - ? WHERE id = ?').run(plan.amount, p.customer_id);
   return exports.get(paymentId);
 };

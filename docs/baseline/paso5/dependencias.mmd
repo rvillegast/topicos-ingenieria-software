@@ -1,0 +1,154 @@
+flowchart LR
+
+subgraph 0["flownow"]
+subgraph 1["src"]
+subgraph 2["controllers"]
+3["authController.js"]
+B["customerController.js"]
+10["integrationController.js"]
+11["notificationController.js"]
+12["paymentController.js"]
+13["reportController.js"]
+15["requestController.js"]
+end
+4["db.js"]
+subgraph 6["platform"]
+7["config.js"]
+16["events.js"]
+end
+subgraph 8["utils"]
+9["helpers.js"]
+end
+subgraph C["services"]
+D["customerService.js"]
+E["notificationService.js"]
+F["paymentService.js"]
+Y["integrationService.js"]
+Z["requestService.js"]
+14["reportService.js"]
+end
+subgraph G["modules"]
+subgraph H["payment"]
+subgraph I["domain"]
+J["amount-due.js"]
+K["charge-retry-policy.js"]
+N["fx-policy.js"]
+O["payment-lifecycle.js"]
+P["errors.js"]
+end
+subgraph L["providers"]
+M["errors.js"]
+Q["index.js"]
+end
+subgraph R["adapters"]
+subgraph S["payfast"]
+T["index.js"]
+end
+subgraph U["stripey"]
+V["index.js"]
+end
+end
+end
+end
+subgraph W["vendor"]
+X["stripey-sdk.js"]
+end
+17["server.js"]
+end
+subgraph 18["node_modules"]
+subgraph 19["express"]
+1A["index.js"]
+end
+end
+end
+5["node:sqlite"]
+A["crypto"]
+3-->4
+3-->7
+3-->9
+4-->7
+4-->5
+9-->4
+9-->7
+9-->A
+B-->4
+B-->D
+B-->9
+D-->4
+D-->7
+D-->9
+D-->E
+D-->Z
+E-->4
+E-->7
+E-->9
+E-->D
+E-->F
+F-->4
+F-->J
+F-->K
+F-->N
+F-->O
+F-->Q
+F-->7
+F-->9
+F-->Y
+F-->E
+F-->Z
+K-->M
+N-->7
+O-->P
+O-->N
+Q-->7
+Q-->T
+Q-->V
+T-->7
+T-->9
+T-->M
+V-->7
+V-->X
+V-->M
+Y-->4
+Y-->Q
+Y-->7
+Y-->9
+Y-->F
+Z-->4
+Z-->9
+Z-->D
+Z-->E
+Z-->F
+10-->4
+10-->7
+10-->Y
+10-->9
+11-->4
+11-->7
+11-->E
+11-->9
+12-->4
+12-->N
+12-->O
+12-->F
+12-->9
+13-->4
+13-->7
+13-->14
+13-->9
+14-->4
+14-->N
+14-->9
+15-->4
+15-->D
+15-->F
+15-->Z
+15-->9
+17-->3
+17-->B
+17-->10
+17-->11
+17-->12
+17-->13
+17-->15
+17-->7
+17-->1A

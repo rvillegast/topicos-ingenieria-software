@@ -1,0 +1,252 @@
+✔ login correcto entrega token y rol; incorrecto → 401 (51.050708ms)
+✔ rutas protegidas exigen token válido; /health es público (42.285458ms)
+[flownow] cliente sincronizado con hubcrm crm_38566
+✔ alta: valores por defecto, sync con CRM (crm_id) y aviso de bienvenida (31.730333ms)
+[flownow] cliente sincronizado con hubcrm crm_64017
+✔ validaciones de alta: nombre, email, teléfono y duplicado (42.219792ms)
+[flownow] cliente sincronizado con hubcrm crm_21784
+✔ consulta y actualización de cliente (32.701833ms)
+[flownow] cliente sincronizado con hubcrm crm_24458
+[flownow] cliente sincronizado con hubcrm crm_55440
+[flownow] factura ERP INV-1793578955007
+[flownow] evento de pago enviado a hubcrm
+[flownow] clientes fusionados 5 -> 4
+✔ fusión de clientes (admin): reasigna solicitudes y pagos, suma gasto, marca merged (37.747792ms)
+✔ exportación CSV de clientes activos (2.437375ms)
+[flownow] cliente sincronizado con hubcrm crm_387
+✔ difusión: envía un correo por cliente activo, filtrable por tier (7.737833ms)
+[flownow] cliente sincronizado con hubcrm crm_33205
+[flownow] factura ERP INV-1793578954952
+[flownow] evento de pago enviado a hubcrm
+✔ pago aprobado: pagado, solicitud marcada, 1 intento, factura ERP y aviso (85.318917ms)
+[flownow] cliente sincronizado con hubcrm crm_33746
+[flownow] factura ERP INV-1793578954979
+[flownow] evento de pago enviado a hubcrm
+[flownow] cliente sincronizado con hubcrm crm_90336
+[flownow] factura ERP INV-1793578954989
+[flownow] evento de pago enviado a hubcrm
+[flownow] cliente sincronizado con hubcrm crm_4264
+[flownow] factura ERP INV-1793578954999
+[flownow] evento de pago enviado a hubcrm
+✔ descuento por tier: silver 10 %, gold 15 %, basic 0 % (37.586041ms)
+[flownow] cliente sincronizado con hubcrm crm_83127
+[flownow] factura ERP INV-1793578955007
+[flownow] evento de pago enviado a hubcrm
+[flownow] factura ERP INV-1793578955014
+[flownow] evento de pago enviado a hubcrm
+✔ bono gold: -5000 si el monto con descuento supera 1.000.000 (15.618917ms)
+[flownow] cliente sincronizado con hubcrm crm_13937
+[flownow] factura ERP INV-1793578955024
+[flownow] evento de pago enviado a hubcrm
+[flownow] factura ERP INV-1793578955029
+[flownow] evento de pago enviado a hubcrm
+✔ moneda: USD ÷ 950 y EUR ÷ 1030 con redondeo a 2 decimales (14.24875ms)
+[flownow] cliente sincronizado con hubcrm crm_31077
+[flownow] evento de pago enviado a hubcrm
+✔ rechazo: pago failed, solicitud sin pagar, aviso de rechazo (9.794333ms)
+[flownow] cliente sincronizado con hubcrm crm_34381
+[flownow] evento de pago enviado a hubcrm
+✔ 3DS: queda pending_action y avisa que falta una acción (8.458917ms)
+[flownow] cliente sincronizado con hubcrm crm_16420
+[flownow] reintento stripey 1
+[flownow] reintento stripey 2
+[flownow] reintento stripey 3
+[flownow] pago 11 falló: timeout
+✔ timeout del proveedor: 3 intentos, pago en error y HTTP 502 (7.644166ms)
+[flownow] cliente sincronizado con hubcrm crm_86052
+[flownow] factura ERP INV-1793578955063
+[flownow] evento de pago enviado a hubcrm
+[flownow] cliente sincronizado con hubcrm crm_60010
+[flownow] cliente sincronizado con hubcrm crm_26444
+✔ validaciones: doble pago 409, moneda no soportada, cliente inactivo, solicitud cancelada y solicitud inexistente (24.712125ms)
+[flownow] cliente sincronizado con hubcrm crm_69584
+[flownow] factura ERP INV-1793578955085
+[flownow] evento de pago enviado a hubcrm
+✔ promoción a gold: acumulado > 2.000.000 sube el tier y notifica al CRM (6.741542ms)
+[flownow] cliente sincronizado con hubcrm crm_43310
+[flownow] factura ERP INV-1793578955090
+[flownow] evento de pago enviado a hubcrm
+✔ efectos laterales de un pago aprobado: ERP, evento CRM y bitácora de integración (5.561584ms)
+[flownow] cliente sincronizado con hubcrm crm_17402
+[flownow] factura ERP INV-1793578955097
+[flownow] evento de pago enviado a hubcrm
+✔ proveedor de respaldo (USE_BACKUP_PROVIDER=1): cobra por payfast (5.288625ms)
+✔ resumen de pagos: total en CLP, fallidos y proveedor (1.647333ms)
+[flownow] cliente sincronizado con hubcrm crm_86128
+[flownow] factura ERP INV-1793578955104
+[flownow] evento de pago enviado a hubcrm
+✔ respaldo PayFast: pasa por el mismo bucle de cobro (1 intento) y se reembolsa por el proveedor principal (6.61325ms)
+[flownow] cliente sincronizado con hubcrm crm_22678
+[flownow] factura ERP INV-1793578954952
+[flownow] evento de pago enviado a hubcrm
+✔ reembolso parcial deja el pago en paid y descuenta total_spent (77.80425ms)
+[flownow] cliente sincronizado con hubcrm crm_78254
+[flownow] factura ERP INV-1793578954982
+[flownow] evento de pago enviado a hubcrm
+[flownow] cliente sincronizado con hubcrm crm_9235
+[flownow] factura ERP INV-1793578955000
+[flownow] evento de pago enviado a hubcrm
+✔ reembolso del saldo completo pasa a refunded; sin monto reembolsa todo (39.877ms)
+[flownow] cliente sincronizado con hubcrm crm_11563
+[flownow] factura ERP INV-1793578955010
+[flownow] evento de pago enviado a hubcrm
+[flownow] cliente sincronizado con hubcrm crm_75304
+[flownow] evento de pago enviado a hubcrm
+✔ reembolso inválido: excede lo pagado o pago no pagado → 400 (23.179542ms)
+[flownow] cliente sincronizado con hubcrm crm_45277
+[flownow] evento de pago enviado a hubcrm
+[flownow] factura ERP INV-1793578955032
+[flownow] evento de pago enviado a hubcrm
+✔ reintento: sólo pagos failed/error; el anterior queda superseded y el nuevo se cobra (11.161333ms)
+[flownow] cliente sincronizado con hubcrm crm_58994
+[flownow] evento de pago enviado a hubcrm
+[flownow] evento de pago enviado a hubcrm
+[flownow] evento de pago enviado a hubcrm
+✔ reintento: con 3 pagos fallidos en la misma solicitud responde 429 (11.199458ms)
+[flownow] cliente sincronizado con hubcrm crm_33481
+[flownow] factura ERP INV-1793578955054
+[flownow] evento de pago enviado a hubcrm
+✔ cancelar una solicitud pagada reembolsa, la cancela y libera la cuenta de abiertas (13.896875ms)
+[flownow] cliente sincronizado con hubcrm crm_98834
+[flownow] factura ERP INV-1793578954961
+[flownow] evento de pago enviado a hubcrm
+[flownow] cliente sincronizado con hubcrm crm_93305
+[flownow] factura ERP INV-1793578954972
+[flownow] evento de pago enviado a hubcrm
+[flownow] cliente sincronizado con hubcrm crm_55802
+[flownow] evento de pago enviado a hubcrm
+✔ reporte de ventas: totales en CLP, por tier, proveedor y moneda; reembolsos y neto (107.73175ms)
+✔ reporte de ventas: filtro por fechas y exportación CSV (6.593209ms)
+✔ reporte de clientes y de solicitudes (9.007ms)
+✔ dashboard: contadores y pagado en CLP (3.168333ms)
+[flownow] cliente sincronizado con hubcrm crm_28182
+[flownow] cliente sincronizado con hubcrm crm_94163
+✔ prioridad: >500.000 o gold = high; <20.000 = low; resto normal (82.6795ms)
+[flownow] cliente sincronizado con hubcrm crm_45694
+✔ crear solicitud: valida monto y cliente activo, registra aviso (17.626958ms)
+[flownow] cliente sincronizado con hubcrm crm_52422
+✔ máximo 10 solicitudes abiertas por cliente → 429 (28.375125ms)
+[flownow] cliente sincronizado con hubcrm crm_11965
+[flownow] factura ERP INV-1793578955051
+[flownow] evento de pago enviado a hubcrm
+✔ máquina de estados: new→in_progress→done; done exige pago; transiciones inválidas → 400 (18.369625ms)
+[flownow] cliente sincronizado con hubcrm crm_97690
+[flownow] cliente sincronizado con hubcrm crm_32609
+✔ creación masiva: omite clientes inactivos, calcula prioridad y descuento, máximo 50 (10.550583ms)
+✔ solicitud inexistente → 404 (1.723041ms)
+[flownow] cliente sincronizado con hubcrm crm_22003
+[flownow] evento de pago enviado a hubcrm
+✔ webhook del proveedor de pagos: charge.succeeded paga el pago y la solicitud (80.292208ms)
+[flownow] cliente sincronizado con hubcrm crm_87209
+[flownow] evento de pago enviado a hubcrm
+✔ webhook del proveedor de pagos: charge.failed marca failed; id desconocido se ignora (17.08625ms)
+[flownow] cliente sincronizado con hubcrm crm_25346
+✔ webhook CRM: contact.updated actualiza el cliente; contact.deleted lo desactiva; desconocido se ignora (16.638625ms)
+✔ los webhooks no exigen token; el resto de la API sí (4.738791ms)
+✔ re-sincronización manual con el CRM y bitácora de integración (3.495667ms)
+✔ desarrollo: defaults no secretos y URLs de proveedores (2.486417ms)
+✔ las variables de entorno sobreescriben los defaults (0.261125ms)
+✔ producción: claves y secretos son obligatorios (sin defaults) (0.556041ms)
+✔ los flags se leen al accederlos, no al cargar el módulo (1.124083ms)
+[flownow] cliente sincronizado con hubcrm crm_60192
+✔ crea un cliente (5.203459ms)
+✔ rechaza email inválido (0.31775ms)
+✔ formatMoney CLP (9.985042ms)
+✔ validateEmail (0.147ms)
+✔ tierDiscount (0.064042ms)
+✔ sin descuento ni bono el monto no cambia (1.218542ms)
+✔ aplica el descuento del tier (0.153417ms)
+✔ bono gold: -5000 sólo si, con descuento, supera 1.000.000 (0.103083ms)
+✔ éxito al primer intento: 1 intento, sin reintentos (1.172667ms)
+✔ reintenta fallas transitorias y se recupera (0.160625ms)
+✔ agota los intentos: MAX_ATTEMPTS (3) y devuelve el último error (0.51ms)
+✔ una falla NO transitoria no se reintenta (0.190708ms)
+✔ un resultado "declined" no es una falla: se devuelve sin reintentar (0.128417ms)
+✔ pasa el comando tal cual al puerto (0.224167ms)
+✔ monedas soportadas: CLP y las que tienen tasa (0.433708ms)
+✔ fromClp: CLP no se convierte; otras monedas dividen por la tasa (0.086ms)
+✔ toClp es la operación inversa (0.051792ms)
+✔ round2 redondea a 2 decimales (2.376584ms)
+✔ usa las tasas de configuración por defecto y respeta el entorno (0.237625ms)
+✔ statusFor traduce el resultado neutro a estado interno (0.521167ms)
+✔ assertPayable acepta una solicitud pagable (1.057042ms)
+✔ assertPayable: errores y códigos HTTP del AS-IS, en su orden (0.550542ms)
+✔ planRefund: parcial deja paid, total pasa a refunded, sin monto reembolsa el saldo del pago (0.630209ms)
+✔ planRefund: sólo pagos pagados y sin exceder lo pagado (0.102583ms)
+✔ isRetryable: sólo failed/error; el límite por solicitud es 3 (0.07275ms)
+✔ [stripey] charge devuelve un resultado con el vocabulario del dominio (0.581375ms)
+✔ [stripey] expone name, refund y parseWebhook (0.507166ms)
+✔ [payfast] charge devuelve un resultado con el vocabulario del dominio (0.176791ms)
+✔ [payfast] expone name, refund y parseWebhook (0.037ms)
+✔ [stripey] traduce estados del proveedor al vocabulario del dominio (0.11825ms)
+✔ [stripey] traduce errores: conexión -> reintentable; resto -> no reintentable (0.456334ms)
+✔ [stripey] refund responde { ok } y parseWebhook traduce eventos (0.520209ms)
+✔ [payfast] cobra por su URL y no soporta reembolsos (0.157291ms)
+✔ selección: flag de respaldo cambia el proveedor activo; el reembolso siempre es del principal (0.099166ms)
+✔ entrega el evento en un sobre versionado, en orden de suscripción (3.263459ms)
+✔ sin consumidores no es un error y los tipos están aislados entre sí (0.12125ms)
+✔ aislamiento de fallos: un consumidor que falla no impide a los demás ni rompe al publicador (0.19575ms)
+✔ también aísla consumidores asíncronos que rechazan (0.124875ms)
+✔ publish espera a los consumidores asíncronos antes de resolver (16.358792ms)
+✔ desuscribirse detiene la entrega (0.193375ms)
+✔ un consumidor puede publicar otro evento (reentrancia) (0.107542ms)
+✔ contrato: exige campos mínimos y tolera campos extra (lector tolerante) (0.077958ms)
+✔ contrato: un payload inválido es error del publicador y no se entrega a nadie (0.305041ms)
+✔ versionado: el contrato es por versión; la v2 convive con la v1 (0.096375ms)
+✔ argumentos inválidos se rechazan (0.137375ms)
+✔ la bitácora de fallos está acotada (100) (0.46425ms)
+ℹ tests 92
+ℹ suites 0
+ℹ pass 92
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 363.019542
+ℹ start of coverage report
+ℹ -------------------------------------------------------------------------------
+ℹ file                           | line % | branch % | funcs % | uncovered lines
+ℹ -------------------------------------------------------------------------------
+ℹ src                            |        |          |         | 
+ℹ  controllers                   |        |          |         | 
+ℹ   authController.js            | 100.00 |    92.86 |  100.00 | 
+ℹ   customerController.js        | 100.00 |    81.25 |  100.00 | 
+ℹ   integrationController.js     |  80.00 |    83.33 |  100.00 | 15-18
+ℹ   notificationController.js    |  88.00 |    55.56 |  100.00 | 20-22
+ℹ   paymentController.js         | 100.00 |    85.00 |  100.00 | 
+ℹ   reportController.js          | 100.00 |    72.73 |  100.00 | 
+ℹ   requestController.js         | 100.00 |    86.96 |   83.33 | 
+ℹ  db.js                         | 100.00 |   100.00 |  100.00 | 
+ℹ  modules                       |        |          |         | 
+ℹ   payment                      |        |          |         | 
+ℹ    adapters                    |        |          |         | 
+ℹ     payfast                    |        |          |         | 
+ℹ      index.js                  | 100.00 |    75.00 |   66.67 | 
+ℹ     stripey                    |        |          |         | 
+ℹ      index.js                  | 100.00 |    86.96 |  100.00 | 
+ℹ    domain                      |        |          |         | 
+ℹ     amount-due.js              | 100.00 |   100.00 |  100.00 | 
+ℹ     charge-retry-policy.js     | 100.00 |   100.00 |   50.00 | 
+ℹ     errors.js                  | 100.00 |   100.00 |  100.00 | 
+ℹ     fx-policy.js               | 100.00 |   100.00 |  100.00 | 
+ℹ     payment-lifecycle.js       | 100.00 |   100.00 |  100.00 | 
+ℹ    providers                   |        |          |         | 
+ℹ     errors.js                  | 100.00 |   100.00 |  100.00 | 
+ℹ     index.js                   | 100.00 |   100.00 |  100.00 | 
+ℹ  platform                      |        |          |         | 
+ℹ   config.js                    | 100.00 |   100.00 |   94.74 | 
+ℹ   events.js                    | 100.00 |    95.24 |   90.00 | 
+ℹ  server.js                     | 100.00 |    66.67 |   50.00 | 
+ℹ  services                      |        |          |         | 
+ℹ   customerService.js           |  95.83 |    96.77 |  100.00 | 22-23
+ℹ   integrationService.js        | 100.00 |    93.33 |  100.00 | 
+ℹ   notificationService.js       |  91.18 |    69.23 |  100.00 | 17-19
+ℹ   paymentService.js            |  97.89 |    89.29 |  100.00 | 58-59
+ℹ   reportService.js             | 100.00 |    86.96 |  100.00 | 
+ℹ   requestService.js            | 100.00 |   100.00 |   80.00 | 
+ℹ  utils                         |        |          |         | 
+ℹ   helpers.js                   |  98.25 |    79.49 |  100.00 | 38
+ℹ -------------------------------------------------------------------------------
+ℹ all files                      |  98.43 |    89.61 |   94.85 | 
+ℹ -------------------------------------------------------------------------------
+ℹ end of coverage report
