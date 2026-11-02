@@ -2,6 +2,7 @@ const db = require('../db');
 const helpers = require('../utils/helpers');
 const config = require('../platform/config');
 const paymentService = require('./paymentService');
+const providers = require('../modules/payment/providers');
 
 exports.pushPaymentToWebhooks = async (paymentId) => {
   const p = paymentService.get(paymentId);
@@ -28,12 +29,13 @@ exports.handleCrmWebhook = (body) => {
 
 // Webhook entrante del proveedor de pagos: muta payments y requests directo
 exports.handleStripeyWebhook = (body) => {
-  const p = db.prepare('SELECT * FROM payments WHERE stripey_charge_id = ?').get(body.data && body.data.object && body.data.object.id);
+  const evt = providers.byName('stripey').parseWebhook(body);   // el adapter traduce al vocabulario del dominio
+  const p = evt && db.prepare('SELECT * FROM payments WHERE stripey_charge_id = ?').get(evt.providerRef);
   if (!p) return { ignored: true };
-  if (body.type === 'charge.succeeded') {
+  if (evt.event === 'captured') {
     db.prepare("UPDATE payments SET status = 'paid', stripey_status = 'succeeded' WHERE id = ?").run(p.id);
     db.prepare('UPDATE requests SET paid = 1 WHERE id = ?').run(p.request_id);
-  } else if (body.type === 'charge.failed') {
+  } else if (evt.event === 'declined') {
     db.prepare("UPDATE payments SET status = 'failed', stripey_status = 'failed' WHERE id = ?").run(p.id);
   }
   return { ok: true };

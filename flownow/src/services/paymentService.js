@@ -1,12 +1,11 @@
 const db = require('../db');
 const config = require('../platform/config');
 const helpers = require('../utils/helpers');
-const GatewayFactory = require('./interfaces/GatewayFactory');
+const providers = require('../modules/payment/providers');
+const { ProviderUnavailableError } = require('../modules/payment/providers/errors');
 const requestService = require('./requestService');
 const notificationService = require('./notificationService');
 const integrationService = require('./integrationService');
-
-const gateway = GatewayFactory.create('stripey');
 
 exports.get = (id) => {
   const p = db.prepare('SELECT * FROM payments WHERE id = ?').get(id);
@@ -33,42 +32,36 @@ exports.processPayment = async (requestId, token, currency) => {
   if (currency !== 'CLP') amount = amount / config.fx.rates[currency]; // TEMP(TD-002): tasa fija hasta integrar un servicio de FX
   amount = Math.round(amount * 100) / 100;
 
+  const provider = providers.active();
   const info = db.prepare('INSERT INTO payments (request_id, customer_id, amount, currency, status, provider, created_at) VALUES (?,?,?,?,?,?,?)')
-    .run(requestId, cust.id, amount, currency, 'pending', 'stripey', helpers.now());
+    .run(requestId, cust.id, amount, currency, 'pending', provider.name, helpers.now());
   const pid = Number(info.lastInsertRowid);
 
+  // Cobro vía el puerto del proveedor: el dominio sólo ve resultados y errores neutros.
   let charge = null;
   let attempts = 0;
   let lastError = null;
-  if (config.flags.useBackupProvider) {
-    // WORKAROUND(TD-005): proveedor de respaldo "payfast" cuando Stripey cae; sin pruebas ni contrato
-    await helpers.httpPost(config.providers.payfast.payUrl, { amount, currency, token });
-    charge = { id: 'pf_' + Date.now(), status: 'succeeded' };
-    db.prepare("UPDATE payments SET provider = 'payfast' WHERE id = ?").run(pid);
-  } else {
-    while (attempts < 3 && !charge) {
-      attempts++;
-      try {
-        charge = await gateway.charge(amount, currency, token, { request_id: requestId, customer_id: cust.id });
-      } catch (e) {
-        lastError = e;
-        if (e.type === 'StripeyConnectionError') { helpers.log('reintento stripey ' + attempts); continue; }
-        else if (e.type === 'StripeyAuthenticationError') break;
-        else break;
-      }
+  while (attempts < 3 && !charge) {
+    attempts++;
+    try {
+      charge = await provider.charge({ amount, currency, token, metadata: { request_id: requestId, customer_id: cust.id } });
+    } catch (e) {
+      lastError = e;
+      if (e instanceof ProviderUnavailableError) { helpers.log('reintento ' + provider.name + ' ' + attempts); continue; }
+      break;
     }
   }
   db.prepare('UPDATE payments SET attempts = ? WHERE id = ?').run(attempts, pid);
 
   if (!charge) {
     db.prepare("UPDATE payments SET status = 'error', stripey_status = 'error' WHERE id = ?").run(pid);
-    helpers.log('pago ' + pid + ' falló: ' + (lastError && lastError.message), 'stripey');
+    helpers.log('pago ' + pid + ' falló: ' + (lastError && lastError.message), provider.name);
     await notificationService.notifyPaymentResult(pid);
     throw Object.assign(new Error('no se pudo contactar al proveedor de pagos'), { status: 502 });
   }
 
-  if (charge.status === 'succeeded') {
-    db.prepare("UPDATE payments SET status = 'paid', stripey_charge_id = ?, stripey_status = ? WHERE id = ?").run(charge.id, charge.status, pid);
+  if (charge.status === 'captured') {
+    db.prepare("UPDATE payments SET status = 'paid', stripey_charge_id = ?, stripey_status = ? WHERE id = ?").run(charge.providerRef, charge.providerStatus, pid);
     db.prepare('UPDATE requests SET paid = 1 WHERE id = ?').run(requestId);
     db.prepare('UPDATE customers SET total_spent = total_spent + ? WHERE id = ?').run(amount, cust.id);
     // factura en ERP
@@ -84,12 +77,12 @@ exports.processPayment = async (requestId, token, currency) => {
       db.prepare("UPDATE customers SET tier = 'gold' WHERE id = ?").run(cust.id);
       await helpers.httpPost(`${config.providers.hubcrm.baseUrl}/contacts/${cust.crm_id}`, { tier: 'gold' });
     }
-  } else if (charge.status === 'failed') {
-    db.prepare("UPDATE payments SET status = 'failed', stripey_charge_id = ?, stripey_status = ? WHERE id = ?").run(charge.id, charge.status, pid);
-  } else if (charge.status === 'requires_action') {
-    db.prepare("UPDATE payments SET status = 'pending_action', stripey_charge_id = ?, stripey_status = ? WHERE id = ?").run(charge.id, charge.status, pid);
+  } else if (charge.status === 'declined') {
+    db.prepare("UPDATE payments SET status = 'failed', stripey_charge_id = ?, stripey_status = ? WHERE id = ?").run(charge.providerRef, charge.providerStatus, pid);
+  } else if (charge.status === 'action_required') {
+    db.prepare("UPDATE payments SET status = 'pending_action', stripey_charge_id = ?, stripey_status = ? WHERE id = ?").run(charge.providerRef, charge.providerStatus, pid);
   } else {
-    db.prepare("UPDATE payments SET status = 'unknown', stripey_status = ? WHERE id = ?").run(charge.status, pid);
+    db.prepare("UPDATE payments SET status = 'unknown', stripey_status = ? WHERE id = ?").run(charge.providerStatus, pid);
   }
   await notificationService.notifyPaymentResult(pid);
   await integrationService.pushPaymentToWebhooks(pid);
@@ -101,8 +94,8 @@ exports.refund = async (paymentId, amount) => {
   if (p.status !== 'paid') throw Object.assign(new Error('sólo se reembolsan pagos pagados'), { status: 400 });
   amount = amount || p.amount;
   if (amount + p.refunded_amount > p.amount) throw Object.assign(new Error('excede el monto pagado'), { status: 400 });
-  const re = await gateway.refund(p.stripey_charge_id, amount);
-  if (re.status !== 'succeeded') throw Object.assign(new Error('refund rechazado por stripey'), { status: 502 });
+  const re = await providers.forRefund().refund({ providerRef: p.stripey_charge_id, amount });
+  if (!re.ok) throw Object.assign(new Error('refund rechazado por el proveedor'), { status: 502 });
   const total = p.refunded_amount + amount;
   db.prepare('UPDATE payments SET refunded_amount = ?, status = ? WHERE id = ?').run(total, total >= p.amount ? 'refunded' : 'paid', paymentId);
   db.prepare('UPDATE customers SET total_spent = total_spent - ? WHERE id = ?').run(amount, p.customer_id);

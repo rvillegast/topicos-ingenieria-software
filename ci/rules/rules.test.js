@@ -58,3 +58,50 @@ test('FF4: el gate de SATD falla con un marcador sin ticket', () => {
   const r = spawnSync(path.join(__dirname, '../../scripts/satd-scan.sh'), ['--gate', d], { encoding: 'utf8' });
   assert.strictEqual(r.status, 1);
 });
+
+// ---- FF2b: nombres de proveedor (ratchet) ----
+const ratchet = (dir, legacy, cycles = 0) => { const f = path.join(dir, 'ratchets.json'); fs.writeFileSync(f, JSON.stringify({ cycles, providerNamePatterns: ['stripey', 'payfast'], providerNameLegacy: legacy })); return f; };
+
+test('FF2b: pasa si los nombres sólo están en adapters, el registro y la configuración', () => {
+  const d = tmp(); const src = path.join(d, 'src');
+  write(src, 'modules/payment/adapters/stripey/index.js', "exports.name = 'stripey';");
+  write(src, 'modules/payment/providers/index.js', "const a = { stripey: 1, payfast: 2 };");
+  write(src, 'platform/config.js', "// stripey");
+  write(src, 'modules/request/a.js', 'module.exports = 1;');
+  assert.strictEqual(run('provider-names.js', src, '--ratchets', ratchet(d, [])).status, 0);
+});
+test('FF2b: falla si un módulo ajeno nombra al proveedor', () => {
+  const d = tmp(); const src = path.join(d, 'src');
+  write(src, 'modules/request/a.js', "const x = 'stripey';");
+  const r = run('provider-names.js', src, '--ratchets', ratchet(d, []));
+  assert.strictEqual(r.status, 1); assert.match(r.stderr, /request\/a\.js/);
+});
+test('FF2b: un archivo legado tolerado por el ratchet pasa, pero si deja de nombrar al proveedor hay que sacarlo', () => {
+  const d = tmp(); const src = path.join(d, 'src');
+  write(src, 'old.js', "const x = 'payfast';");
+  assert.strictEqual(run('provider-names.js', src, '--ratchets', ratchet(d, ['old.js'])).status, 0);
+  write(src, 'old.js', 'const x = 1;');
+  const r = run('provider-names.js', src, '--ratchets', ratchet(d, ['old.js']));
+  assert.strictEqual(r.status, 1); assert.match(r.stderr, /quitarlo/);
+});
+
+// ---- FF1 / FF2 con dependency-cruiser ----
+const arch = (d, cycles) => spawnSync('node', [path.join(__dirname, 'arch.js'), 'src', '--ratchets', ratchet(d, [], cycles)], { cwd: d, encoding: 'utf8' });
+
+test('FF2: falla si un módulo ajeno importa el SDK del proveedor; pasa si lo hace el adapter', () => {
+  const d = tmp();
+  write(d, 'vendor/stripey-sdk.js', 'module.exports = class {};');
+  write(d, 'src/modules/payment/adapters/stripey/index.js', "module.exports = require('../../../../../vendor/stripey-sdk');");
+  assert.strictEqual(arch(d, 0).status, 0);
+  write(d, 'src/modules/notification/n.js', "module.exports = require('../../../vendor/stripey-sdk');");
+  const r = arch(d, 0);
+  assert.strictEqual(r.status, 1); assert.match(r.stderr, /not-to-sdk-outside-adapter/);
+});
+test('FF1: falla ante un ciclo nuevo y respeta el ratchet (no puede subir; si baja hay que bajarlo)', () => {
+  const d = tmp();
+  write(d, 'src/a.js', "exports.b = () => require('./b');");
+  write(d, 'src/b.js', "const a = require('./a'); exports.a = a;");
+  assert.strictEqual(arch(d, 0).status, 1);           // 1 ciclo > ratchet 0
+  assert.strictEqual(arch(d, 1).status, 0);           // tolerado por el ratchet
+  assert.strictEqual(arch(d, 2).status, 1);           // mejoró: obliga a fijar el avance
+});

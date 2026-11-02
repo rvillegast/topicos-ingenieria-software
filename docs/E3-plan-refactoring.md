@@ -85,7 +85,7 @@ Meta de cobertura (FF7): `paymentService`/futuro `modules/payment` ≥ 80 % lín
 | 1 ✅ | **Characterization tests** | suite black-box de §3 sobre el AS-IS (hecho: 46 pruebas) | TD-008 (cerrada) | bajo | FF7 (umbral de cobertura crítica) |
 | 2 ✅ | **HardcodedValue → Configuration** | `platform/config` (env + defaults de desarrollo): claves, URLs, tasas FX, flags, secreto de firma | TD-006, parte de TD-002, H-1..H-4 | bajo | **FF5** |
 | 3 ✅ | **Seam: bus de eventos** | `platform/events` con `schemaVersion`, aislamiento de fallos y pruebas | TD-009 (registrar) | bajo | — |
-| 4 | **DirectVendorDependency → Port + Adapter** | `ProviderPort` + `StripeyAdapter` (ACL de estados/errores); respaldo PayFast como segundo adapter; se elimina `GatewayFactory`/`IPaymentGateway`/`INotifier` triviales | TD-005 | medio | **FF2**, FF2b |
+| 4 ✅ | **DirectVendorDependency → Port + Adapter** | `ProviderPort` + `StripeyAdapter` (ACL de estados/errores); respaldo PayFast como segundo adapter; se elimina `GatewayFactory`/`IPaymentGateway`/`INotifier` triviales | TD-005 | medio | **FF2**, FF2b |
 | 5 | **LargeMethod → ExtractClass** | `processPayment` → `PaymentLifecycle` + `ChargeRetryPolicy` + `FxPolicy` (funciones puras con pruebas unitarias) | TD-002 | medio | umbral de complejidad (CCN ≤ 10 en el módulo) |
 | 6 | **SharedDataMutation → OwnershipBoundary (eventos)** | Payment publica `PaymentCaptured/Failed/Refunded`; **Request** marca `paid` y **Customer** actualiza `totalSpent`/tier por suscripción; Payment deja de escribir `requests`/`customers`. *Rompe el ciclo Request↔Payment* | — | **alto** | — |
 | 7 | **Ownership de tabla** | `PaymentRepository` única vía a `payment_payments` (renombre `payments` → `payment_payments`, `stripey_*` → `provider_*`); presentador HTTP de compatibilidad para los campos legacy | TD-010 | medio | **FF3** (ratchet: `payment_*`, `customer_*`) |
@@ -152,6 +152,28 @@ Efecto de comportamiento: ninguno con la configuración por defecto (la suite de
 - `publish` **espera** a los consumidores: así, cuando los pasos 6 y 8 muevan los efectos del pago a eventos, el flujo HTTP conserva su comportamiento (los efectos ocurren antes de responder).
 - **Sin cambio de comportamiento:** el bus todavía no está conectado a ningún flujo (es el *seam*; se usa desde el paso 6). No es una abstracción sin presión de cambio: existe para romper los ciclos de ADR-004 y se prueba por separado antes de depender de él.
 - TD-009 queda **implementada como mitigación** (bitácora de fallos) y verificada con las pruebas de aislamiento; el outbox sigue siendo evolución futura aceptada.
+
+### 4.4. Resultado del paso 4 (medido)
+
+`DirectVendorDependency → Interface + Adapter` en `src/modules/payment/`:
+
+- **Puerto** de proveedor de pagos (`charge`, `refund`, `parseWebhook`) con vocabulario del dominio (`captured | declined | action_required | unknown`) y errores neutros (`ProviderError`, `ProviderUnavailableError` reintentable). `providers/index.js` elige el proveedor por configuración (`active()`, `forRefund()`, `byName()`); **no** es una factory genérica: hay dos variantes reales.
+- **Adapters** `adapters/stripey` (ACL: único archivo que importa el SDK y conoce sus estados y errores) y `adapters/payfast` (antes, código inline marcado `WORKAROUND`; cierra el núcleo de TD-005).
+- `paymentService.processPayment` ya no conoce tipos ni errores del proveedor: usa el puerto y un único bucle de cobro. **Se eliminaron** `IPaymentGateway`, `GatewayFactory`, `StripeyGateway` e `INotifier`/`EmailNotifier` (interfaces con una sola implementación).
+- La traducción del webhook entrante se movió al adapter (`parseWebhook`).
+
+| Indicador | Antes (`aa782aa`) | Después | Cómo se midió |
+|---|---|---|---|
+| FF2: archivos que importan el SDK fuera del adapter | **1** (`StripeyGateway.js`; la regla detecta la violación sobre el código previo) | **0** | `node ci/rules/arch.js` |
+| FF2b: archivos fuera de adapters/config/registro que nombran a Stripey/PayFast | **10** | **8** (ratchet; seguirá bajando en los pasos 6, 7 y 8) | `node ci/rules/provider-names.js` |
+| `processPayment` | 71 NLOC · CCN 26 | 64 NLOC · CCN **23** | `baseline.sh` (lizard) |
+| Interfaces triviales | 5 archivos en `services/interfaces/` | **0** | — |
+| Pruebas | 63 | **72** verdes (9 nuevas: contrato del puerto para ambos adapters) | `npm test` |
+| Ciclos | 6 | 6 (sin cambio; se rompen en los pasos 6, 8, 10 y 11) | FF1 con ratchet |
+
+**Honestidad sobre S1:** el escenario "cambiar de proveedor" **aún no mejora** en la heurística (12 archivos antes y después), porque las columnas `stripey_*`, los avisos y el webhook siguen en el AS-IS hasta los pasos 7 y 8. Lo que ya cambió es la **frontera**: ningún archivo fuera del adapter importa el SDK ni interpreta sus estados o errores, y FF2 lo impide en CI.
+
+**Único cambio de comportamiento observable:** la ruta de respaldo PayFast ahora pasa por el mismo bucle de cobro y registra `attempts = 1` (antes 0), y un error de red de PayFast se trata como falla del proveedor (502) en lugar de excepción sin controlar. La prueba de caracterización quedó fijada antes del cambio y se actualizó con el motivo.
 
 ## 5. Estimación y reparto (supuesto: 10–14 h del equipo, §16.3)
 

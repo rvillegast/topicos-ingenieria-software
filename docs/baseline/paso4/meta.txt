@@ -1,0 +1,4 @@
+fecha: 2026-11-01T21:17:23-03:00
+commit: 3ef43b57d97e34d635fe7bcf344e2ad98d822b8c
+node: v24.18.0
+dependency-cruiser: 18.7.0 · jscpd: 5.4.2 · lizard: 1.24.3

@@ -137,14 +137,15 @@ test('resumen de pagos: total en CLP, fallidos y proveedor', async () => {
   assert.match(s.totalFormatted, /^\$/);
 });
 
-test('respaldo PayFast: no registra intentos (attempts = 0) y su pago se reembolsa por el proveedor principal', async () => {
-  // Quirk del AS-IS (TD-005): la ruta de respaldo no pasa por el bucle de reintentos y los reembolsos
-  // siempre salen por Stripey, aunque el cobro haya sido por PayFast. Se caracteriza antes de refactorizar.
+test('respaldo PayFast: pasa por el mismo bucle de cobro (1 intento) y se reembolsa por el proveedor principal', async () => {
+  // Cambio deliberado del paso 4 (TD-005): en el AS-IS la ruta de respaldo no entraba al bucle de reintentos y
+  // registraba attempts = 0; ahora usa el mismo puerto que Stripey y registra 1 intento. Lo demás se preserva:
+  // los reembolsos siguen saliendo por Stripey aunque el cobro haya sido por PayFast.
   process.env.USE_BACKUP_PROVIDER = '1';
   let paid;
   try { const c = await h.customer(); const r = await h.request(c.id, 40000); paid = (await h.pay(r.id)).body; }
   finally { delete process.env.USE_BACKUP_PROVIDER; }
-  assert.strictEqual(paid.provider, 'payfast'); assert.strictEqual(paid.attempts, 0); assert.strictEqual(paid.stripey_status, 'succeeded');
+  assert.strictEqual(paid.provider, 'payfast'); assert.strictEqual(paid.attempts, 1); assert.strictEqual(paid.stripey_status, 'succeeded');
   const refund = await h.api('POST', `/payments/${paid.id}/refund`, {});
   assert.strictEqual(refund.status, 200); assert.strictEqual(refund.body.status, 'refunded');
 });

@@ -19,8 +19,9 @@ out.push(`- Archivos fuente: **${files.length}** · LOC totales: **${sizes.find(
 
 // Dependencias
 const dc = JSON.parse(read('dependencias.json'));
-const mods = dc.modules.filter((m) => !m.coreModule && !/node_modules/.test(m.source));
-const edges = mods.reduce((n, m) => n + m.dependencies.filter((d) => !d.coreModule && !/node_modules/.test(d.resolved)).length, 0);
+const isVendor = (p) => /(^|\/)vendor\//.test(p || '');   // el SDK simulado no es código propio: se excluye igual que en el AS-IS
+const mods = dc.modules.filter((m) => !m.coreModule && !/node_modules/.test(m.source) && !isVendor(m.source));
+const edges = mods.reduce((n, m) => n + m.dependencies.filter((d) => !d.coreModule && !/node_modules/.test(d.resolved) && !isVendor(d.resolved)).length, 0);
 const cycles = new Map();
 for (const v of dc.summary.violations.filter((v) => v.type === 'cycle')) {
   const ring = [v.from, ...v.cycle.map((c) => c.name)];
@@ -28,7 +29,7 @@ for (const v of dc.summary.violations.filter((v) => v.type === 'cycle')) {
   cycles.set(nodes.join('|'), ring.map(short).join(' → '));
 }
 const inFan = {}, outFan = {};
-for (const m of mods) for (const d of m.dependencies) { if (d.coreModule || /node_modules/.test(d.resolved)) continue; outFan[m.source] = (outFan[m.source] || 0) + 1; inFan[d.resolved] = (inFan[d.resolved] || 0) + 1; }
+for (const m of mods) for (const d of m.dependencies) { if (d.coreModule || /node_modules/.test(d.resolved) || isVendor(d.resolved)) continue; outFan[m.source] = (outFan[m.source] || 0) + 1; inFan[d.resolved] = (inFan[d.resolved] || 0) + 1; }
 h('Dependencias (dependency-cruiser)');
 out.push(`- Módulos (archivos): **${mods.length}** · aristas: **${edges}** · violaciones de ciclo reportadas: **${dc.summary.violations.filter((v) => v.type === 'cycle').length}**`);
 out.push(`- Dependencias circulares: **${cycles.size}** ciclos distintos`);

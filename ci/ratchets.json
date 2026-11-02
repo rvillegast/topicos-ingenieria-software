@@ -1,0 +1,18 @@
+{
+  "_nota": "Ratchets: contadores/listas que sólo pueden mejorar. Cada paso de E3 los reduce; nunca se amplían para hacer pasar un cambio.",
+  "cycles": 6,
+  "providerNamePatterns": [
+    "stripey",
+    "payfast"
+  ],
+  "providerNameLegacy": [
+    "controllers/integrationController.js",
+    "controllers/paymentController.js",
+    "db.js",
+    "server.js",
+    "services/integrationService.js",
+    "services/notificationService.js",
+    "services/paymentService.js",
+    "services/reportService.js"
+  ]
+}

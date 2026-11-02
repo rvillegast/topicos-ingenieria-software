@@ -1,0 +1,139 @@
+flowchart LR
+
+subgraph 0["flownow"]
+subgraph 1["src"]
+subgraph 2["controllers"]
+3["authController.js"]
+B["customerController.js"]
+U["integrationController.js"]
+V["notificationController.js"]
+W["paymentController.js"]
+X["reportController.js"]
+Z["requestController.js"]
+end
+4["db.js"]
+subgraph 6["platform"]
+7["config.js"]
+10["events.js"]
+end
+subgraph 8["utils"]
+9["helpers.js"]
+end
+subgraph C["services"]
+D["customerService.js"]
+E["notificationService.js"]
+F["paymentService.js"]
+S["integrationService.js"]
+T["requestService.js"]
+Y["reportService.js"]
+end
+subgraph G["modules"]
+subgraph H["payment"]
+subgraph I["providers"]
+J["index.js"]
+N["errors.js"]
+end
+subgraph K["adapters"]
+subgraph L["payfast"]
+M["index.js"]
+end
+subgraph O["stripey"]
+P["index.js"]
+end
+end
+end
+end
+subgraph Q["vendor"]
+R["stripey-sdk.js"]
+end
+11["server.js"]
+end
+subgraph 12["node_modules"]
+subgraph 13["express"]
+14["index.js"]
+end
+end
+end
+5["node:sqlite"]
+A["crypto"]
+3-->4
+3-->7
+3-->9
+4-->7
+4-->5
+9-->4
+9-->7
+9-->A
+B-->4
+B-->D
+B-->9
+D-->4
+D-->7
+D-->9
+D-->E
+D-->T
+E-->4
+E-->7
+E-->9
+E-->D
+E-->F
+F-->4
+F-->J
+F-->N
+F-->7
+F-->9
+F-->S
+F-->E
+F-->T
+J-->7
+J-->M
+J-->P
+M-->7
+M-->9
+M-->N
+P-->7
+P-->R
+P-->N
+S-->4
+S-->J
+S-->7
+S-->9
+S-->F
+T-->4
+T-->9
+T-->D
+T-->E
+T-->F
+U-->4
+U-->7
+U-->S
+U-->9
+V-->4
+V-->7
+V-->E
+V-->9
+W-->4
+W-->7
+W-->F
+W-->9
+X-->4
+X-->7
+X-->Y
+X-->9
+Y-->4
+Y-->7
+Y-->9
+Z-->4
+Z-->D
+Z-->F
+Z-->T
+Z-->9
+11-->3
+11-->B
+11-->U
+11-->V
+11-->W
+11-->X
+11-->Z
+11-->7
+11-->14
