@@ -84,7 +84,7 @@ Meta de cobertura (FF7): `paymentService`/futuro `modules/payment` ≥ 80 % lín
 |---|---|---|---|---|---|
 | 1 ✅ | **Characterization tests** | suite black-box de §3 sobre el AS-IS (hecho: 46 pruebas) | TD-008 (cerrada) | bajo | FF7 (umbral de cobertura crítica) |
 | 2 ✅ | **HardcodedValue → Configuration** | `platform/config` (env + defaults de desarrollo): claves, URLs, tasas FX, flags, secreto de firma | TD-006, parte de TD-002, H-1..H-4 | bajo | **FF5** |
-| 3 | **Seam: bus de eventos** | `platform/events` con `schemaVersion`, aislamiento de fallos y pruebas | TD-009 (registrar) | bajo | — |
+| 3 ✅ | **Seam: bus de eventos** | `platform/events` con `schemaVersion`, aislamiento de fallos y pruebas | TD-009 (registrar) | bajo | — |
 | 4 | **DirectVendorDependency → Port + Adapter** | `ProviderPort` + `StripeyAdapter` (ACL de estados/errores); respaldo PayFast como segundo adapter; se elimina `GatewayFactory`/`IPaymentGateway`/`INotifier` triviales | TD-005 | medio | **FF2**, FF2b |
 | 5 | **LargeMethod → ExtractClass** | `processPayment` → `PaymentLifecycle` + `ChargeRetryPolicy` + `FxPolicy` (funciones puras con pruebas unitarias) | TD-002 | medio | umbral de complejidad (CCN ≤ 10 en el módulo) |
 | 6 | **SharedDataMutation → OwnershipBoundary (eventos)** | Payment publica `PaymentCaptured/Failed/Refunded`; **Request** marca `paid` y **Customer** actualiza `totalSpent`/tier por suscripción; Payment deja de escribir `requests`/`customers`. *Rompe el ciclo Request↔Payment* | — | **alto** | — |
@@ -143,6 +143,15 @@ flowchart TB
 Las 5 líneas con URLs y 4 con "posibles secretos" que aún muestra `baseline.sh` están **sólo** en `platform/config.js` (el único lugar permitido). Verificado además: con `NODE_ENV=production` y sin variables, la app **no arranca** (falla con "Falta la variable de entorno …"); con las variables, `admin123` deja de funcionar y sólo entra la contraseña configurada.
 
 Efecto de comportamiento: ninguno con la configuración por defecto (la suite de caracterización lo demuestra). El secreto de firma por defecto cambió (`dev-only-token-secret`), lo que sólo invalida tokens ya emitidos.
+
+### 4.3. Resultado del paso 3 (medido)
+
+`platform/events.js`: bus en proceso con sobre versionado (`id`, `type`, `schemaVersion`, `occurredAt`, `payload` inmutable), `subscribe`/`publish`, contratos mínimos por versión (`registerContract`: campos requeridos y tipos, lector tolerante) y **aislamiento de fallos** (un consumidor que falla no impide a los demás ni rompe al publicador; queda en la bitácora acotada `deadLetters()`).
+
+- **12 pruebas nuevas** (`test/platform/events.test.js`): orden de entrega, sobre, aislamiento (síncrono y asíncrono), espera de consumidores async, desuscripción, reentrancia, contrato (campos mínimos/extra/inválido sin entrega), convivencia de v1 y v2, argumentos inválidos, tope de la bitácora. Total: **62 verdes**; la suite de caracterización sigue sin cambios. Cobertura de `events.js`: 100 % líneas.
+- `publish` **espera** a los consumidores: así, cuando los pasos 6 y 8 muevan los efectos del pago a eventos, el flujo HTTP conserva su comportamiento (los efectos ocurren antes de responder).
+- **Sin cambio de comportamiento:** el bus todavía no está conectado a ningún flujo (es el *seam*; se usa desde el paso 6). No es una abstracción sin presión de cambio: existe para romper los ciclos de ADR-004 y se prueba por separado antes de depender de él.
+- TD-009 queda **implementada como mitigación** (bitácora de fallos) y verificada con las pruebas de aislamiento; el outbox sigue siendo evolución futura aceptada.
 
 ## 5. Estimación y reparto (supuesto: 10–14 h del equipo, §16.3)
 

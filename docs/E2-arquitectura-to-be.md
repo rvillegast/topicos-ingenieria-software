@@ -262,7 +262,7 @@ Cada tabla lleva el prefijo de su owner; FF3 verifica que ningún archivo fuera 
 | Webhooks HTTP entrantes (`/integrations/webhook/crm`, `/payments/webhooks/provider`) | API HTTP | Integration / Payment (adapter) | sistemas externos | URL versionada | validados y traducidos en la frontera (ACL) |
 | `ProviderPort` | puerto interno | Payment | `StripeyAdapter` (y, si procede, un adapter de respaldo) | interno, sin versionado público | cambia sólo con ADR-003 |
 
-Los eventos se declaran como **JSON Schema** en `modules/<m>/contract/events/*.schema.json`; una prueba de contrato valida que cada publicador emite conforme al schema y que cada consumidor tolera campos extra.
+Los eventos se declaran como **contratos mínimos versionados** (campos requeridos y tipos, `registerContract` de `platform/events`) en `modules/<m>/contract/events.js`; el bus rechaza a un publicador que viole su contrato, y las pruebas de contrato verifican que cada consumidor tolera campos extra. Si algún evento llegara a salir del proceso, se formaliza como JSON Schema (decisión futura, sin dependencia nueva hoy).
 
 ## 12. Dependencias permitidas / prohibidas
 
