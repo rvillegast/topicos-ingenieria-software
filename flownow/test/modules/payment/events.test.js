@@ -11,7 +11,7 @@ const helpers = require('../../../src/utils/helpers');
 let h; const seen = [];
 test.before(async () => {
   h = await start();
-  for (const t of [paymentEvents.CAPTURED, paymentEvents.REFUNDED, paymentEvents.CONFIRMED, customerEvents.TIER_CHANGED, integrationEvents.INVOICE_ISSUED])
+  for (const t of [paymentEvents.CAPTURED, paymentEvents.REFUNDED, paymentEvents.CONFIRMED, paymentEvents.FAILED, paymentEvents.ACTION_REQUIRED, customerEvents.TIER_CHANGED, integrationEvents.INVOICE_ISSUED])
     bus.subscribe(t, (e) => { seen.push(e); }, 'espía-de-prueba');
 });
 test.after(async () => { await h.close(); });
@@ -99,4 +99,55 @@ test('reintento: el límite se informa sin nombrar al proveedor', async () => {
   for (let i = 0; i < 3; i++) ids.push((await h.pay(r.id, 'tok_declined')).body.id);
   const res = await h.api('POST', `/payments/${ids[0]}/retry`, { token: 'tok_ok' });
   assert.strictEqual(res.status, 429); assert.ok(!/stripey/i.test(res.body.error));
+});
+
+// ---- Paso 8: avisos y evento al CRM por eventos ----
+const urlsSince = (n) => helpers.outbox.slice(n).map((x) => x.url);
+const subjects = async (cid) => (await h.notifications(cid)).map((n) => n.subject);
+
+test('orden de efectos de un cobro aprobado (igual que el AS-IS): ERP -> aviso al cliente -> evento al CRM', async () => {
+  const c = await h.customer(); const r = await h.request(c.id, 30000); const n = helpers.outbox.length;
+  await h.pay(r.id);
+  assert.deepStrictEqual(urlsSince(n), [
+    'https://erp.acme-internal.net/api/invoices', 'https://api.mailblast.io/v3/send', 'https://api.hubcrm.com/v2/events']);
+});
+
+test('los avisos de pago ya no nombran al proveedor ni su referencia', async () => {
+  const c = await h.customer(); const ok = await h.request(c.id, 40000); await h.pay(ok.id);
+  const bad = await h.request(c.id, 5000); await h.pay(bad.id, 'tok_declined');
+  const bodies = (await h.notifications(c.id)).map((x) => x.body).join(' | ');
+  assert.match(bodies, /fue procesado\./); assert.match(bodies, /fue rechazado\./);
+  assert.ok(!/stripey|ch_\d+/i.test(bodies), bodies);
+});
+
+test('rechazo: publica Payment.Failed (declined) y el CRM recibe payment.failed', async () => {
+  const c = await h.customer(); const r = await h.request(c.id, 5000); const n = helpers.outbox.length;
+  const p = (await h.pay(r.id, 'tok_declined')).body;
+  assert.deepStrictEqual(last(paymentEvents.FAILED).payload, { paymentId: p.id, requestId: r.id, customerId: c.id, amount: 5000, currency: 'CLP', reason: 'declined' });
+  const crm = helpers.outbox.slice(n).find((x) => x.url.endsWith('/events'));
+  assert.strictEqual(crm.body.type, 'payment.failed'); assert.strictEqual(crm.body.amount, 5000);
+});
+
+test('3DS: publica Payment.ActionRequired; aviso pendiente y CRM payment.requires_action', async () => {
+  const c = await h.customer(); const r = await h.request(c.id, 7000); const n = helpers.outbox.length;
+  const p = (await h.pay(r.id, 'tok_3ds')).body;
+  assert.strictEqual(last(paymentEvents.ACTION_REQUIRED).payload.paymentId, p.id);
+  assert.ok((await subjects(c.id)).includes('Pago pendiente'));
+  assert.strictEqual(helpers.outbox.slice(n).find((x) => x.url.endsWith('/events')).body.type, 'payment.requires_action');
+});
+
+test('proveedor caído: Payment.Failed (unavailable), aviso pendiente, 502 y NADA al CRM (comportamiento del AS-IS)', async () => {
+  const c = await h.customer(); const r = await h.request(c.id, 8000); const n = helpers.outbox.length;
+  const res = await h.pay(r.id, 'tok_timeout');
+  assert.strictEqual(res.status, 502);
+  assert.strictEqual(last(paymentEvents.FAILED).payload.reason, 'unavailable');
+  assert.ok((await subjects(c.id)).includes('Pago pendiente'));
+  assert.ok(!urlsSince(n).some((u) => u.endsWith('/events')), 'no se notifica al CRM');
+});
+
+test('Payment ya no conoce a Notification ni a Integration: un consumidor extra recibe los eventos y nadie más cambia', async () => {
+  const got = []; bus.subscribe(paymentEvents.FAILED, (e) => { got.push(e.payload.reason); }, 'extra');
+  const c = await h.customer(); const r = await h.request(c.id, 6000);
+  await h.pay(r.id, 'tok_declined');
+  assert.deepStrictEqual(got, ['declined']);
 });

@@ -1,0 +1,5 @@
+flownow/src/platform/config.js:38:    payfast: { get payUrl() { return text('PAYFAST_PAY_URL', 'https://api.payfast.cl/v1/pay'); } },
+flownow/src/platform/config.js:39:    hubcrm: { get baseUrl() { return text('HUBCRM_BASE_URL', 'https://api.hubcrm.com/v2'); } },
+flownow/src/platform/config.js:40:    erp: { get baseUrl() { return text('ERP_BASE_URL', 'https://erp.acme-internal.net/api'); } },
+flownow/src/platform/config.js:42:      get sendUrl() { return text('MAILBLAST_SEND_URL', 'https://api.mailblast.io/v3/send'); },
+flownow/src/platform/config.js:46:      get sendUrl() { return text('SMSGO_SEND_URL', 'https://api.smsgo.com/send'); },

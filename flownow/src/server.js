@@ -12,6 +12,8 @@ const reports = require('./controllers/reportController');
 require('./modules/request/subscriptions').register();
 require('./modules/integration/subscriptions').register();
 require('./modules/customer/subscriptions').register();
+require('./modules/notification/subscriptions').register();
+require('./modules/integration/subscriptions').registerCrmEvents();
 
 const app = express();
 app.use(express.json());

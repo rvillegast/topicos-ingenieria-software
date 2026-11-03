@@ -1,6 +1,6 @@
 # ADR-003: Estrategia para proveedores externos (Adapter / ACL)
 
-Status: Propuesto (implementado parcialmente en el paso 4 para pagos: puerto, adapters Stripey/PayFast, FF2 y FF2b)
+Status: Propuesto (implementado parcialmente en el paso 4 para pagos: puerto, adapters Stripey/PayFast, FF2 y FF2b; paso 8: los avisos al cliente ya no nombran al proveedor)
 Context: Los nombres, URLs y tipos de proveedor están dispersos: Stripey en 11 archivos (51 ocurrencias; incluso columnas `stripey_*` y textos al cliente), HubCRM en 6, SmsGo en 2, ERP en 2, MailBlast en 1, PayFast inline como `WORKAROUND`. `IPaymentGateway`/`GatewayFactory`/`INotifier` tienen una sola implementación y no ocultan nada (el servicio igual compara `e.type === 'Stripey…'`).
 Architectural concern: lock-in conceptual (§8), Interoperability, Evolvability: ¿necesitamos adapter / ACL?
 Decision: Cada proveedor vive **sólo** en un adapter dentro del módulo que lo posee: Stripey/PayFast en `payment/adapters`, MailBlast/SmsGo en `notification/adapters`, HubCRM/ERP en `integration/adapters`. El adapter implementa un **puerto neutro** (`ProviderPort`, `ChannelPort`, `CrmPort`, `ErpPort`) y actúa como ACL: traduce estados, errores y DTOs al vocabulario interno (`ProviderOutcome`: `captured|declined|action_required|unavailable`). Selección y credenciales por configuración. Los eventos y el esquema no llevan nombres ni tipos del proveedor (adiós `stripey_status`).

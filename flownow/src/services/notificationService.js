@@ -2,7 +2,7 @@ const db = require('../db');
 const config = require('../platform/config');
 const helpers = require('../utils/helpers');
 const customerService = require('./customerService');
-const paymentService = require('./paymentService');
+const { paymentMessage } = require('../modules/notification/payment-messages');
 
 exports.notifyWelcome = async (customerId) => {
   const c = customerService.get(customerId);
@@ -19,14 +19,11 @@ exports.notifyRequestCreated = async (customerId, requestId, amount) => {
   }
 };
 
-exports.notifyPaymentResult = async (paymentId) => {
-  const p = paymentService.get(paymentId);
-  const c = db.prepare('SELECT name, phone FROM customers WHERE id = ?').get(p.customer_id);
-  let subject, body;
-  if (p.provider_status === 'succeeded') { subject = 'Pago confirmado'; body = 'Hola ' + c.name + ', tu pago de ' + helpers.formatMoney(p.amount, p.currency) + ' fue procesado por Stripey (' + p.provider_ref + ').'; }
-  else if (p.provider_status === 'failed') { subject = 'Pago rechazado'; body = 'Hola ' + c.name + ', Stripey rechazó tu pago de ' + helpers.formatMoney(p.amount, p.currency) + '.'; }
-  else { subject = 'Pago pendiente'; body = 'Hola ' + c.name + ', tu pago requiere una acción adicional.'; }
-  await helpers.sendEmail(p.customer_id, subject, body);
+// Aviso de resultado de pago a partir del evento (el contrato trae el monto; el nombre se resuelve aquí).
+exports.onPaymentOutcome = async (outcome, payload) => {
+  const c = db.prepare('SELECT name FROM customers WHERE id = ?').get(payload.customerId);
+  const { subject, body } = paymentMessage({ outcome, name: c.name, formattedAmount: helpers.formatMoney(payload.amount, payload.currency) });
+  await helpers.sendEmail(payload.customerId, subject, body);
 };
 
 exports.list = (customerId) => customerId

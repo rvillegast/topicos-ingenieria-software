@@ -7,6 +7,7 @@ const bus = require('../../platform/events');
 const paymentEvents = require('../payment/contract/events');
 const customerEvents = require('../customer/contract/events');
 const integrationEvents = require('./contract/events');
+const integrationService = require('../../services/integrationService');
 
 let registered = false;
 exports.register = () => {
@@ -27,4 +28,17 @@ exports.register = () => {
   bus.subscribe(customerEvents.TIER_CHANGED, async (e) => {
     await helpers.httpPost(`${config.providers.hubcrm.baseUrl}/contacts/${e.payload.crmId}`, { tier: e.payload.tier });
   }, 'integration.syncCrmTier');
+};
+
+// Evento de pago hacia el CRM. Se registra aparte (después de Customer y Notification) para conservar el orden
+// de efectos del AS-IS: ERP -> tier -> aviso al cliente -> evento al CRM.
+let registeredCrm = false;
+exports.registerCrmEvents = () => {
+  if (registeredCrm) return; registeredCrm = true;
+  bus.subscribe(paymentEvents.CAPTURED, (e) => integrationService.onPaymentOutcome('captured', e.payload), 'integration.crmPaymentCaptured');
+  bus.subscribe(paymentEvents.FAILED, (e) => {
+    if (e.payload.reason === 'unavailable') return;   // AS-IS: si el proveedor no responde no se notifica al CRM
+    return integrationService.onPaymentOutcome(e.payload.reason === 'declined' ? 'declined' : 'unknown', e.payload);
+  }, 'integration.crmPaymentFailed');
+  bus.subscribe(paymentEvents.ACTION_REQUIRED, (e) => integrationService.onPaymentOutcome('action_required', e.payload), 'integration.crmPaymentActionRequired');
 };

@@ -71,7 +71,7 @@ rules:
 | FF5 | ✅ implementada | `ci/rules/rules.test.js`: falla ante URL, clave `sk_live`, secreto, tipo de cambio y correo literales; pasa con `platform/config.js` como único permitido. Sobre el código previo al paso 2 detecta **22** violaciones; hoy **0** |
 | FF1 | ✅ con ratchet (paso 4) | `ci/rules/arch.js`: los ciclos no pueden subir de 6; si bajan, obliga a fijar el avance; bloqueante en 0 al paso 11. `rules.test.js` demuestra que falla ante un ciclo nuevo |
 | FF2 | ✅ implementada (paso 4) | regla `not-to-sdk-outside-adapter`; sobre el código previo al paso 4 detecta la violación (`StripeyGateway.js`); hoy 0. Demostración de fallo en `rules.test.js` |
-| FF2b | ✅ con ratchet (paso 4) | `ci/rules/provider-names.js`: lista legada en `ci/ratchets.json` (6 archivos tras el paso 7) que sólo puede encoger |
+| FF2b | ✅ con ratchet (paso 4) | `ci/rules/provider-names.js`: lista legada en `ci/ratchets.json` (5 archivos tras el paso 8) que sólo puede encoger |
 | FF3 | ✅ implementada (paso 7) | `ci/rules/table-ownership.js` + `ci/ownership.json`: `payment_payments` estricta (0 accesos ajenos; antes 5); resto con ratchet en `ci/ratchets.json`. `rules.test.js` demuestra que falla ante acceso ajeno, ratchet que sube o tabla sin owner |
 | FF6, FF7, FF8 | diseñadas | paso 9 de E3 y cierre |
 

@@ -89,7 +89,7 @@ Meta de cobertura (FF7): `paymentService`/futuro `modules/payment` ≥ 80 % lín
 | 5 ✅ | **LargeMethod → ExtractClass** | `processPayment` → `PaymentLifecycle` + `ChargeRetryPolicy` + `FxPolicy` (funciones puras con pruebas unitarias) | TD-002 | medio | umbral de complejidad (CCN ≤ 10 en el módulo) |
 | 6 ✅ | **SharedDataMutation → OwnershipBoundary (eventos)** | Payment publica `PaymentCaptured/Failed/Refunded`; **Request** marca `paid` y **Customer** actualiza `totalSpent`/tier por suscripción; Payment deja de escribir `requests`/`customers`. *Rompe el ciclo Request↔Payment* | — | **alto** | — |
 | 7 ✅ | **Ownership de tabla** | `PaymentRepository` única vía a `payment_payments` (renombre `payments` → `payment_payments`, `stripey_*` → `provider_*`); presentador HTTP de compatibilidad para los campos legacy | TD-010 | medio | **FF3** (ratchet: `payment_*`, `customer_*`) |
-| 8 | **Efectos laterales por eventos** | Notification e Integration suscritos al pago (aviso; factura ERP; evento CRM); se retiran las llamadas directas. *Rompe Payment↔Notification y Payment↔Integration* | TD-004 | medio | — |
+| 8 ✅ | **Efectos laterales por eventos** | Notification e Integration suscritos al pago (aviso; factura ERP; evento CRM); se retiran las llamadas directas. *Rompe Payment↔Notification y Payment↔Integration* | TD-004 | medio | — |
 | 9 | **Orquestación en Request** | `Request.payRequest` descuenta, valida y llama `Payments.createPayment`; `paymentController` queda como adaptador HTTP delgado (sin SQL) | — | medio | FF6 (fronteras por `contract/`) |
 | 10 | **Romper Customer↔Notification** | bienvenida por `CustomerRegistered`; sync CRM sale de Customer (Integration lo hace con reintento) | TD-001 | medio | — |
 | 11 | **Romper Customer↔Request** | `open_requests` deja de calcularse en Customer: el gateway HTTP compone `CustomerDirectory.get` + `Requests.countOpen` (API composition). *Rompe los 2 ciclos restantes* | — | medio | **FF1** sobre todo el grafo |
@@ -262,6 +262,30 @@ Los nombres públicos de la API (`stripey_charge_id`, `stripey_status`) se conse
 Todo lo demás —campos, orden de claves, estados y cuerpos HTTP— es idéntico (lo demuestra la suite de caracterización).
 
 **Hallazgo preservado (nuevo TD-011):** una confirmación tardía por webhook marca el pago y la solicitud pero **no suma el gasto del cliente ni emite factura** (defecto del AS-IS). Se preservó con un evento propio (`Payment.Confirmed`) que sólo consume Request, y se registró en el ledger.
+
+### 4.8. Resultado del paso 8 (medido)
+
+Payment publica **todos** sus resultados como eventos de contrato v1: `Payment.Captured`, `Payment.Failed` (`reason`: `declined | unavailable | unknown`) y `Payment.ActionRequired`. Notification (`modules/notification/subscriptions.js`) e Integration (`registerCrmEvents`) reaccionan; `paymentService` ya **no importa** `notificationService` ni `integrationService`, y éstos ya no importan `paymentService` para este flujo.
+
+- **Mensajes** (`modules/notification/payment-messages.js`, función pura): la decisión de qué se le dice al cliente es de Notification. **Cambio de comportamiento aprobado en este paso:** los textos ya no nombran al proveedor ni su referencia (antes "…fue procesado por Stripey (ch_1001)" y "Stripey rechazó tu pago"; ahora "…fue procesado." y "…fue rechazado."). Los asuntos no cambian.
+- **CRM:** Integration traduce el resultado neutro al vocabulario del CRM (`captured→succeeded`, `declined→failed`, `action_required→requires_action`); el cuerpo enviado es idéntico al del AS-IS.
+- **Orden de efectos preservado** (probado): ERP → aviso al cliente → evento al CRM. Para lograrlo, `server.js` registra las suscripciones en ese orden (la del CRM va al final, con `registerCrmEvents`).
+- **Casos raros del AS-IS preservados y probados:** con el proveedor caído (502) se avisa al cliente pero **no** se notifica al CRM; un resultado desconocido avisa y notifica al CRM.
+
+| Indicador | Antes (paso 7) | Después | Cómo se midió |
+|---|---|---|---|
+| Ciclos entre servicios | 5 | **3** (desaparecen Payment↔Notification y Payment↔Integration, como se predijo) | FF1; ratchet bajado a 3 |
+| Escenario S1: archivos / áreas (heurística) | 12 / 5 | **11 / 4** (sale `notificationService`; fuera de Payment y configuración quedan 5: `paymentController`, `server.js`, `integrationService`, `integrationController`, `reportService`) | `escenarios.csv` |
+| FF2b: archivos legados que nombran al proveedor | 6 | **5** (ratchet bajado) | `provider-names.js` |
+| Pruebas | 107 | **117** verdes (mensajes, eventos Failed/ActionRequired, orden de efectos, caída del proveedor, CRM por resultado) | `npm test` |
+| Suite de caracterización | 63 | 63 **sin modificar** (verifica asuntos, efectos ERP/CRM y orden) | `npm test` |
+| Duplicación | 5,95 % | 5,98 % | jscpd |
+
+Ciclos restantes (3): `customerService ↔ notificationService`, `customerService ↔ requestService` y `requestService → notificationService → customerService → requestService`; los rompen los pasos 10 y 11.
+
+**Cambios de comportamiento observables de este paso:** (1) los textos de los avisos de pago sin nombre de proveedor (aprobado, ver arriba); (2) un fallo de Notification o del CRM ya no hace fallar el cobro (aislamiento del bus, TD-009). Todo lo demás es idéntico.
+
+**Hallazgo preservado (nuevo TD-012):** cuando el proveedor no responde, el cliente recibe el aviso "Pago pendiente — tu pago requiere una acción adicional", que no corresponde a una caída del proveedor.
 
 ## 5. Estimación y reparto (supuesto: 10–14 h del equipo, §16.3)
 

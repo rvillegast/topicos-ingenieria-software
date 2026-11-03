@@ -8,8 +8,6 @@ const { PaymentError } = require('../modules/payment/domain/errors');
 const fx = require('../modules/payment/domain/fx-policy');
 const { amountDue } = require('../modules/payment/domain/amount-due');
 const { chargeWithRetry } = require('../modules/payment/domain/charge-retry-policy');
-const notificationService = require('./notificationService');
-const integrationService = require('./integrationService');
 
 exports.get = (id) => {
   const p = repo.get(id);
@@ -41,11 +39,21 @@ const insertPending = (request, customer, amount, currency, providerName) =>
 const recordOutcome = (pid, charge) =>
   repo.recordOutcome(pid, { status: lifecycle.statusFor(charge.status), providerRef: charge.providerRef, providerStatus: charge.providerStatus });
 
-const failUnreachable = async (pid, providerName, lastError) => {
+const failUnreachable = async (pid, base, providerName, lastError) => {
   repo.markError(pid);
   helpers.log('pago ' + pid + ' falló: ' + (lastError && lastError.message), providerName);
-  await notificationService.notifyPaymentResult(pid);
+  await paymentEvents.publishFailed({ ...base, reason: 'unavailable' });
   throw Object.assign(new Error('no se pudo contactar al proveedor de pagos'), { status: 502 });
+};
+
+// Publica el resultado del cobro. Quién reacciona (solicitud, cliente, avisos, ERP, CRM) no es asunto de Payment.
+const publishOutcome = (base, charge) => {
+  switch (charge.status) {
+    case 'captured': return paymentEvents.publishCaptured(base);
+    case 'declined': return paymentEvents.publishFailed({ ...base, reason: 'declined' });
+    case 'action_required': return paymentEvents.publishActionRequired(base);
+    default: return paymentEvents.publishFailed({ ...base, reason: 'unknown' });
+  }
 };
 
 // Orquesta el cobro: validar -> calcular monto -> cobrar con reintentos -> registrar -> publicar evento -> avisar.
@@ -60,16 +68,11 @@ exports.processPayment = async (requestId, token, currency) => {
     provider, { amount, currency, token, metadata: { request_id: request.id, customer_id: customer.id } },
     (n) => helpers.log('reintento ' + provider.name + ' ' + n));
   repo.setAttempts(pid, attempts);
-  if (!charge) return failUnreachable(pid, provider.name, lastError);
+  const base = { paymentId: pid, requestId: request.id, customerId: customer.id, amount, currency };
+  if (!charge) return failUnreachable(pid, base, provider.name, lastError);
 
   recordOutcome(pid, charge);
-  // Los efectos de un cobro capturado (solicitud pagada, gasto del cliente, factura ERP, tier en el CRM) los
-  // aplican sus dueños al recibir el evento: Payment ya no escribe en requests ni en customers.
-  if (charge.status === 'captured') {
-    await paymentEvents.publishCaptured({ paymentId: pid, requestId: request.id, customerId: customer.id, amount, currency });
-  }
-  await notificationService.notifyPaymentResult(pid);
-  await integrationService.pushPaymentToWebhooks(pid);
+  await publishOutcome(base, charge);
   return exports.get(pid);
 };
 

@@ -4,10 +4,12 @@ const config = require('../platform/config');
 const paymentService = require('./paymentService');
 const providers = require('../modules/payment/providers');
 
-exports.pushPaymentToWebhooks = async (paymentId) => {
-  const p = paymentService.get(paymentId);
-  const c = db.prepare('SELECT crm_id, email FROM customers WHERE id = ?').get(p.customer_id);
-  await helpers.httpPost(`${config.providers.hubcrm.baseUrl}/events`, { contact: c.crm_id, type: 'payment.' + p.provider_status, amount: p.amount });
+// Vocabulario del CRM para el resultado de un pago (traducción desde el vocabulario neutro del dominio).
+const CRM_PAYMENT_TYPE = { captured: 'succeeded', declined: 'failed', action_required: 'requires_action', unknown: 'unknown' };
+
+exports.onPaymentOutcome = async (outcome, payload) => {
+  const c = db.prepare('SELECT crm_id FROM customers WHERE id = ?').get(payload.customerId);
+  await helpers.httpPost(`${config.providers.hubcrm.baseUrl}/events`, { contact: c.crm_id, type: 'payment.' + CRM_PAYMENT_TYPE[outcome], amount: payload.amount });
   helpers.log('evento de pago enviado a hubcrm', 'hubcrm');
 };
 

@@ -51,6 +51,7 @@ Clasificación según la literatura citada en §7 (diseño, defecto, documentaci
 | TD-009 | Design (decisión consciente, sin marcador) | Eventos en proceso (ADR-004): sin garantía de entrega ante caída entre commit y publicación | **Accept** | Con un solo proceso y ~700 LOC, un outbox/broker sería sobreingeniería (§5). Se registra para que no sea deuda oculta. | A | 2026-11-15 (revisión) | prueba de aislamiento de fallos del bus; bitácora de eventos; escenario documentado en E8 | **Aceptada**; mitigación implementada y probada en el paso 3 (`test/platform/events.test.js`: aislamiento, bitácora acotada). Sigue vigente la ausencia de outbox |
 | TD-010 | Design (decisión consciente, sin marcador) | Respuestas HTTP de pagos siguen exponiendo `stripey_charge_id`/`stripey_status` (compatibilidad con clientes actuales) | **Accept** | Cambiar el contrato HTTP rompería consumidores; se confina a **un** presentador de compatibilidad `payment/http/legacy-presenter` (allowlist explícita de FF2b) mientras se versiona la API (§6.2). | A | 2026-11-15 (revisión) | FF2b sólo permite el nombre del proveedor en ese archivo; prueba de compatibilidad de la respuesta | **Implementada (paso 7):** presentador `payment/http/legacy-presenter.js` + suite de caracterización con los nombres legados. La deuda sigue vigente hasta versionar la API |
 | TD-011 | Defect (hallazgo de caracterización, sin marcador) | Una confirmación tardía del proveedor (webhook `charge.succeeded` tras un 3DS) marca el pago y la solicitud pero **no suma `total_spent` ni emite factura ERP** (`test/modules/payment/events.test.js`) | **Accept** | Corregirlo es un cambio de comportamiento de negocio (cuentas del cliente y facturación) que el equipo no puede decidir solo; se preserva con el evento `Payment.Confirmed`, que sólo consume Request. | A (consulta al docente/negocio) | 2026-11-15 | decisión escrita; si se corrige, `Payment.Confirmed` pasa a consumirse también por Customer e Integration y se actualiza la prueba | Propuesta |
+| TD-012 | Defect (hallazgo de caracterización, sin marcador) | Si el proveedor de pagos no responde (502), el cliente recibe "Pago pendiente: tu pago requiere una acción adicional" (`modules/notification/payment-messages.js`) | **Accept** | El texto no distingue una caída del proveedor de un 3DS; corregirlo es un cambio de comunicación al cliente que se decide con el negocio. Se preserva y queda cubierto por prueba. | A (consulta al docente/negocio) | 2026-11-15 | texto acordado; prueba de `paymentMessage` y del caso de proveedor caído actualizada | Propuesta |
 
 Tipos: Design · Defect · Documentation · Requirement · Test.
 
@@ -75,9 +76,9 @@ No cuentan en la métrica de SATD, pero rompen FF5 y deben resolverse en el alca
 
 | | AS-IS | TO-BE (meta) |
 |---|---|---|
-| SATD total (alcance) | 8 | 8 gestionadas (ninguna borrada sin resolver) + 3 decisiones/hallazgos conscientes registrados |
+| SATD total (alcance) | 8 | 8 gestionadas (ninguna borrada sin resolver) + 4 decisiones/hallazgos conscientes registrados |
 | Corregidas (Refactor/Remove) | — | TD-001, 002, 005, 006, 007, 008 (**cerradas hasta ahora:** TD-008; TD-006 en código) |
-| Aceptadas y registradas | — | TD-003, 004, 009, 010, 011 (009, 010 y 011 son decisiones o hallazgos sin marcador) |
+| Aceptadas y registradas | — | TD-003, 004, 009, 010, 011, 012 (009 a 012 son decisiones o hallazgos sin marcador) |
 | **No gestionadas** | **8** | **0** (medido tras el paso 2: los 6 marcadores restantes citan su `TD-xxx`) |
 
 > "TO-BE" aquí es la meta de diseño. El valor final sale de `satd-scan.sh --gate` sobre el código TO-BE (E8).
