@@ -3,9 +3,14 @@ const helpers = require('../utils/helpers');
 const fx = require('../modules/payment/domain/fx-policy');
 const lifecycle = require('../modules/payment/domain/payment-lifecycle');
 const paymentService = require('../services/paymentService');
+const requestService = require('../services/requestService');
+
+// La respuesta HTTP de un cobro incluye la solicitud actualizada: se compone aquí, en el borde, para que
+// Payment no dependa de Request.
+const withRequest = (payment) => Object.assign(payment, { request: requestService.get(payment.request_id) });
 
 exports.pay = async (req, res) => {
-  try { res.status(201).json(await paymentService.processPayment(+req.body.request_id, req.body.token, req.body.currency)); }
+  try { res.status(201).json(withRequest(await paymentService.processPayment(+req.body.request_id, req.body.token, req.body.currency))); }
   catch (e) { res.status(e.status || 500).json({ error: e.message }); }
 };
 exports.list = (req, res) => res.json(paymentService.list());
@@ -23,7 +28,7 @@ exports.retry = async (req, res) => {
   const count = db.prepare("SELECT COUNT(*) n FROM payments WHERE request_id = ? AND status IN ('failed','error')").get(p.request_id).n;
   if (count >= lifecycle.MAX_FAILED_PER_REQUEST) return res.status(429).json({ error: 'máximo 3 reintentos con Stripey' });
   db.prepare("UPDATE payments SET status = 'superseded' WHERE id = ?").run(p.id);
-  try { res.status(201).json(await paymentService.processPayment(p.request_id, req.body.token, p.currency)); }
+  try { res.status(201).json(withRequest(await paymentService.processPayment(p.request_id, req.body.token, p.currency))); }
   catch (e) { res.status(e.status || 500).json({ error: e.message }); }
 };
 

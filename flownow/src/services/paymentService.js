@@ -1,12 +1,11 @@
 const db = require('../db');
-const config = require('../platform/config');
 const helpers = require('../utils/helpers');
 const providers = require('../modules/payment/providers');
+const paymentEvents = require('../modules/payment/contract/events');
 const lifecycle = require('../modules/payment/domain/payment-lifecycle');
 const fx = require('../modules/payment/domain/fx-policy');
 const { amountDue } = require('../modules/payment/domain/amount-due');
 const { chargeWithRetry } = require('../modules/payment/domain/charge-retry-policy');
-const requestService = require('./requestService');
 const notificationService = require('./notificationService');
 const integrationService = require('./integrationService');
 
@@ -45,25 +44,7 @@ const failUnreachable = async (pid, providerName, lastError) => {
   throw Object.assign(new Error('no se pudo contactar al proveedor de pagos'), { status: 502 });
 };
 
-// Efectos de un cobro capturado: marca la solicitud, suma el gasto, factura en el ERP y promueve a gold.
-// (Se reparten por eventos en los pasos 6 y 8 del plan.)
-const settleCaptured = async (request, customer, amount, currency) => {
-  db.prepare('UPDATE requests SET paid = 1 WHERE id = ?').run(request.id);
-  db.prepare('UPDATE customers SET total_spent = total_spent + ? WHERE id = ?').run(amount, customer.id);
-  try {
-    const inv = await helpers.httpPost(`${config.providers.erp.baseUrl}/invoices`, { request: request.id, amount, currency, customer: customer.email });
-    db.prepare('UPDATE requests SET erp_invoice = ? WHERE id = ?').run(inv.invoice, request.id);
-    helpers.log('factura ERP ' + inv.invoice, 'erp');
-  } catch (e) {
-    helpers.log('ERP caído, factura pendiente', 'erp'); // TODO(TD-004): cola de reintentos para facturas
-  }
-  if (customer.total_spent + amount > 2000000 && customer.tier !== 'gold') {
-    db.prepare("UPDATE customers SET tier = 'gold' WHERE id = ?").run(customer.id);
-    await helpers.httpPost(`${config.providers.hubcrm.baseUrl}/contacts/${customer.crm_id}`, { tier: 'gold' });
-  }
-};
-
-// Orquesta el cobro: validar -> calcular monto -> cobrar con reintentos -> registrar -> efectos -> avisar.
+// Orquesta el cobro: validar -> calcular monto -> cobrar con reintentos -> registrar -> publicar evento -> avisar.
 exports.processPayment = async (requestId, token, currency) => {
   currency = currency || 'CLP';
   const { request, customer } = loadPayable(requestId, currency);
@@ -78,10 +59,14 @@ exports.processPayment = async (requestId, token, currency) => {
   if (!charge) return failUnreachable(pid, provider.name, lastError);
 
   recordOutcome(pid, charge);
-  if (charge.status === 'captured') await settleCaptured(request, customer, amount, currency);
+  // Los efectos de un cobro capturado (solicitud pagada, gasto del cliente, factura ERP, tier en el CRM) los
+  // aplican sus dueños al recibir el evento: Payment ya no escribe en requests ni en customers.
+  if (charge.status === 'captured') {
+    await paymentEvents.publishCaptured({ paymentId: pid, requestId: request.id, customerId: customer.id, amount, currency });
+  }
   await notificationService.notifyPaymentResult(pid);
   await integrationService.pushPaymentToWebhooks(pid);
-  return Object.assign(exports.get(pid), { request: requestService.get(request.id) });
+  return exports.get(pid);
 };
 
 exports.refund = async (paymentId, amount) => {
@@ -90,6 +75,6 @@ exports.refund = async (paymentId, amount) => {
   const re = await providers.forRefund().refund({ providerRef: p.stripey_charge_id, amount: plan.amount });
   if (!re.ok) throw Object.assign(new Error('refund rechazado por el proveedor'), { status: 502 });
   db.prepare('UPDATE payments SET refunded_amount = ?, status = ? WHERE id = ?').run(plan.total, plan.status, paymentId);
-  db.prepare('UPDATE customers SET total_spent = total_spent - ? WHERE id = ?').run(plan.amount, p.customer_id);
+  await paymentEvents.publishRefunded({ paymentId, requestId: p.request_id, customerId: p.customer_id, amount: plan.amount, currency: p.currency });
   return exports.get(paymentId);
 };

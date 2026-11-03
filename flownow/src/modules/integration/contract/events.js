@@ -1,0 +1,7 @@
+// Contrato público de eventos de Integration (v1).
+const bus = require('../../../platform/events');
+
+exports.INVOICE_ISSUED = 'Integration.InvoiceIssued';
+bus.registerContract(exports.INVOICE_ISSUED, 1, { requestId: 'number', invoice: 'string' });
+
+exports.publishInvoiceIssued = (p) => bus.publish(exports.INVOICE_ISSUED, p);

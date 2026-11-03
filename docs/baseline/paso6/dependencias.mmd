@@ -1,0 +1,193 @@
+flowchart LR
+
+subgraph 0["flownow"]
+subgraph 1["src"]
+subgraph 2["controllers"]
+3["authController.js"]
+B["customerController.js"]
+13["integrationController.js"]
+14["notificationController.js"]
+15["paymentController.js"]
+16["reportController.js"]
+18["requestController.js"]
+end
+4["db.js"]
+subgraph 6["platform"]
+7["config.js"]
+K["events.js"]
+end
+subgraph 8["utils"]
+9["helpers.js"]
+end
+subgraph C["services"]
+D["customerService.js"]
+E["notificationService.js"]
+F["paymentService.js"]
+11["integrationService.js"]
+12["requestService.js"]
+17["reportService.js"]
+end
+subgraph G["modules"]
+subgraph H["payment"]
+subgraph I["contract"]
+J["events.js"]
+end
+subgraph L["domain"]
+M["amount-due.js"]
+N["charge-retry-policy.js"]
+Q["fx-policy.js"]
+R["payment-lifecycle.js"]
+S["errors.js"]
+end
+subgraph O["providers"]
+P["errors.js"]
+T["index.js"]
+end
+subgraph U["adapters"]
+subgraph V["payfast"]
+W["index.js"]
+end
+subgraph X["stripey"]
+Y["index.js"]
+end
+end
+end
+subgraph 19["customer"]
+subgraph 1A["contract"]
+1B["events.js"]
+end
+1C["subscriptions.js"]
+end
+subgraph 1D["integration"]
+subgraph 1E["contract"]
+1F["events.js"]
+end
+1G["subscriptions.js"]
+end
+subgraph 1H["request"]
+1I["subscriptions.js"]
+end
+end
+subgraph Z["vendor"]
+10["stripey-sdk.js"]
+end
+1J["server.js"]
+end
+subgraph 1K["node_modules"]
+subgraph 1L["express"]
+1M["index.js"]
+end
+end
+end
+5["node:sqlite"]
+A["crypto"]
+3-->4
+3-->7
+3-->9
+4-->7
+4-->5
+9-->4
+9-->7
+9-->A
+B-->4
+B-->D
+B-->9
+D-->4
+D-->7
+D-->9
+D-->E
+D-->12
+E-->4
+E-->7
+E-->9
+E-->D
+E-->F
+F-->4
+F-->J
+F-->M
+F-->N
+F-->Q
+F-->R
+F-->T
+F-->9
+F-->11
+F-->E
+J-->K
+N-->P
+Q-->7
+R-->S
+R-->Q
+T-->7
+T-->W
+T-->Y
+W-->7
+W-->9
+W-->P
+Y-->7
+Y-->10
+Y-->P
+11-->4
+11-->T
+11-->7
+11-->9
+11-->F
+12-->4
+12-->9
+12-->D
+12-->E
+12-->F
+13-->4
+13-->7
+13-->11
+13-->9
+14-->4
+14-->7
+14-->E
+14-->9
+15-->4
+15-->Q
+15-->R
+15-->F
+15-->12
+15-->9
+16-->4
+16-->7
+16-->17
+16-->9
+17-->4
+17-->Q
+17-->9
+18-->4
+18-->D
+18-->F
+18-->12
+18-->9
+1B-->K
+1C-->4
+1C-->K
+1C-->J
+1C-->1B
+1F-->K
+1G-->4
+1G-->7
+1G-->K
+1G-->9
+1G-->1B
+1G-->J
+1G-->1F
+1I-->4
+1I-->K
+1I-->1F
+1I-->J
+1J-->3
+1J-->B
+1J-->13
+1J-->14
+1J-->15
+1J-->16
+1J-->18
+1J-->1C
+1J-->1G
+1J-->1I
+1J-->7
+1J-->1M

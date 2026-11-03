@@ -1,0 +1,2903 @@
+{
+  "modules": [
+    {
+      "source": "flownow/src/controllers/authController.js",
+      "dependencies": [
+        {
+          "module": "../db",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/db.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../platform/config",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/platform/config.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../utils/helpers",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/utils/helpers.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "flownow/src/server.js"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "flownow/src/db.js",
+      "dependencies": [
+        {
+          "module": "./platform/config",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/platform/config.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "node:sqlite",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "core",
+            "require"
+          ],
+          "protocol": "node:",
+          "resolved": "node:sqlite",
+          "coreModule": true,
+          "followable": false,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "flownow/src/controllers/authController.js",
+        "flownow/src/utils/helpers.js",
+        "flownow/src/controllers/customerController.js",
+        "flownow/src/services/customerService.js",
+        "flownow/src/services/notificationService.js",
+        "flownow/src/services/paymentService.js",
+        "flownow/src/services/integrationService.js",
+        "flownow/src/services/requestService.js",
+        "flownow/src/controllers/integrationController.js",
+        "flownow/src/controllers/notificationController.js",
+        "flownow/src/controllers/paymentController.js",
+        "flownow/src/controllers/reportController.js",
+        "flownow/src/services/reportService.js",
+        "flownow/src/controllers/requestController.js",
+        "flownow/src/modules/customer/subscriptions.js",
+        "flownow/src/modules/integration/subscriptions.js",
+        "flownow/src/modules/request/subscriptions.js"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "node:sqlite",
+      "followable": false,
+      "coreModule": true,
+      "couldNotResolve": false,
+      "matchesDoNotFollow": false,
+      "dependencyTypes": [
+        "core",
+        "require"
+      ],
+      "dependencies": [],
+      "dependents": [
+        "flownow/src/db.js"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "flownow/src/platform/config.js",
+      "dependencies": [],
+      "dependents": [
+        "flownow/src/controllers/authController.js",
+        "flownow/src/db.js",
+        "flownow/src/utils/helpers.js",
+        "flownow/src/services/customerService.js",
+        "flownow/src/services/notificationService.js",
+        "flownow/src/modules/payment/domain/fx-policy.js",
+        "flownow/src/modules/payment/providers/index.js",
+        "flownow/src/modules/payment/adapters/payfast/index.js",
+        "flownow/src/modules/payment/adapters/stripey/index.js",
+        "flownow/src/services/integrationService.js",
+        "flownow/src/controllers/integrationController.js",
+        "flownow/src/controllers/notificationController.js",
+        "flownow/src/controllers/reportController.js",
+        "flownow/src/modules/integration/subscriptions.js",
+        "flownow/src/server.js"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "flownow/src/utils/helpers.js",
+      "dependencies": [
+        {
+          "module": "../db",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/db.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../platform/config",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/platform/config.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "crypto",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "core",
+            "require"
+          ],
+          "resolved": "crypto",
+          "coreModule": true,
+          "followable": false,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "flownow/src/controllers/authController.js",
+        "flownow/src/controllers/customerController.js",
+        "flownow/src/services/customerService.js",
+        "flownow/src/services/notificationService.js",
+        "flownow/src/services/paymentService.js",
+        "flownow/src/modules/payment/adapters/payfast/index.js",
+        "flownow/src/services/integrationService.js",
+        "flownow/src/services/requestService.js",
+        "flownow/src/controllers/integrationController.js",
+        "flownow/src/controllers/notificationController.js",
+        "flownow/src/controllers/paymentController.js",
+        "flownow/src/controllers/reportController.js",
+        "flownow/src/services/reportService.js",
+        "flownow/src/controllers/requestController.js",
+        "flownow/src/modules/integration/subscriptions.js"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "crypto",
+      "followable": false,
+      "coreModule": true,
+      "couldNotResolve": false,
+      "matchesDoNotFollow": false,
+      "dependencyTypes": [
+        "core",
+        "require"
+      ],
+      "dependencies": [],
+      "dependents": [
+        "flownow/src/utils/helpers.js"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "flownow/src/controllers/customerController.js",
+      "dependencies": [
+        {
+          "module": "../db",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/db.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../services/customerService",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/services/customerService.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../utils/helpers",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/utils/helpers.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "flownow/src/server.js"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "flownow/src/services/customerService.js",
+      "dependencies": [
+        {
+          "module": "../db",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/db.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../platform/config",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/platform/config.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../utils/helpers",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/utils/helpers.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "./notificationService",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/services/notificationService.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": true,
+          "cycle": [
+            {
+              "name": "flownow/src/services/notificationService.js",
+              "dependencyTypes": [
+                "local",
+                "require"
+              ]
+            },
+            {
+              "name": "flownow/src/services/customerService.js",
+              "dependencyTypes": [
+                "local",
+                "require"
+              ]
+            }
+          ],
+          "valid": false,
+          "rules": [
+            {
+              "severity": "error",
+              "name": "no-circular"
+            }
+          ]
+        },
+        {
+          "module": "./requestService",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/services/requestService.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": true,
+          "cycle": [
+            {
+              "name": "flownow/src/services/requestService.js",
+              "dependencyTypes": [
+                "local",
+                "require"
+              ]
+            },
+            {
+              "name": "flownow/src/services/customerService.js",
+              "dependencyTypes": [
+                "local",
+                "require"
+              ]
+            }
+          ],
+          "valid": false,
+          "rules": [
+            {
+              "severity": "error",
+              "name": "no-circular"
+            }
+          ]
+        }
+      ],
+      "dependents": [
+        "flownow/src/controllers/customerController.js",
+        "flownow/src/services/notificationService.js",
+        "flownow/src/services/requestService.js",
+        "flownow/src/controllers/requestController.js"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "flownow/src/services/notificationService.js",
+      "dependencies": [
+        {
+          "module": "../db",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/db.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../platform/config",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/platform/config.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../utils/helpers",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/utils/helpers.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "./customerService",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/services/customerService.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": true,
+          "cycle": [
+            {
+              "name": "flownow/src/services/customerService.js",
+              "dependencyTypes": [
+                "local",
+                "require"
+              ]
+            },
+            {
+              "name": "flownow/src/services/notificationService.js",
+              "dependencyTypes": [
+                "local",
+                "require"
+              ]
+            }
+          ],
+          "valid": false,
+          "rules": [
+            {
+              "severity": "error",
+              "name": "no-circular"
+            }
+          ]
+        },
+        {
+          "module": "./paymentService",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/services/paymentService.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": true,
+          "cycle": [
+            {
+              "name": "flownow/src/services/paymentService.js",
+              "dependencyTypes": [
+                "local",
+                "require"
+              ]
+            },
+            {
+              "name": "flownow/src/services/notificationService.js",
+              "dependencyTypes": [
+                "local",
+                "require"
+              ]
+            }
+          ],
+          "valid": false,
+          "rules": [
+            {
+              "severity": "error",
+              "name": "no-circular"
+            }
+          ]
+        }
+      ],
+      "dependents": [
+        "flownow/src/services/customerService.js",
+        "flownow/src/services/paymentService.js",
+        "flownow/src/services/requestService.js",
+        "flownow/src/controllers/notificationController.js"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "flownow/src/services/paymentService.js",
+      "dependencies": [
+        {
+          "module": "../db",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/db.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../modules/payment/contract/events",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/modules/payment/contract/events.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../modules/payment/domain/amount-due",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/modules/payment/domain/amount-due.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../modules/payment/domain/charge-retry-policy",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/modules/payment/domain/charge-retry-policy.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../modules/payment/domain/fx-policy",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/modules/payment/domain/fx-policy.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../modules/payment/domain/payment-lifecycle",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/modules/payment/domain/payment-lifecycle.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../modules/payment/providers",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/modules/payment/providers/index.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../utils/helpers",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/utils/helpers.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "./integrationService",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/services/integrationService.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": true,
+          "cycle": [
+            {
+              "name": "flownow/src/services/integrationService.js",
+              "dependencyTypes": [
+                "local",
+                "require"
+              ]
+            },
+            {
+              "name": "flownow/src/services/paymentService.js",
+              "dependencyTypes": [
+                "local",
+                "require"
+              ]
+            }
+          ],
+          "valid": false,
+          "rules": [
+            {
+              "severity": "error",
+              "name": "no-circular"
+            }
+          ]
+        },
+        {
+          "module": "./notificationService",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/services/notificationService.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": true,
+          "cycle": [
+            {
+              "name": "flownow/src/services/notificationService.js",
+              "dependencyTypes": [
+                "local",
+                "require"
+              ]
+            },
+            {
+              "name": "flownow/src/services/paymentService.js",
+              "dependencyTypes": [
+                "local",
+                "require"
+              ]
+            }
+          ],
+          "valid": false,
+          "rules": [
+            {
+              "severity": "error",
+              "name": "no-circular"
+            }
+          ]
+        }
+      ],
+      "dependents": [
+        "flownow/src/services/notificationService.js",
+        "flownow/src/services/integrationService.js",
+        "flownow/src/services/requestService.js",
+        "flownow/src/controllers/paymentController.js",
+        "flownow/src/controllers/requestController.js"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "flownow/src/modules/payment/contract/events.js",
+      "dependencies": [
+        {
+          "module": "../../../platform/events",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/platform/events.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "flownow/src/services/paymentService.js",
+        "flownow/src/modules/customer/subscriptions.js",
+        "flownow/src/modules/integration/subscriptions.js",
+        "flownow/src/modules/request/subscriptions.js"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "flownow/src/platform/events.js",
+      "dependencies": [],
+      "dependents": [
+        "flownow/src/modules/payment/contract/events.js",
+        "flownow/src/modules/customer/contract/events.js",
+        "flownow/src/modules/customer/subscriptions.js",
+        "flownow/src/modules/integration/contract/events.js",
+        "flownow/src/modules/integration/subscriptions.js",
+        "flownow/src/modules/request/subscriptions.js"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "flownow/src/modules/payment/domain/amount-due.js",
+      "dependencies": [],
+      "dependents": [
+        "flownow/src/services/paymentService.js"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "flownow/src/modules/payment/domain/charge-retry-policy.js",
+      "dependencies": [
+        {
+          "module": "../providers/errors",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/modules/payment/providers/errors.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "flownow/src/services/paymentService.js"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "flownow/src/modules/payment/providers/errors.js",
+      "dependencies": [],
+      "dependents": [
+        "flownow/src/modules/payment/domain/charge-retry-policy.js",
+        "flownow/src/modules/payment/adapters/payfast/index.js",
+        "flownow/src/modules/payment/adapters/stripey/index.js"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "flownow/src/modules/payment/domain/fx-policy.js",
+      "dependencies": [
+        {
+          "module": "../../../platform/config",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/platform/config.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "flownow/src/services/paymentService.js",
+        "flownow/src/modules/payment/domain/payment-lifecycle.js",
+        "flownow/src/controllers/paymentController.js",
+        "flownow/src/services/reportService.js"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "flownow/src/modules/payment/domain/payment-lifecycle.js",
+      "dependencies": [
+        {
+          "module": "./errors",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/modules/payment/domain/errors.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "./fx-policy",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/modules/payment/domain/fx-policy.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "flownow/src/services/paymentService.js",
+        "flownow/src/controllers/paymentController.js"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "flownow/src/modules/payment/domain/errors.js",
+      "dependencies": [],
+      "dependents": [
+        "flownow/src/modules/payment/domain/payment-lifecycle.js"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "flownow/src/modules/payment/providers/index.js",
+      "dependencies": [
+        {
+          "module": "../../../platform/config",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/platform/config.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../adapters/payfast",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/modules/payment/adapters/payfast/index.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../adapters/stripey",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/modules/payment/adapters/stripey/index.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "flownow/src/services/paymentService.js",
+        "flownow/src/services/integrationService.js"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "flownow/src/modules/payment/adapters/payfast/index.js",
+      "dependencies": [
+        {
+          "module": "../../../../platform/config",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/platform/config.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../../../../utils/helpers",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/utils/helpers.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../../providers/errors",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/modules/payment/providers/errors.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "flownow/src/modules/payment/providers/index.js"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "flownow/src/modules/payment/adapters/stripey/index.js",
+      "dependencies": [
+        {
+          "module": "../../../../platform/config",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/platform/config.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../../../../vendor/stripey-sdk",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/vendor/stripey-sdk.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../../providers/errors",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/modules/payment/providers/errors.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "flownow/src/modules/payment/providers/index.js"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "flownow/src/vendor/stripey-sdk.js",
+      "dependencies": [],
+      "dependents": [
+        "flownow/src/modules/payment/adapters/stripey/index.js"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "flownow/src/services/integrationService.js",
+      "dependencies": [
+        {
+          "module": "../db",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/db.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../modules/payment/providers",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/modules/payment/providers/index.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../platform/config",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/platform/config.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../utils/helpers",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/utils/helpers.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "./paymentService",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/services/paymentService.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": true,
+          "cycle": [
+            {
+              "name": "flownow/src/services/paymentService.js",
+              "dependencyTypes": [
+                "local",
+                "require"
+              ]
+            },
+            {
+              "name": "flownow/src/services/integrationService.js",
+              "dependencyTypes": [
+                "local",
+                "require"
+              ]
+            }
+          ],
+          "valid": false,
+          "rules": [
+            {
+              "severity": "error",
+              "name": "no-circular"
+            }
+          ]
+        }
+      ],
+      "dependents": [
+        "flownow/src/services/paymentService.js",
+        "flownow/src/controllers/integrationController.js"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "flownow/src/services/requestService.js",
+      "dependencies": [
+        {
+          "module": "../db",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/db.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../utils/helpers",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/utils/helpers.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "./customerService",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/services/customerService.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": true,
+          "cycle": [
+            {
+              "name": "flownow/src/services/customerService.js",
+              "dependencyTypes": [
+                "local",
+                "require"
+              ]
+            },
+            {
+              "name": "flownow/src/services/requestService.js",
+              "dependencyTypes": [
+                "local",
+                "require"
+              ]
+            }
+          ],
+          "valid": false,
+          "rules": [
+            {
+              "severity": "error",
+              "name": "no-circular"
+            }
+          ]
+        },
+        {
+          "module": "./notificationService",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/services/notificationService.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": true,
+          "cycle": [
+            {
+              "name": "flownow/src/services/notificationService.js",
+              "dependencyTypes": [
+                "local",
+                "require"
+              ]
+            },
+            {
+              "name": "flownow/src/services/customerService.js",
+              "dependencyTypes": [
+                "local",
+                "require"
+              ]
+            },
+            {
+              "name": "flownow/src/services/requestService.js",
+              "dependencyTypes": [
+                "local",
+                "require"
+              ]
+            }
+          ],
+          "valid": false,
+          "rules": [
+            {
+              "severity": "error",
+              "name": "no-circular"
+            }
+          ]
+        },
+        {
+          "module": "./paymentService",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/services/paymentService.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "flownow/src/services/customerService.js",
+        "flownow/src/controllers/paymentController.js",
+        "flownow/src/controllers/requestController.js"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "flownow/src/controllers/integrationController.js",
+      "dependencies": [
+        {
+          "module": "../db",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/db.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../platform/config",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/platform/config.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../services/integrationService",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/services/integrationService.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../utils/helpers",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/utils/helpers.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "flownow/src/server.js"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "flownow/src/controllers/notificationController.js",
+      "dependencies": [
+        {
+          "module": "../db",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/db.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../platform/config",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/platform/config.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../services/notificationService",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/services/notificationService.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../utils/helpers",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/utils/helpers.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "flownow/src/server.js"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "flownow/src/controllers/paymentController.js",
+      "dependencies": [
+        {
+          "module": "../db",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/db.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../modules/payment/domain/fx-policy",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/modules/payment/domain/fx-policy.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../modules/payment/domain/payment-lifecycle",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/modules/payment/domain/payment-lifecycle.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../services/paymentService",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/services/paymentService.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../services/requestService",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/services/requestService.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../utils/helpers",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/utils/helpers.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "flownow/src/server.js"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "flownow/src/controllers/reportController.js",
+      "dependencies": [
+        {
+          "module": "../db",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/db.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../platform/config",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/platform/config.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../services/reportService",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/services/reportService.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../utils/helpers",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/utils/helpers.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "flownow/src/server.js"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "flownow/src/services/reportService.js",
+      "dependencies": [
+        {
+          "module": "../db",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/db.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../modules/payment/domain/fx-policy",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/modules/payment/domain/fx-policy.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../utils/helpers",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/utils/helpers.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "flownow/src/controllers/reportController.js"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "flownow/src/controllers/requestController.js",
+      "dependencies": [
+        {
+          "module": "../db",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/db.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../services/customerService",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/services/customerService.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../services/paymentService",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/services/paymentService.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../services/requestService",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/services/requestService.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../utils/helpers",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/utils/helpers.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "flownow/src/server.js"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "flownow/src/modules/customer/contract/events.js",
+      "dependencies": [
+        {
+          "module": "../../../platform/events",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/platform/events.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "flownow/src/modules/customer/subscriptions.js",
+        "flownow/src/modules/integration/subscriptions.js"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "flownow/src/modules/customer/subscriptions.js",
+      "dependencies": [
+        {
+          "module": "../../db",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/db.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../../platform/events",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/platform/events.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../payment/contract/events",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/modules/payment/contract/events.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "./contract/events",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/modules/customer/contract/events.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "flownow/src/server.js"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "flownow/src/modules/integration/contract/events.js",
+      "dependencies": [
+        {
+          "module": "../../../platform/events",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/platform/events.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "flownow/src/modules/integration/subscriptions.js",
+        "flownow/src/modules/request/subscriptions.js"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "flownow/src/modules/integration/subscriptions.js",
+      "dependencies": [
+        {
+          "module": "../../db",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/db.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../../platform/config",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/platform/config.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../../platform/events",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/platform/events.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../../utils/helpers",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/utils/helpers.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../customer/contract/events",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/modules/customer/contract/events.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../payment/contract/events",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/modules/payment/contract/events.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "./contract/events",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/modules/integration/contract/events.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "flownow/src/server.js"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "flownow/src/modules/request/subscriptions.js",
+      "dependencies": [
+        {
+          "module": "../../db",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/db.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../../platform/events",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/platform/events.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../integration/contract/events",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/modules/integration/contract/events.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../payment/contract/events",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/modules/payment/contract/events.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "flownow/src/server.js"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "flownow/src/server.js",
+      "dependencies": [
+        {
+          "module": "./controllers/authController",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/controllers/authController.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "./controllers/customerController",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/controllers/customerController.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "./controllers/integrationController",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/controllers/integrationController.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "./controllers/notificationController",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/controllers/notificationController.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "./controllers/paymentController",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/controllers/paymentController.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "./controllers/reportController",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/controllers/reportController.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "./controllers/requestController",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/controllers/requestController.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "./modules/customer/subscriptions",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/modules/customer/subscriptions.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "./modules/integration/subscriptions",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/modules/integration/subscriptions.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "./modules/request/subscriptions",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/modules/request/subscriptions.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "./platform/config",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "require"
+          ],
+          "resolved": "flownow/src/platform/config.js",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "express",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "npm",
+            "require"
+          ],
+          "resolved": "flownow/node_modules/express/index.js",
+          "coreModule": false,
+          "followable": false,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": true,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "flownow/node_modules/express/index.js",
+      "followable": false,
+      "coreModule": false,
+      "couldNotResolve": false,
+      "matchesDoNotFollow": true,
+      "dependencyTypes": [
+        "npm",
+        "require"
+      ],
+      "dependencies": [],
+      "dependents": [
+        "flownow/src/server.js"
+      ],
+      "orphan": false,
+      "valid": true
+    }
+  ],
+  "summary": {
+    "violations": [
+      {
+        "type": "cycle",
+        "from": "flownow/src/services/customerService.js",
+        "to": "flownow/src/services/notificationService.js",
+        "unresolvedTo": "./notificationService",
+        "dependencyTypes": [
+          "local",
+          "require"
+        ],
+        "rule": {
+          "severity": "error",
+          "name": "no-circular"
+        },
+        "cycle": [
+          {
+            "name": "flownow/src/services/notificationService.js",
+            "dependencyTypes": [
+              "local",
+              "require"
+            ]
+          },
+          {
+            "name": "flownow/src/services/customerService.js",
+            "dependencyTypes": [
+              "local",
+              "require"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "cycle",
+        "from": "flownow/src/services/customerService.js",
+        "to": "flownow/src/services/requestService.js",
+        "unresolvedTo": "./requestService",
+        "dependencyTypes": [
+          "local",
+          "require"
+        ],
+        "rule": {
+          "severity": "error",
+          "name": "no-circular"
+        },
+        "cycle": [
+          {
+            "name": "flownow/src/services/requestService.js",
+            "dependencyTypes": [
+              "local",
+              "require"
+            ]
+          },
+          {
+            "name": "flownow/src/services/customerService.js",
+            "dependencyTypes": [
+              "local",
+              "require"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "cycle",
+        "from": "flownow/src/services/integrationService.js",
+        "to": "flownow/src/services/paymentService.js",
+        "unresolvedTo": "./paymentService",
+        "dependencyTypes": [
+          "local",
+          "require"
+        ],
+        "rule": {
+          "severity": "error",
+          "name": "no-circular"
+        },
+        "cycle": [
+          {
+            "name": "flownow/src/services/paymentService.js",
+            "dependencyTypes": [
+              "local",
+              "require"
+            ]
+          },
+          {
+            "name": "flownow/src/services/integrationService.js",
+            "dependencyTypes": [
+              "local",
+              "require"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "cycle",
+        "from": "flownow/src/services/notificationService.js",
+        "to": "flownow/src/services/paymentService.js",
+        "unresolvedTo": "./paymentService",
+        "dependencyTypes": [
+          "local",
+          "require"
+        ],
+        "rule": {
+          "severity": "error",
+          "name": "no-circular"
+        },
+        "cycle": [
+          {
+            "name": "flownow/src/services/paymentService.js",
+            "dependencyTypes": [
+              "local",
+              "require"
+            ]
+          },
+          {
+            "name": "flownow/src/services/notificationService.js",
+            "dependencyTypes": [
+              "local",
+              "require"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "cycle",
+        "from": "flownow/src/services/requestService.js",
+        "to": "flownow/src/services/notificationService.js",
+        "unresolvedTo": "./notificationService",
+        "dependencyTypes": [
+          "local",
+          "require"
+        ],
+        "rule": {
+          "severity": "error",
+          "name": "no-circular"
+        },
+        "cycle": [
+          {
+            "name": "flownow/src/services/notificationService.js",
+            "dependencyTypes": [
+              "local",
+              "require"
+            ]
+          },
+          {
+            "name": "flownow/src/services/customerService.js",
+            "dependencyTypes": [
+              "local",
+              "require"
+            ]
+          },
+          {
+            "name": "flownow/src/services/requestService.js",
+            "dependencyTypes": [
+              "local",
+              "require"
+            ]
+          }
+        ]
+      }
+    ],
+    "error": 5,
+    "warn": 0,
+    "info": 0,
+    "ignore": 0,
+    "advisedExitCode": 5,
+    "totalCruised": 37,
+    "totalDependenciesCruised": 110,
+    "optionsUsed": {
+      "baseDir": "/Users/cuchi/Developer/topicos-ingenieria-software",
+      "combinedDependencies": false,
+      "detectImportsInAmbientModules": false,
+      "detectJSDocImports": false,
+      "detectProcessBuiltinModuleCalls": false,
+      "doNotFollow": {
+        "path": "node_modules"
+      },
+      "exoticRequireStrings": [],
+      "externalModuleResolutionStrategy": "node_modules",
+      "metrics": false,
+      "moduleSystems": [
+        "es6",
+        "cjs",
+        "tsd",
+        "amd"
+      ],
+      "outputTo": "-",
+      "outputType": "json",
+      "preserveSymlinks": false,
+      "rulesFile": "ci/dependency-cruiser.cjs",
+      "skipAnalysisNotInRules": false,
+      "tsPreCompilationDeps": false,
+      "args": "flownow/src"
+    },
+    "ruleSetUsed": {
+      "forbidden": [
+        {
+          "name": "no-circular",
+          "comment": "FF1: el grafo de módulos no puede tener ciclos (§4.3). Ratchet en ci/ratchets.json hasta llegar a 0.",
+          "severity": "error",
+          "from": {},
+          "to": {
+            "circular": true
+          },
+          "scope": "module"
+        },
+        {
+          "name": "not-to-sdk-outside-adapter",
+          "comment": "FF2: el SDK/tipos del proveedor de pagos sólo pueden importarse desde modules/payment/adapters (ADR-003).",
+          "severity": "error",
+          "from": {
+            "pathNot": "(^|/)src/modules/payment/adapters/"
+          },
+          "to": {
+            "path": "(^|/)vendor/stripey"
+          },
+          "scope": "module"
+        }
+      ]
+    },
+    "environment": {
+      "version": "18.7.0",
+      "nodeVersionSupported": "^22||^24||>=26",
+      "nodeVersionFound": "v24.18.0",
+      "osVersionFound": "arm64 darwin@27.0.0",
+      "transpilersFound": [
+        {
+          "name": "javascript",
+          "version": "*",
+          "available": true,
+          "currentVersion": "acorn@8.19.0"
+        },
+        {
+          "name": "babel",
+          "version": ">=7.0.0 <8.0.0",
+          "available": false,
+          "currentVersion": "-"
+        },
+        {
+          "name": "coffee-script",
+          "version": ">=1.0.0 <2.0.0",
+          "available": false,
+          "currentVersion": "-"
+        },
+        {
+          "name": "coffeescript",
+          "version": ">=1.0.0 <3.0.0",
+          "available": false,
+          "currentVersion": "-"
+        },
+        {
+          "name": "livescript",
+          "version": ">=1.0.0 <2.0.0",
+          "available": false,
+          "currentVersion": "-"
+        },
+        {
+          "name": "svelte",
+          "version": ">=3.0.0 <6.0.0",
+          "available": false,
+          "currentVersion": "-"
+        },
+        {
+          "name": "swc",
+          "version": ">=1.0.0 <2.0.0",
+          "available": false,
+          "currentVersion": "-"
+        },
+        {
+          "name": "typescript",
+          "version": ">=2.0.0 <7.0.0",
+          "available": false,
+          "currentVersion": "-"
+        },
+        {
+          "name": "vue-template-compiler",
+          "version": ">=2.0.0 <3.0.0",
+          "available": false,
+          "currentVersion": "-"
+        },
+        {
+          "name": "@vue/compiler-sfc",
+          "version": ">=3.0.0 <4.0.0",
+          "available": false,
+          "currentVersion": "-"
+        }
+      ],
+      "extensionsFound": [
+        {
+          "extension": ".js",
+          "available": true
+        },
+        {
+          "extension": ".cjs",
+          "available": true
+        },
+        {
+          "extension": ".mjs",
+          "available": true
+        },
+        {
+          "extension": ".jsx",
+          "available": true
+        },
+        {
+          "extension": ".ts",
+          "available": false
+        },
+        {
+          "extension": ".tsx",
+          "available": false
+        },
+        {
+          "extension": ".d.ts",
+          "available": false
+        },
+        {
+          "extension": ".cts",
+          "available": false
+        },
+        {
+          "extension": ".d.cts",
+          "available": false
+        },
+        {
+          "extension": ".mts",
+          "available": false
+        },
+        {
+          "extension": ".d.mts",
+          "available": false
+        },
+        {
+          "extension": ".vue",
+          "available": false
+        },
+        {
+          "extension": ".svelte",
+          "available": false
+        },
+        {
+          "extension": ".ls",
+          "available": false
+        },
+        {
+          "extension": ".coffee",
+          "available": false
+        },
+        {
+          "extension": ".litcoffee",
+          "available": false
+        },
+        {
+          "extension": ".coffee.md",
+          "available": false
+        },
+        {
+          "extension": ".csx",
+          "available": false
+        },
+        {
+          "extension": ".cjsx",
+          "available": false
+        }
+      ]
+    }
+  }
+}

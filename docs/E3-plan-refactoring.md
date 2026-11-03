@@ -87,7 +87,7 @@ Meta de cobertura (FF7): `paymentService`/futuro `modules/payment` ≥ 80 % lín
 | 3 ✅ | **Seam: bus de eventos** | `platform/events` con `schemaVersion`, aislamiento de fallos y pruebas | TD-009 (registrar) | bajo | — |
 | 4 ✅ | **DirectVendorDependency → Port + Adapter** | `ProviderPort` + `StripeyAdapter` (ACL de estados/errores); respaldo PayFast como segundo adapter; se elimina `GatewayFactory`/`IPaymentGateway`/`INotifier` triviales | TD-005 | medio | **FF2**, FF2b |
 | 5 ✅ | **LargeMethod → ExtractClass** | `processPayment` → `PaymentLifecycle` + `ChargeRetryPolicy` + `FxPolicy` (funciones puras con pruebas unitarias) | TD-002 | medio | umbral de complejidad (CCN ≤ 10 en el módulo) |
-| 6 | **SharedDataMutation → OwnershipBoundary (eventos)** | Payment publica `PaymentCaptured/Failed/Refunded`; **Request** marca `paid` y **Customer** actualiza `totalSpent`/tier por suscripción; Payment deja de escribir `requests`/`customers`. *Rompe el ciclo Request↔Payment* | — | **alto** | — |
+| 6 ✅ | **SharedDataMutation → OwnershipBoundary (eventos)** | Payment publica `PaymentCaptured/Failed/Refunded`; **Request** marca `paid` y **Customer** actualiza `totalSpent`/tier por suscripción; Payment deja de escribir `requests`/`customers`. *Rompe el ciclo Request↔Payment* | — | **alto** | — |
 | 7 | **Ownership de tabla** | `PaymentRepository` única vía a `payment_payments` (renombre `payments` → `payment_payments`, `stripey_*` → `provider_*`); presentador HTTP de compatibilidad para los campos legacy | TD-010 | medio | **FF3** (ratchet: `payment_*`, `customer_*`) |
 | 8 | **Efectos laterales por eventos** | Notification e Integration suscritos al pago (aviso; factura ERP; evento CRM); se retiran las llamadas directas. *Rompe Payment↔Notification y Payment↔Integration* | TD-004 | medio | — |
 | 9 | **Orquestación en Request** | `Request.payRequest` descuenta, valida y llama `Payments.createPayment`; `paymentController` queda como adaptador HTTP delgado (sin SQL) | — | medio | FF6 (fronteras por `contract/`) |
@@ -200,6 +200,33 @@ Efecto de comportamiento: ninguno con la configuración por defecto (la suite de
 \* `events.publish` (CCN 12) es código nuevo del paso 3 con validaciones de argumentos; FF8 exigirá ≤ 10 en el alcance intervenido, así que queda como ajuste pendiente de ese paso (partir `publish` en `validate` + `deliver`).
 
 **Sin cambio de comportamiento:** la suite de caracterización (63 pruebas del flujo HTTP) pasa **sin modificaciones**. Se preservaron el orden de validación, el orden de las escrituras y el log de reintentos (que también se emite tras el último intento fallido).
+
+### 4.6. Resultado del paso 6 (medido)
+
+`SharedDataMutation → OwnershipBoundary`: Payment deja de escribir en tablas ajenas y publica eventos de contrato versionado (`modules/payment/contract/events.js`: `Payment.Captured` y `Payment.Refunded` v1, sin campos del proveedor). Los dueños reaccionan:
+
+| Consumidor | Reacciona a | Efecto (antes lo hacía `paymentService`) |
+|---|---|---|
+| Request (`modules/request/subscriptions.js`) | `Payment.Captured` · `Integration.InvoiceIssued` | marca `requests.paid` · adjunta `requests.erp_invoice` |
+| Customer (`modules/customer/subscriptions.js`) | `Payment.Captured` · `Payment.Refunded` | `total_spent` y promoción a gold (publica `Customer.TierChanged`) |
+| Integration (`modules/integration/subscriptions.js`) | `Payment.Captured` · `Customer.TierChanged` | factura en el ERP (publica `Integration.InvoiceIssued`) · actualiza el tier en el CRM |
+
+`server.js` es la raíz de composición: registra las suscripciones en el orden de efectos del AS-IS. La respuesta HTTP del cobro sigue incluyendo la solicitud actualizada, pero se compone en `paymentController` (el borde), de modo que `paymentService` **ya no importa** `requestService`.
+
+| Indicador | Antes (paso 5) | Después | Cómo se midió |
+|---|---|---|---|
+| Escrituras de `paymentService` a tablas ajenas | **5** (`customers` ×3, `requests` ×2) | **0** | `scripts/data-access.js` sobre `5c222a2` y el árbol actual |
+| Ciclos entre servicios | 6 | **5** (desaparece Request↔Payment, como se predijo) | FF1 / `dependencias.json`; ratchet bajado a 5 |
+| Pruebas | 92 | **100** verdes (8 nuevas de contrato de eventos y consumidores) | `npm test` |
+| Suite de caracterización | 63 verdes | 63 verdes **sin modificar** | `npm test` |
+| Duplicación (jscpd) | 6,69 % | 7,43 % | `baseline.sh` |
+
+**Lectura honesta de las cifras**
+- La métrica "archivos que escriben cada tabla" **no mejora todavía** (customers 7, requests 5): las escrituras se movieron a los módulos dueños (`*/subscriptions.js`), pero las demás siguen en servicios y controllers hasta los pasos 7 a 10. El avance real de este paso es semántico: Payment ya no muta datos que no gobierna.
+- Payment sigue **leyendo** `requests` y `customers` para validar el cobro (`loadPayable`); eso se corta en el paso 9, cuando Request le entregue el monto resuelto.
+- La duplicación subió 0,74 puntos por el patrón repetido de contratos y suscripciones (código nuevo). Se vigilará; no se esconde.
+
+**Cambio de comportamiento (previsto en TD-009):** los efectos secundarios ahora corren detrás del bus, que aísla fallos. Si falla un efecto (p. ej. la llamada al CRM al subir de tier), antes el cobro respondía 500 con el pago ya registrado; ahora responde 201 y el fallo queda en la bitácora `deadLetters()`. Con el funcionamiento normal el comportamiento es idéntico (la suite de caracterización lo demuestra; el orden de los efectos se preservó registrando las suscripciones en el orden original).
 
 ## 5. Estimación y reparto (supuesto: 10–14 h del equipo, §16.3)
 

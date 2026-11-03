@@ -8,6 +8,11 @@ const notifications = require('./controllers/notificationController');
 const integrations = require('./controllers/integrationController');
 const reports = require('./controllers/reportController');
 
+// Composición: cada módulo registra sus suscripciones a eventos (orden = orden de efectos del AS-IS).
+require('./modules/request/subscriptions').register();
+require('./modules/integration/subscriptions').register();
+require('./modules/customer/subscriptions').register();
+
 const app = express();
 app.use(express.json());
 auth.seedAdmin();
