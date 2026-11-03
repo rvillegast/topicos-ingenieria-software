@@ -1,6 +1,6 @@
 # ADR-001: Límite del módulo Payment
 
-Status: Propuesto
+Status: Propuesto (implementado en los pasos 5 a 9: Payment es hoja con contrato público, dueño único de `payment_payments`; descuento y bono ahora son de Request)
 Context: El pago está repartido en `paymentService.processPayment` (71 NLOC, CCN 26: validación, descuento, FX, reintentos, ERP, CRM, aviso), `paymentController` (retry y summary con SQL propio), `reportService`, `integrationService` y `notificationService`. `payments` se escribe desde 4 archivos y `paymentService` forma ciclos con request, notification e integration.
 Architectural concern: Parnas (§3) y cohesión: ¿qué decisión volátil debe quedar oculta y qué NO es responsabilidad del pago?
 Decision: Payment es un módulo con secreto = proveedor, tokenización, reintentos, FX, estados de transacción y persistencia. Es **hoja** del grafo (no depende de otros módulos). Expone `createPayment`, `refundPayment`, `retryPayment`, `getPaymentStatus` y eventos `PaymentCaptured/Failed/Refunded/ActionRequired` v1. Quedan **fuera**: descuento y prioridad (→ Request), factura ERP y evento CRM (→ Integration), avisos (→ Notification), tier/total gastado (→ Customer), agregación de ventas (→ Reporting). Dueño único de `payment_payments`.
