@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // FF2b: los nombres de proveedores externos sólo pueden aparecer en su adapter, la configuración y el
-// presentador de compatibilidad (ADR-003, TD-010). Ratchet: los archivos "legados" que aún los nombran están
+// presentador de compatibilidad y la migración del esquema (que debe conocer los nombres antiguos de columnas) (ADR-003, TD-010). Ratchet: los archivos "legados" que aún los nombran están
 // listados en ci/ratchets.json (providerNameLegacy) y esa lista sólo puede ENCOGER.
 // Uso: node ci/rules/provider-names.js <ruta-src> [--ratchets archivo]
 const fs = require('fs'), path = require('path');
@@ -9,7 +9,7 @@ const args = process.argv.slice(2);
 const root = args[0];
 const ri = args.indexOf('--ratchets');
 const ratchetsFile = ri >= 0 ? args[ri + 1] : path.join(__dirname, '../ratchets.json');
-const ALLOWED = [/(^|\/)adapters\//, /(^|\/)payment\/providers\/index\.js$/, /(^|\/)platform\/config\.js$/, /(^|\/)payment\/http\/legacy-presenter\.js$/];
+const ALLOWED = [/(^|\/)adapters\//, /(^|\/)payment\/providers\/index\.js$/, /(^|\/)platform\/config\.js$/, /(^|\/)payment\/http\/legacy-presenter\.js$/, /(^|\/)payment\/persistence\/schema\.js$/];
 
 function scan(src, patterns) {
   const re = new RegExp(patterns.join('|'), 'i'); const found = new Set();

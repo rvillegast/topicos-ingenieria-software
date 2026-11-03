@@ -1,0 +1,11 @@
+{
+  "_nota": "Owner de cada tabla y los paths (relativos a src/) que pueden accederla. enforced=true: cualquier otro archivo es una violación. enforced=false: tabla aún no migrada; su acceso ajeno tiene ratchet en ratchets.json (sólo puede bajar).",
+  "tables": {
+    "payment_payments": { "owner": "payment", "paths": ["modules/payment/"], "enforced": true },
+    "customers": { "owner": "customer", "paths": ["modules/customer/", "services/customerService.js", "controllers/customerController.js"], "enforced": false },
+    "requests": { "owner": "request", "paths": ["modules/request/", "services/requestService.js", "controllers/requestController.js"], "enforced": false },
+    "notifications": { "owner": "notification", "paths": ["modules/notification/", "services/notificationService.js", "controllers/notificationController.js"], "enforced": false },
+    "integration_logs": { "owner": "integration", "paths": ["modules/integration/", "services/integrationService.js", "controllers/integrationController.js"], "enforced": false },
+    "users": { "owner": "identity", "paths": ["modules/identity/", "controllers/authController.js"], "enforced": false }
+  }
+}

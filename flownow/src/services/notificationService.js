@@ -23,8 +23,8 @@ exports.notifyPaymentResult = async (paymentId) => {
   const p = paymentService.get(paymentId);
   const c = db.prepare('SELECT name, phone FROM customers WHERE id = ?').get(p.customer_id);
   let subject, body;
-  if (p.stripey_status === 'succeeded') { subject = 'Pago confirmado'; body = 'Hola ' + c.name + ', tu pago de ' + helpers.formatMoney(p.amount, p.currency) + ' fue procesado por Stripey (' + p.stripey_charge_id + ').'; }
-  else if (p.stripey_status === 'failed') { subject = 'Pago rechazado'; body = 'Hola ' + c.name + ', Stripey rechazó tu pago de ' + helpers.formatMoney(p.amount, p.currency) + '.'; }
+  if (p.provider_status === 'succeeded') { subject = 'Pago confirmado'; body = 'Hola ' + c.name + ', tu pago de ' + helpers.formatMoney(p.amount, p.currency) + ' fue procesado por Stripey (' + p.provider_ref + ').'; }
+  else if (p.provider_status === 'failed') { subject = 'Pago rechazado'; body = 'Hola ' + c.name + ', Stripey rechazó tu pago de ' + helpers.formatMoney(p.amount, p.currency) + '.'; }
   else { subject = 'Pago pendiente'; body = 'Hola ' + c.name + ', tu pago requiere una acción adicional.'; }
   await helpers.sendEmail(p.customer_id, subject, body);
 };

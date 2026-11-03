@@ -1,13 +1,23 @@
 const db = require('../db');
 const fx = require('../modules/payment/domain/fx-policy');
+const paymentService = require('./paymentService');
+const legacy = require('../modules/payment/http/legacy-presenter');
 const helpers = require('../utils/helpers');
+
+// Filas del reporte de ventas: los pagos vienen del contrato de Payment (ya no se consulta su tabla) y se
+// completan con solicitud y cliente. Mismo contenido y orden de columnas que el JOIN anterior.
+function salesRows(from, to) {
+  const reqs = new Map(db.prepare('SELECT id, title, discount FROM requests').all().map((r) => [r.id, r]));
+  const custs = new Map(db.prepare('SELECT id, name, tier, email FROM customers').all().map((c) => [c.id, c]));
+  return paymentService.reportRows(from, to)
+    .filter((p) => reqs.has(p.request_id) && custs.has(p.customer_id))   // equivale al JOIN interno
+    .map((p) => { const r = reqs.get(p.request_id); const c = custs.get(p.customer_id);
+      return { ...legacy.reportRow(p), title: r.title, discount: r.discount, customer_id: c.id, customer: c.name, tier: c.tier, email: c.email }; });
+}
 
 // Reporte de ventas: una sola función hace consulta, cálculo, formato y exportación
 exports.salesReport = (from, to, format) => {
-  const rows = db.prepare(`SELECT p.id payment_id, p.amount, p.currency, p.status, p.provider, p.stripey_status, p.refunded_amount,
-      r.id request_id, r.title, r.discount, c.id customer_id, c.name customer, c.tier, c.email
-    FROM payments p JOIN requests r ON r.id = p.request_id JOIN customers c ON c.id = p.customer_id
-    WHERE p.created_at >= ? AND p.created_at <= ? ORDER BY p.id`).all(from || '0000', to || '9999');
+  const rows = salesRows(from, to);
   let total = 0, refunded = 0, paidCount = 0, failedCount = 0;
   const byTier = {}; const byProvider = {}; const byCurrency = {};
   for (const x of rows) {
@@ -27,10 +37,10 @@ exports.salesReport = (from, to, format) => {
 
 // Reporte de clientes (casi copia del de ventas)
 exports.customersReport = (format) => {
+  const paidByCustomer = paymentService.paidCountByCustomer();
   const rows = db.prepare(`SELECT c.id, c.name, c.email, c.tier, c.status, c.total_spent,
-    (SELECT COUNT(*) FROM requests r WHERE r.customer_id = c.id) requests,
-    (SELECT COUNT(*) FROM payments p WHERE p.customer_id = c.id AND p.status = 'paid') paid_payments
-    FROM customers c ORDER BY c.total_spent DESC`).all();
+    (SELECT COUNT(*) FROM requests r WHERE r.customer_id = c.id) requests
+    FROM customers c ORDER BY c.total_spent DESC`).all().map((c) => ({ ...c, paid_payments: paidByCustomer.get(c.id) || 0 }));
   if (format === 'csv') return helpers.toCsv(rows);
   let total = 0; const byTier = {};
   for (const x of rows) { total += x.total_spent; byTier[x.tier] = (byTier[x.tier] || 0) + x.total_spent; }

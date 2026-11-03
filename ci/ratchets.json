@@ -8,11 +8,16 @@
   "providerNameLegacy": [
     "controllers/integrationController.js",
     "controllers/paymentController.js",
-    "db.js",
     "server.js",
     "services/integrationService.js",
     "services/notificationService.js",
-    "services/paymentService.js",
     "services/reportService.js"
-  ]
+  ],
+  "tableForeignFiles": {
+    "customers": 11,
+    "requests": 4,
+    "notifications": 3,
+    "integration_logs": 1,
+    "users": 0
+  }
 }

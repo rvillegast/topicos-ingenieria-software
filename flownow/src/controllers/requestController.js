@@ -2,14 +2,16 @@ const db = require('../db');
 const helpers = require('../utils/helpers');
 const requestService = require('../services/requestService');
 const customerService = require('../services/customerService');
+const paymentService = require('../services/paymentService');
+const legacy = require('../modules/payment/http/legacy-presenter');
 
 exports.create = async (req, res) => {
-  try { res.status(201).json(await requestService.create(req.body)); }
+  try { res.status(201).json(legacy.request(await requestService.create(req.body))); }
   catch (e) { res.status(e.status || 500).json({ error: e.message }); }
 };
 exports.list = (req, res) => res.json(requestService.list());
-exports.get = (req, res) => { try { res.json(requestService.get(+req.params.id)); } catch (e) { res.status(e.status || 500).json({ error: e.message }); } };
-exports.changeStatus = (req, res) => { try { res.json(requestService.changeStatus(+req.params.id, req.body.status)); } catch (e) { res.status(e.status || 500).json({ error: e.message }); } };
+exports.get = (req, res) => { try { res.json(legacy.request(requestService.get(+req.params.id))); } catch (e) { res.status(e.status || 500).json({ error: e.message }); } };
+exports.changeStatus = (req, res) => { try { res.json(legacy.request(requestService.changeStatus(+req.params.id, req.body.status))); } catch (e) { res.status(e.status || 500).json({ error: e.message }); } };
 
 // Lógica de negocio en controller: creación masiva con reglas de prioridad y descuento duplicadas
 exports.bulkCreate = async (req, res) => {
@@ -36,13 +38,10 @@ exports.cancel = async (req, res) => {
   const r = db.prepare('SELECT * FROM requests WHERE id = ?').get(+req.params.id);
   if (!r) return res.status(404).json({ error: 'no existe' });
   if (r.status === 'done' || r.status === 'cancelled') return res.status(400).json({ error: 'no cancelable' });
-  const paid = db.prepare("SELECT * FROM payments WHERE request_id = ? AND status = 'paid'").all(r.id);
-  for (const p of paid) {
-    const paymentService = require('../services/paymentService');
-    await paymentService.refund(p.id);
-  }
+  const paid = paymentService.listForRequest(r.id).filter((p) => p.status === 'paid');
+  for (const p of paid) await paymentService.refund(p.id);
   db.prepare("UPDATE requests SET status = 'cancelled' WHERE id = ?").run(r.id);
   db.prepare('UPDATE customers SET open_requests = open_requests - 1 WHERE id = ?').run(r.customer_id);
   await helpers.sendEmail(r.customer_id, 'Solicitud cancelada', 'Tu solicitud #' + r.id + ' fue cancelada.');
-  res.json(requestService.get(r.id));
+  res.json(legacy.request(requestService.get(r.id)));
 };

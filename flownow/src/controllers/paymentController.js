@@ -1,42 +1,33 @@
-const db = require('../db');
 const helpers = require('../utils/helpers');
 const fx = require('../modules/payment/domain/fx-policy');
-const lifecycle = require('../modules/payment/domain/payment-lifecycle');
+const legacy = require('../modules/payment/http/legacy-presenter');
 const paymentService = require('../services/paymentService');
 const requestService = require('../services/requestService');
 
-// La respuesta HTTP de un cobro incluye la solicitud actualizada: se compone aquí, en el borde, para que
-// Payment no dependa de Request.
-const withRequest = (payment) => Object.assign(payment, { request: requestService.get(payment.request_id) });
+// Adaptador HTTP de Payment: traduce a los nombres públicos (TD-010) y compone la respuesta en el borde.
+// La respuesta de un cobro incluye la solicitud actualizada; se compone aquí para que Payment no dependa de Request.
+const withRequest = (payment) => Object.assign(legacy.payment(payment), { request: legacy.request(requestService.get(payment.request_id)) });
+const fail = (res, e) => res.status(e.status || 500).json({ error: e.message });
 
 exports.pay = async (req, res) => {
   try { res.status(201).json(withRequest(await paymentService.processPayment(+req.body.request_id, req.body.token, req.body.currency))); }
-  catch (e) { res.status(e.status || 500).json({ error: e.message }); }
+  catch (e) { fail(res, e); }
 };
-exports.list = (req, res) => res.json(paymentService.list());
-exports.get = (req, res) => { try { res.json(paymentService.get(+req.params.id)); } catch (e) { res.status(e.status || 500).json({ error: e.message }); } };
+exports.list = (req, res) => res.json(paymentService.list().map(legacy.payment));
+exports.get = (req, res) => { try { res.json(legacy.payment(paymentService.get(+req.params.id))); } catch (e) { fail(res, e); } };
 exports.refund = async (req, res) => {
-  try { res.json(await paymentService.refund(+req.params.id, req.body.amount)); }
-  catch (e) { res.status(e.status || 500).json({ error: e.message }); }
+  try { res.json(legacy.payment(await paymentService.refund(+req.params.id, req.body.amount))); }
+  catch (e) { fail(res, e); }
 };
-
-// Reintento de pago fallido: reglas de negocio y SQL en el controller
 exports.retry = async (req, res) => {
-  const p = db.prepare('SELECT * FROM payments WHERE id = ?').get(+req.params.id);
-  if (!p) return res.status(404).json({ error: 'no existe' });
-  if (!lifecycle.isRetryable(p)) return res.status(400).json({ error: 'sólo pagos fallidos' });
-  const count = db.prepare("SELECT COUNT(*) n FROM payments WHERE request_id = ? AND status IN ('failed','error')").get(p.request_id).n;
-  if (count >= lifecycle.MAX_FAILED_PER_REQUEST) return res.status(429).json({ error: 'máximo 3 reintentos con Stripey' });
-  db.prepare("UPDATE payments SET status = 'superseded' WHERE id = ?").run(p.id);
-  try { res.status(201).json(withRequest(await paymentService.processPayment(p.request_id, req.body.token, p.currency))); }
-  catch (e) { res.status(e.status || 500).json({ error: e.message }); }
+  try { res.status(201).json(withRequest(await paymentService.retryPayment(+req.params.id, req.body.token))); }
+  catch (e) { fail(res, e); }
 };
 
-// Resumen para el dashboard de finanzas (otra consulta que duplica la de reportes)
+// Resumen para el dashboard de finanzas
 exports.summary = (req, res) => {
-  const rows = db.prepare("SELECT amount, currency, status FROM payments").all();
   let total = 0, failed = 0;
-  for (const x of rows) {
+  for (const x of paymentService.summaryRows()) {
     if (x.status === 'paid') total += fx.toClp(x.amount, x.currency);
     if (x.status === 'failed') failed++;
   }

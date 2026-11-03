@@ -52,9 +52,9 @@ test('[stripey] traduce errores: conexión -> reintentable; resto -> no reintent
 test('[stripey] refund responde { ok } y parseWebhook traduce eventos', async () => {
   const s = providers.byName('stripey');
   assert.deepStrictEqual(await s.refund({ providerRef: 'ch_1', amount: 500 }), { ok: true });
-  assert.deepStrictEqual(s.parseWebhook({ type: 'charge.succeeded', data: { object: { id: 'ch_9' } } }), { providerRef: 'ch_9', event: 'captured' });
-  assert.deepStrictEqual(s.parseWebhook({ type: 'charge.failed', data: { object: { id: 'ch_9' } } }), { providerRef: 'ch_9', event: 'declined' });
-  assert.deepStrictEqual(s.parseWebhook({ type: 'otro', data: { object: { id: 'ch_9' } } }), { providerRef: 'ch_9', event: null });
+  assert.deepStrictEqual(s.parseWebhook({ type: 'charge.succeeded', data: { object: { id: 'ch_9' } } }), { providerRef: 'ch_9', event: 'captured', providerStatus: 'succeeded' });
+  assert.deepStrictEqual(s.parseWebhook({ type: 'charge.failed', data: { object: { id: 'ch_9' } } }), { providerRef: 'ch_9', event: 'declined', providerStatus: 'failed' });
+  assert.deepStrictEqual(s.parseWebhook({ type: 'otro', data: { object: { id: 'ch_9' } } }), { providerRef: 'ch_9', event: null, providerStatus: null });
   assert.strictEqual(s.parseWebhook({}), null);
 });
 

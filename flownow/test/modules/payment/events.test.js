@@ -11,7 +11,7 @@ const helpers = require('../../../src/utils/helpers');
 let h; const seen = [];
 test.before(async () => {
   h = await start();
-  for (const t of [paymentEvents.CAPTURED, paymentEvents.REFUNDED, customerEvents.TIER_CHANGED, integrationEvents.INVOICE_ISSUED])
+  for (const t of [paymentEvents.CAPTURED, paymentEvents.REFUNDED, paymentEvents.CONFIRMED, customerEvents.TIER_CHANGED, integrationEvents.INVOICE_ISSUED])
     bus.subscribe(t, (e) => { seen.push(e); }, 'espía-de-prueba');
 });
 test.after(async () => { await h.close(); });
@@ -80,4 +80,23 @@ test('aislamiento: un consumidor que falla no rompe el cobro y queda en la bitá
   const res = await h.pay(r.id);
   assert.strictEqual(res.status, 201); assert.strictEqual(res.body.status, 'paid'); assert.strictEqual(res.body.request.paid, 1);
   assert.ok(bus.deadLetters().some((d) => d.handler === 'consumidor-roto' && d.error === 'consumidor roto'));
+});
+
+test('confirmación tardía (webhook): publica Payment.Confirmed, marca la solicitud y NO suma gasto (TD-011)', async () => {
+  const c = await h.customer(); const r = await h.request(c.id, 50000);
+  const p = (await h.pay(r.id, 'tok_3ds')).body;
+  const res = await h.call('POST', '/integrations/webhook/stripey', { type: 'charge.succeeded', data: { object: { id: p.stripey_charge_id } } });
+  assert.deepStrictEqual(res.body, { ok: true });
+  assert.deepStrictEqual(last(paymentEvents.CONFIRMED).payload, { paymentId: p.id, requestId: r.id, customerId: c.id, amount: 50000, currency: 'CLP' });
+  assert.strictEqual((await row('/requests/' + r.id)).paid, 1);
+  assert.strictEqual((await row('/customers/' + c.id)).total_spent, 0);          // defecto AS-IS preservado
+  assert.strictEqual((await row('/requests/' + r.id)).erp_invoice, null);
+  assert.strictEqual((await row('/payments/' + p.id)).stripey_status, 'succeeded');
+});
+
+test('reintento: el límite se informa sin nombrar al proveedor', async () => {
+  const c = await h.customer(); const r = await h.request(c.id, 5000); const ids = [];
+  for (let i = 0; i < 3; i++) ids.push((await h.pay(r.id, 'tok_declined')).body.id);
+  const res = await h.api('POST', `/payments/${ids[0]}/retry`, { token: 'tok_ok' });
+  assert.strictEqual(res.status, 429); assert.ok(!/stripey/i.test(res.body.error));
 });

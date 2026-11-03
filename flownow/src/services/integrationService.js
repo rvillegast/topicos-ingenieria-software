@@ -7,7 +7,7 @@ const providers = require('../modules/payment/providers');
 exports.pushPaymentToWebhooks = async (paymentId) => {
   const p = paymentService.get(paymentId);
   const c = db.prepare('SELECT crm_id, email FROM customers WHERE id = ?').get(p.customer_id);
-  await helpers.httpPost(`${config.providers.hubcrm.baseUrl}/events`, { contact: c.crm_id, type: 'payment.' + p.stripey_status, amount: p.amount });
+  await helpers.httpPost(`${config.providers.hubcrm.baseUrl}/events`, { contact: c.crm_id, type: 'payment.' + p.provider_status, amount: p.amount });
   helpers.log('evento de pago enviado a hubcrm', 'hubcrm');
 };
 
@@ -27,18 +27,7 @@ exports.handleCrmWebhook = (body) => {
   return { ignored: true };
 };
 
-// Webhook entrante del proveedor de pagos: muta payments y requests directo
-exports.handleStripeyWebhook = (body) => {
-  const evt = providers.byName('stripey').parseWebhook(body);   // el adapter traduce al vocabulario del dominio
-  const p = evt && db.prepare('SELECT * FROM payments WHERE stripey_charge_id = ?').get(evt.providerRef);
-  if (!p) return { ignored: true };
-  if (evt.event === 'captured') {
-    db.prepare("UPDATE payments SET status = 'paid', stripey_status = 'succeeded' WHERE id = ?").run(p.id);
-    db.prepare('UPDATE requests SET paid = 1 WHERE id = ?').run(p.request_id);
-  } else if (evt.event === 'declined') {
-    db.prepare("UPDATE payments SET status = 'failed', stripey_status = 'failed' WHERE id = ?").run(p.id);
-  }
-  return { ok: true };
-};
+// Webhook entrante del proveedor de pagos: el adapter traduce y Payment aplica (esta capa no toca sus tablas).
+exports.handleStripeyWebhook = (body) => paymentService.applyProviderEvent(providers.byName('stripey').parseWebhook(body));
 
 exports.logs = () => db.prepare('SELECT * FROM integration_logs ORDER BY id DESC LIMIT 100').all();

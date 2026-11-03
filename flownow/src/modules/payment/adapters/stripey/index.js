@@ -5,7 +5,7 @@
 //        status: 'captured' | 'declined' | 'action_required' | 'unknown'   (vocabulario del dominio)
 //        providerStatus: estado crudo del proveedor, sólo para persistencia legacy (TD-010)
 //   refund({ providerRef, amount })               -> { ok }
-//   parseWebhook(body)                            -> { providerRef, event: 'captured' | 'declined' } | null
+//   parseWebhook(body)                            -> { providerRef, event: 'captured' | 'declined' | null, providerStatus } | null
 //   Lanza ProviderUnavailableError (reintentable) o ProviderError (no reintentable).
 const Stripey = require('../../../../vendor/stripey-sdk');
 const config = require('../../../../platform/config');
@@ -44,7 +44,7 @@ exports.refund = async ({ providerRef, amount }) => {
 exports.parseWebhook = (body) => {
   const providerRef = body && body.data && body.data.object && body.data.object.id;
   if (!providerRef) return null;
-  if (body.type === 'charge.succeeded') return { providerRef, event: 'captured' };
-  if (body.type === 'charge.failed') return { providerRef, event: 'declined' };
-  return { providerRef, event: null };   // evento conocido pero sin efecto (se ignora)
+  if (body.type === 'charge.succeeded') return { providerRef, event: 'captured', providerStatus: 'succeeded' };
+  if (body.type === 'charge.failed') return { providerRef, event: 'declined', providerStatus: 'failed' };
+  return { providerRef, event: null, providerStatus: null };   // evento conocido pero sin efecto (se ignora)
 };

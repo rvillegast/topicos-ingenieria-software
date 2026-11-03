@@ -4,7 +4,7 @@ const helpers = require('../utils/helpers');
 const config = require('../platform/config');
 
 exports.crmWebhook = (req, res) => res.json(integrationService.handleCrmWebhook(req.body));
-exports.stripeyWebhook = (req, res) => res.json(integrationService.handleStripeyWebhook(req.body));
+exports.stripeyWebhook = async (req, res) => res.json(await integrationService.handleStripeyWebhook(req.body));
 exports.logs = (req, res) => res.json(integrationService.logs());
 
 // Re-sincronización manual con HubCRM: SQL + llamada HTTP en el controller

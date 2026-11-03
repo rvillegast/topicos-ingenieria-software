@@ -1,6 +1,7 @@
 const db = require('../db');
 const helpers = require('../utils/helpers');
 const customerService = require('../services/customerService');
+const paymentService = require('../services/paymentService');
 
 exports.create = async (req, res) => {
   try { res.status(201).json(await customerService.create(req.body)); }
@@ -18,7 +19,7 @@ exports.merge = (req, res) => {
   const rem = db.prepare('SELECT * FROM customers WHERE id = ?').get(remove_id);
   if (!keep || !rem || keep_id === remove_id) return res.status(400).json({ error: 'ids inválidos' });
   db.prepare('UPDATE requests SET customer_id = ? WHERE customer_id = ?').run(keep_id, remove_id);
-  db.prepare('UPDATE payments SET customer_id = ? WHERE customer_id = ?').run(keep_id, remove_id);
+  paymentService.reassignCustomer(remove_id, keep_id);
   db.prepare('UPDATE notifications SET customer_id = ? WHERE customer_id = ?').run(keep_id, remove_id);
   const spent = keep.total_spent + rem.total_spent;
   const tier = spent > 2000000 ? 'gold' : spent > 500000 ? 'silver' : keep.tier;

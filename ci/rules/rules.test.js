@@ -105,3 +105,39 @@ test('FF1: falla ante un ciclo nuevo y respeta el ratchet (no puede subir; si ba
   assert.strictEqual(arch(d, 1).status, 0);           // tolerado por el ratchet
   assert.strictEqual(arch(d, 2).status, 1);           // mejoró: obliga a fijar el avance
 });
+
+// ---- FF3: ownership de tablas ----
+const OWN = { tables: {
+  payment_payments: { owner: 'payment', paths: ['modules/payment/'], enforced: true },
+  customers: { owner: 'customer', paths: ['modules/customer/'], enforced: false } } };
+const own = (dir, ratchets) => { const o = path.join(dir, 'own.json'), r = path.join(dir, 'r.json');
+  fs.writeFileSync(o, JSON.stringify(OWN)); fs.writeFileSync(r, JSON.stringify({ tableForeignFiles: ratchets })); return ['--ownership', o, '--ratchets', r]; };
+const schema = (src) => write(src, 'db.js', 'db.exec(`CREATE TABLE IF NOT EXISTS payment_payments (id INTEGER); CREATE TABLE IF NOT EXISTS customers (id INTEGER)`);');
+
+test('FF3: pasa si sólo el owner toca su tabla', () => {
+  const d = tmp(); const src = path.join(d, 'src'); schema(src);
+  write(src, 'modules/payment/repo.js', "db.prepare('SELECT * FROM payment_payments');");
+  write(src, 'modules/customer/repo.js', "db.prepare('SELECT * FROM customers');");
+  assert.strictEqual(run('table-ownership.js', src, ...own(d, { customers: 0 })).status, 0);
+});
+test('FF3: falla si otro módulo lee o escribe una tabla enforced', () => {
+  const d = tmp(); const src = path.join(d, 'src'); schema(src);
+  write(src, 'modules/notification/n.js', "db.prepare('SELECT * FROM payment_payments');");
+  const r = run('table-ownership.js', src, ...own(d, { customers: 0 }));
+  assert.strictEqual(r.status, 1); assert.match(r.stderr, /payment_payments.*notification\/n\.js/);
+  write(src, 'modules/notification/n.js', "db.prepare('UPDATE payment_payments SET status = 1');");
+  assert.strictEqual(run('table-ownership.js', src, ...own(d, { customers: 0 })).status, 1);
+});
+test('FF3: tabla aún no migrada respeta el ratchet (no puede subir; si baja hay que fijarlo)', () => {
+  const d = tmp(); const src = path.join(d, 'src'); schema(src);
+  write(src, 'services/other.js', "db.prepare('SELECT * FROM customers');");
+  assert.strictEqual(run('table-ownership.js', src, ...own(d, { customers: 1 })).status, 0);
+  assert.strictEqual(run('table-ownership.js', src, ...own(d, { customers: 0 })).status, 1);   // subió
+  assert.strictEqual(run('table-ownership.js', src, ...own(d, { customers: 2 })).status, 1);   // mejoró: fijar
+});
+test('FF3: una tabla sin owner declarado es una violación', () => {
+  const d = tmp(); const src = path.join(d, 'src');
+  write(src, 'db.js', 'db.exec(`CREATE TABLE IF NOT EXISTS huerfana (id INTEGER)`);');
+  const r = run('table-ownership.js', src, ...own(d, { customers: 0 }));
+  assert.strictEqual(r.status, 1); assert.match(r.stderr, /huerfana.*sin owner/);
+});

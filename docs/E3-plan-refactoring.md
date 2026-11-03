@@ -88,7 +88,7 @@ Meta de cobertura (FF7): `paymentService`/futuro `modules/payment` ≥ 80 % lín
 | 4 ✅ | **DirectVendorDependency → Port + Adapter** | `ProviderPort` + `StripeyAdapter` (ACL de estados/errores); respaldo PayFast como segundo adapter; se elimina `GatewayFactory`/`IPaymentGateway`/`INotifier` triviales | TD-005 | medio | **FF2**, FF2b |
 | 5 ✅ | **LargeMethod → ExtractClass** | `processPayment` → `PaymentLifecycle` + `ChargeRetryPolicy` + `FxPolicy` (funciones puras con pruebas unitarias) | TD-002 | medio | umbral de complejidad (CCN ≤ 10 en el módulo) |
 | 6 ✅ | **SharedDataMutation → OwnershipBoundary (eventos)** | Payment publica `PaymentCaptured/Failed/Refunded`; **Request** marca `paid` y **Customer** actualiza `totalSpent`/tier por suscripción; Payment deja de escribir `requests`/`customers`. *Rompe el ciclo Request↔Payment* | — | **alto** | — |
-| 7 | **Ownership de tabla** | `PaymentRepository` única vía a `payment_payments` (renombre `payments` → `payment_payments`, `stripey_*` → `provider_*`); presentador HTTP de compatibilidad para los campos legacy | TD-010 | medio | **FF3** (ratchet: `payment_*`, `customer_*`) |
+| 7 ✅ | **Ownership de tabla** | `PaymentRepository` única vía a `payment_payments` (renombre `payments` → `payment_payments`, `stripey_*` → `provider_*`); presentador HTTP de compatibilidad para los campos legacy | TD-010 | medio | **FF3** (ratchet: `payment_*`, `customer_*`) |
 | 8 | **Efectos laterales por eventos** | Notification e Integration suscritos al pago (aviso; factura ERP; evento CRM); se retiran las llamadas directas. *Rompe Payment↔Notification y Payment↔Integration* | TD-004 | medio | — |
 | 9 | **Orquestación en Request** | `Request.payRequest` descuenta, valida y llama `Payments.createPayment`; `paymentController` queda como adaptador HTTP delgado (sin SQL) | — | medio | FF6 (fronteras por `contract/`) |
 | 10 | **Romper Customer↔Notification** | bienvenida por `CustomerRegistered`; sync CRM sale de Customer (Integration lo hace con reintento) | TD-001 | medio | — |
@@ -227,6 +227,41 @@ Efecto de comportamiento: ninguno con la configuración por defecto (la suite de
 - La duplicación subió 0,74 puntos por el patrón repetido de contratos y suscripciones (código nuevo). Se vigilará; no se esconde.
 
 **Cambio de comportamiento (previsto en TD-009):** los efectos secundarios ahora corren detrás del bus, que aísla fallos. Si falla un efecto (p. ej. la llamada al CRM al subir de tier), antes el cobro respondía 500 con el pago ya registrado; ahora responde 201 y el fallo queda en la bitácora `deadLetters()`. Con el funcionamiento normal el comportamiento es idéntico (la suite de caracterización lo demuestra; el orden de los efectos se preservó registrando las suscripciones en el orden original).
+
+### 4.7. Resultado del paso 7 (medido)
+
+`PaymentRepository` (`modules/payment/persistence/payment-repository.js`) es ahora la **única** vía a la tabla, que pasó de `payments` a `payment_payments` (columnas `stripey_charge_id`/`stripey_status` → `provider_ref`/`provider_status`). El esquema y su migración viven en el módulo (`persistence/schema.js`): una base creada con el esquema anterior se renombra **sin perder datos** y de forma idempotente (probado). Quienes antes hacían SQL sobre pagos usan ahora el contrato de Payment:
+
+| Quién tocaba `payments` | Ahora |
+|---|---|
+| `paymentController.retry`/`summary` (SQL y reglas en el controller) | `paymentService.retryPayment` (reglas en el dominio) y `summaryRows`; el controller es un adaptador HTTP sin SQL |
+| `requestController.cancel`, `customerController.merge`, `reportController.dashboard` | `listForRequest`, `reassignCustomer`, `paidTotal` |
+| `reportService` (JOIN y subconsulta sobre pagos) | `reportRows` y `paidCountByCustomer`, completados con solicitud y cliente |
+| `integrationService` (webhook que mutaba pagos y solicitudes) | el adapter traduce y `paymentService.applyProviderEvent` aplica; la solicitud se marca por el evento `Payment.Confirmed` |
+
+Los nombres públicos de la API (`stripey_charge_id`, `stripey_status`) se conservan **sólo** en `http/legacy-presenter.js` (TD-010); el dominio, el esquema y los eventos usan nombres neutros.
+
+| Indicador | Antes (paso 6) | Después | Cómo se midió |
+|---|---|---|---|
+| Archivos **ajenos** que acceden a la tabla de pagos | **5** (`customerController`, `reportController`, `requestController`, `integrationService`, `reportService`; ya contando `paymentService` y `paymentController` como dueños) | **0** | `ci/rules/table-ownership.js` (FF3) sobre `41d6343` con la tabla sin prefijo y sobre el árbol actual |
+| Archivos que leen / escriben la tabla de pagos | 6 / 4 | **1 / 1** (el repositorio) | `acceso-datos.csv` |
+| Tablas escritas desde más de un archivo | 5 de 6 | **4 de 6** | `resumen.md` |
+| FF3 | no existía | **activa**: `payment_payments` estricta; las otras tablas con ratchet (customers 11, requests 4, notifications 3, integration_logs 1, users 0) | `ci/ownership.json`, `ci/ratchets.json` |
+| FF2b: archivos que nombran a Stripey/PayFast fuera de adapters | 8 | **6** (ratchet bajado) | `provider-names.js` |
+| Pruebas | 100 | **107** (esquema/migración, presentador, confirmación tardía, límite de reintentos) | `npm test` |
+| Suite de caracterización | 63 | 63 **sin modificar** (incluye nombres `stripey_*` y cabecera del CSV de ventas) | `npm test` |
+| Duplicación | 7,43 % | **5,95 %** | jscpd |
+
+**Lectura honesta**
+- **S1 todavía no baja** (12 archivos en la heurística). De esos 12, 6 están dentro de Payment/configuración (el lugar esperado: adapters, registro, presentador, esquema, config) y 6 siguen fuera: la ruta y el controller del webhook (`server.js`, `integrationController`, `integrationService`), los textos de `notificationService` y los campos de `reportService`. Se resuelven en los pasos 8 y 12.
+- FF3 con ratchet **no** certifica que los demás módulos estén limpios: sólo impide que empeoren. Customer (11 archivos ajenos) es el caso más grande y se ataca en los pasos 9 a 11.
+
+**Cambios de comportamiento observable (los dos, menores):**
+1. El mensaje de error al superar el límite de reintentos pasó de "máximo 3 reintentos con Stripey" a "máximo 3 reintentos" (no nombra al proveedor); el código HTTP 429 es el mismo.
+2. Un error de un consumidor de `Payment.Confirmed` ya no llega al webhook como 500 (aislamiento del bus, TD-009).
+Todo lo demás —campos, orden de claves, estados y cuerpos HTTP— es idéntico (lo demuestra la suite de caracterización).
+
+**Hallazgo preservado (nuevo TD-011):** una confirmación tardía por webhook marca el pago y la solicitud pero **no suma el gasto del cliente ni emite factura** (defecto del AS-IS). Se preservó con un evento propio (`Payment.Confirmed`) que sólo consume Request, y se registró en el ledger.
 
 ## 5. Estimación y reparto (supuesto: 10–14 h del equipo, §16.3)
 
