@@ -3,6 +3,7 @@ const db = require('../../db');
 const bus = require('../../platform/events');
 const paymentEvents = require('../payment/contract/events');
 const customerEvents = require('./contract/events');
+const integrationEvents = require('../integration/contract/events');
 
 const GOLD_THRESHOLD = 2000000;   // política de tiers (razón de cambio de Customer)
 
@@ -21,4 +22,8 @@ exports.register = () => {
   bus.subscribe(paymentEvents.REFUNDED, (e) => {
     db.prepare('UPDATE customers SET total_spent = total_spent - ? WHERE id = ?').run(e.payload.amount, e.payload.customerId);
   }, 'customer.registerRefund');
+  // El id del contacto en el CRM es un dato de Customer: Integration lo informa, Customer lo guarda.
+  bus.subscribe(integrationEvents.CONTACT_SYNCED, (e) => {
+    db.prepare('UPDATE customers SET crm_id = ? WHERE id = ?').run(e.payload.crmId, e.payload.customerId);
+  }, 'customer.storeCrmId');
 };

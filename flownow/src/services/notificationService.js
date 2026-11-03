@@ -1,12 +1,10 @@
 const db = require('../db');
 const config = require('../platform/config');
 const helpers = require('../utils/helpers');
-const customerService = require('./customerService');
 const { paymentMessage } = require('../modules/notification/payment-messages');
 
-exports.notifyWelcome = async (customerId) => {
-  const c = customerService.get(customerId);
-  await helpers.sendEmail(customerId, 'Bienvenido a FlowNow', 'Hola ' + c.name + ', gracias por unirte a FlowNow!');
+exports.notifyWelcome = async ({ customerId, name }) => {
+  await helpers.sendEmail(customerId, 'Bienvenido a FlowNow', 'Hola ' + name + ', gracias por unirte a FlowNow!');
 };
 
 exports.notifyRequestCreated = async (customerId, requestId, amount) => {

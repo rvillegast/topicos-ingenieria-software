@@ -309,7 +309,27 @@ Payment pasa a ser una **hoja con contrato público** y Request pasa a ser quien
 
 **Sin cambios de comportamiento observables.** La política de precio (descuento y bono) se movió sin tocar sus fórmulas; las pruebas de caracterización de descuento y bono pasan intactas, y la prueba de `pricing` se movió de Payment a Request.
 
-**Lectura honesta:** FF6 es estricta para Payment y para las importaciones **entre carpetas `modules/`**; las dependencias entre los servicios legados (`services/`, `controllers/`) todavía no están bajo FF6 porque esos módulos no se han movido a `modules/` (Customer, Request, Notification). Los ciclos restantes (3) viven justamente ahí y se rompen en los pasos 10 y 11. Sigue habiendo SQL en otros controllers (`requestController`, `customerController`, `notificationController`, `integrationController`, `reportController`): fuera del slice de Payment.
+**Lectura honesta:** FF6 es estricta para Payment y para las importaciones **entre carpetas `modules/`**; las dependencias entre los servicios legados (`services/`, `controllers/`) todavía no están bajo FF6 porque esos módulos no se han movido a `modules/` (Customer, Request, Notification). Los ciclos restantes viven justamente ahí (hoy queda 1, tras el paso 10) y se rompen en los pasos 10 y 11. Sigue habiendo SQL en otros controllers (`requestController`, `customerController`, `notificationController`, `integrationController`, `reportController`): fuera del slice de Payment.
+
+### 4.10. Resultado del paso 10 (medido)
+
+El alta de cliente deja de llamar al CRM y a Notification: **Customer publica `Customer.Registered` v1** (`customerId, name, email`) y reaccionan sus consumidores:
+
+- **Integration** (`integration.syncCrmContact`) crea el contacto en HubCRM con 3 reintentos y publica `Integration.ContactSynced` v1 (`customerId, crmId`). **Customer** (`customer.storeCrmId`) guarda el `crm_id`: el dato sigue teniendo un único dueño y Integration ya no escribe `customers`.
+- **Notification** (`notification.welcome`) envía la bienvenida con el nombre que trae el evento; ya no importa `customerService`.
+- El orden de efectos del AS-IS se conserva (CRM → bienvenida) y la respuesta del `POST /customers` es la misma (incluye `crm_id`).
+- Si el CRM está caído, el alta **no falla** (igual que en el AS-IS), la bienvenida se envía, el fallo queda en la bitácora de eventos (`deadLetters`) y `POST /integrations/crm/resync` repara el contacto. Esto **mitiga TD-001**: ya no se pierde en silencio; lo que sigue sin existir es la cola de reintentos automática (se acepta, ver ledger).
+
+| Indicador | Antes (paso 9) | Después | Cómo se midió |
+|---|---|---|---|
+| Ciclos entre archivos | 3 | **1** (`customerService` ↔ `requestService`; ratchet bajado de 3 a 1) | `ci/rules/arch.js` |
+| `customerService` depende de Notification/CRM/config | sí | **no** | `dependencias.json` |
+| Escenario S4 (nueva integración externa), heurística | 11 archivos / 5 áreas | **10 / 5** | `escenarios.csv` |
+| Duplicación (jscpd) | 5.79 % | 5.39 % | `resumen.md` |
+| Pruebas | 121 | **124** (+3: evento de alta, orden de efectos, CRM caído) | `npm test` |
+| Suite de caracterización | 63 | 63 **sin modificar** | `npm test` |
+
+**Sin cambios de comportamiento observables.** Lectura honesta: se esperaba bajar de 3 a 2 ciclos y bajaron a 1, porque el ciclo de tres nodos pasaba por la arista `customerService → notificationService`, que desapareció. Queda el ciclo Customer↔Request (`open_requests`), que cierra el paso 11.
 
 ## 5. Estimación y reparto (supuesto: 10–14 h del equipo, §16.3)
 

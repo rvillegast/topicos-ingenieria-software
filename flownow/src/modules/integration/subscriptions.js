@@ -24,6 +24,14 @@ exports.register = () => {
       helpers.log('ERP caído, factura pendiente', 'erp'); // TODO(TD-004): cola de reintentos para facturas
     }
   }, 'integration.issueInvoice');
+  // Alta de cliente -> contacto en el CRM. Si el CRM no responde, el fallo queda en la bitácora de eventos
+  // (deadLetters) y el contacto se repara con POST /integrations/crm/resync (TD-001 mitigada).
+  bus.subscribe(customerEvents.REGISTERED, async (e) => {
+    const { customerId, name, email } = e.payload;
+    const r = await helpers.retry(() => helpers.httpPost(`${config.providers.hubcrm.baseUrl}/contacts`, { name, email }), 3);
+    helpers.log('cliente sincronizado con hubcrm ' + r.id, 'hubcrm');
+    await integrationEvents.publishContactSynced({ customerId, crmId: r.id });
+  }, 'integration.syncCrmContact');
   // Mantiene el tier del contacto en el CRM.
   bus.subscribe(customerEvents.TIER_CHANGED, async (e) => {
     await helpers.httpPost(`${config.providers.hubcrm.baseUrl}/contacts/${e.payload.crmId}`, { tier: e.payload.tier });

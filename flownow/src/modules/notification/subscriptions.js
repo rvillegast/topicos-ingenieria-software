@@ -1,5 +1,6 @@
 // Notification reacciona a los resultados de pago (antes: llamada directa desde processPayment).
 const bus = require('../../platform/events');
+const customerEvents = require('../customer/contract/events');
 const paymentEvents = require('../payment/contract/events');
 const notificationService = require('../../services/notificationService');
 
@@ -9,4 +10,5 @@ exports.register = () => {
   bus.subscribe(paymentEvents.CAPTURED, (e) => notificationService.onPaymentOutcome('captured', e.payload), 'notification.paymentCaptured');
   bus.subscribe(paymentEvents.FAILED, (e) => notificationService.onPaymentOutcome(e.payload.reason === 'declined' ? 'declined' : 'pending', e.payload), 'notification.paymentFailed');
   bus.subscribe(paymentEvents.ACTION_REQUIRED, (e) => notificationService.onPaymentOutcome('pending', e.payload), 'notification.paymentActionRequired');
+  bus.subscribe(customerEvents.REGISTERED, (e) => notificationService.notifyWelcome(e.payload), 'notification.welcome');
 };

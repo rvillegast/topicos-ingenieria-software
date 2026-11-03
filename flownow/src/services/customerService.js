@@ -1,8 +1,7 @@
 const db = require('../db');
 const helpers = require('../utils/helpers');
-const config = require('../platform/config');
 const requestService = require('./requestService');
-const notificationService = require('./notificationService');
+const customerEvents = require('../modules/customer/contract/events');
 
 exports.create = async (data) => {
   if (!data.name || data.name.length < 2) throw httpError(400, 'nombre inválido');
@@ -13,15 +12,8 @@ exports.create = async (data) => {
   const info = db.prepare('INSERT INTO customers (name, email, phone, tier, created_at) VALUES (?,?,?,?,?)')
     .run(data.name, data.email, data.phone || null, data.tier || 'basic', helpers.now());
   const id = Number(info.lastInsertRowid);
-  // sincroniza con el CRM (HubCRM) al crear
-  try {
-    const r = await helpers.retry(() => helpers.httpPost(`${config.providers.hubcrm.baseUrl}/contacts`, { name: data.name, email: data.email }), 3);
-    db.prepare('UPDATE customers SET crm_id = ? WHERE id = ?').run(r.id, id);
-    helpers.log('cliente sincronizado con hubcrm ' + r.id, 'hubcrm');
-  } catch (e) {
-    helpers.log('falló sync hubcrm: ' + e.message, 'hubcrm'); // FIXME(TD-001): reintentar luego, hoy se pierde el contacto
-  }
-  await notificationService.notifyWelcome(id);
+  // Quién reacciona al alta (CRM, bienvenida) no es asunto de Customer: se entera por el evento.
+  await customerEvents.publishRegistered({ customerId: id, name: data.name, email: data.email });
   return exports.get(id);
 };
 
