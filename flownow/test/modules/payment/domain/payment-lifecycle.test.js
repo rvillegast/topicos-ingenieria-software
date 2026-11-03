@@ -3,22 +3,14 @@ const assert = require('node:assert');
 const lc = require('../../../../src/modules/payment/domain/payment-lifecycle');
 const { PaymentError } = require('../../../../src/modules/payment/domain/errors');
 
-const ok = { request: { id: 1, paid: 0, status: 'new' }, customer: { status: 'active' }, currency: 'CLP' };
-const fails = (over, status, msg) => assert.throws(() => lc.assertPayable({ ...ok, ...over }), (e) => e instanceof PaymentError && e.status === status && msg.test(e.message));
-
 test('statusFor traduce el resultado neutro a estado interno', () => {
   assert.strictEqual(lc.statusFor('captured'), 'paid'); assert.strictEqual(lc.statusFor('declined'), 'failed');
   assert.strictEqual(lc.statusFor('action_required'), 'pending_action'); assert.strictEqual(lc.statusFor('unknown'), 'unknown');
   assert.strictEqual(lc.statusFor('raro'), 'unknown');
 });
-test('assertPayable acepta una solicitud pagable', () => assert.doesNotThrow(() => lc.assertPayable(ok)));
-test('assertPayable: errores y códigos HTTP del AS-IS, en su orden', () => {
-  fails({ request: undefined }, 404, /no encontrada/);
-  fails({ request: { paid: 1 } }, 409, /ya pagada/);
-  fails({ request: { paid: 0, status: 'cancelled' } }, 400, /cancelada/);
-  fails({ customer: { status: 'inactive' } }, 400, /inactivo/);
-  fails({ currency: 'JPY' }, 400, /moneda/);
-  fails({ request: { paid: 1, status: 'cancelled' }, customer: { status: 'inactive' }, currency: 'JPY' }, 409, /ya pagada/);   // primero gana
+test('assertCurrency: acepta CLP y las monedas con tasa; rechaza el resto con 400', () => {
+  for (const c of ['CLP', 'USD', 'EUR']) assert.doesNotThrow(() => lc.assertCurrency(c));
+  for (const c of ['JPY', undefined, 'toString']) assert.throws(() => lc.assertCurrency(c), (e) => e instanceof PaymentError && e.status === 400 && /moneda/.test(e.message));
 });
 test('planRefund: parcial deja paid, total pasa a refunded, sin monto reembolsa el saldo del pago', () => {
   const p = { status: 'paid', amount: 100000, refunded_amount: 0 };

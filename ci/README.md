@@ -10,7 +10,7 @@ Reglas de arquitectura y configuración del quality gate. Diseño completo en [`
 | FF3 | Sólo el owner lee/escribe sus tablas | script Node + `ownership.json` | `rules/table-ownership.js`, `ownership.json`, `ratchets.json` | ✅ implementada (`payment_payments` estricta; resto con ratchet) |
 | FF4 | Sin SATD no gestionada | `scripts/satd-scan.sh --gate` + `rules/ledger-consistency.js` | `../scripts/`, `rules/ledger-consistency.js` | ✅ implementada |
 | FF5 | Sin URLs/secretos hard-coded | script portable (+ gitleaks para el historial, pendiente) | `rules/no-hardcoded.js` | ✅ implementada |
-| FF6 | Dependencias prohibidas / sólo vía `contract/` | dependency-cruiser | `dependency-cruiser.cjs` | diseñada |
+| FF6 | Dependencias prohibidas / sólo vía `contract/` | dependency-cruiser vía `rules/arch.js` | `dependency-cruiser.cjs` | ✅ implementada (módulos y Payment) |
 | FF7 | Pruebas críticas y cobertura | `node:test` + `rules/coverage-threshold.js` | `rules/` | diseñada |
 | FF8 | La complejidad no aumenta | lizard + ratchet | `lizard-ratchet.json` | diseñada |
 

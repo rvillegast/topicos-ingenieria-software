@@ -1,7 +1,8 @@
 const db = require('../db');
 const helpers = require('../utils/helpers');
 const customerService = require('./customerService');
-const paymentService = require('./paymentService');
+const payments = require('../modules/payment/contract');
+const { amountDue } = require('../modules/request/pricing');
 const notificationService = require('./notificationService');
 
 exports.countOpenFor = (customerId) =>
@@ -28,7 +29,7 @@ exports.create = async (data) => {
 exports.get = (id) => {
   const r = db.prepare('SELECT * FROM requests WHERE id = ?').get(id);
   if (!r) throw customerService.httpError(404, 'solicitud no encontrada');
-  r.payments = paymentService.listForRequest(id);
+  r.payments = payments.listForRequest(id);
   return r;
 };
 
@@ -42,4 +43,23 @@ exports.changeStatus = (id, status) => {
   db.prepare('UPDATE requests SET status = ? WHERE id = ?').run(status, id);
   if (status === 'done' || status === 'cancelled') db.prepare('UPDATE customers SET open_requests = open_requests - 1 WHERE id = ?').run(r.customer_id);
   return exports.get(id);
+};
+
+// Paga una solicitud: Request decide SI se puede pagar y CUÁNTO (precio con descuento y bono) y le pide a Payment
+// que cobre ese monto. Payment no conoce solicitudes ni clientes. Orden de validación preservado del AS-IS.
+exports.payRequest = async (requestId, token, currency) => {
+  const r = db.prepare('SELECT * FROM requests WHERE id = ?').get(requestId);
+  if (!r) throw customerService.httpError(404, 'solicitud no encontrada');
+  if (r.paid) throw customerService.httpError(409, 'solicitud ya pagada');
+  if (r.status === 'cancelled') throw customerService.httpError(400, 'solicitud cancelada');
+  const customer = customerService.pricingInfo(r.customer_id);
+  if (customer.status !== 'active') throw customerService.httpError(400, 'cliente inactivo');
+  const amount = amountDue({ amount: r.amount, discount: r.discount, tier: customer.tier });
+  return payments.createPayment({ requestId: r.id, customerId: r.customer_id, amount, currency, token });
+};
+
+// Reintenta un cobro fallido: Payment valida y reemplaza el pago anterior; Request vuelve a resolver el monto y cobra.
+exports.retryPayment = async (paymentId, token) => {
+  const { requestId, currency } = payments.beginRetry(paymentId);
+  return exports.payRequest(requestId, token, currency);
 };

@@ -5,12 +5,9 @@ const fx = require('./fx-policy');
 // Estado interno del pago según el resultado neutro del proveedor.
 exports.statusFor = (outcomeStatus) => ({ captured: 'paid', declined: 'failed', action_required: 'pending_action' }[outcomeStatus] || 'unknown');
 
-// Invariantes para cobrar una solicitud. Orden de validación preservado del AS-IS.
-exports.assertPayable = ({ request, customer, currency }) => {
-  if (!request) throw new PaymentError('solicitud no encontrada', 404);
-  if (request.paid) throw new PaymentError('solicitud ya pagada', 409);
-  if (request.status === 'cancelled') throw new PaymentError('solicitud cancelada', 400);
-  if (customer.status !== 'active') throw new PaymentError('cliente inactivo', 400);
+// Única validación previa al cobro que es de Payment: la moneda. Las de la solicitud y del cliente (existe, no pagada,
+// no cancelada, activo) son de Request, que es quien decide si se puede pagar.
+exports.assertCurrency = (currency) => {
   if (!fx.isSupported(currency)) throw new PaymentError('moneda no soportada', 400);
 };
 

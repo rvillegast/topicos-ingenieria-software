@@ -1,5 +1,5 @@
 const reportService = require('../services/reportService');
-const paymentService = require('../services/paymentService');
+const payments = require('../modules/payment/contract');
 const config = require('../platform/config');
 const db = require('../db');
 const helpers = require('../utils/helpers');
@@ -25,7 +25,7 @@ exports.dashboard = (req, res) => {
   if (!config.flags.useNewReports) return res.json({ legacy: true });
   const customers = db.prepare('SELECT COUNT(*) n FROM customers').get().n;
   const open = db.prepare("SELECT COUNT(*) n FROM requests WHERE status NOT IN ('done','cancelled')").get().n;
-  const paid = paymentService.paidTotal('CLP');
+  const paid = payments.paidTotal('CLP');
   const notif = db.prepare('SELECT COUNT(*) n FROM notifications').get().n;
   res.json({ customers, openRequests: open, paidCLP: helpers.formatMoney(paid, 'CLP'), notifications: notif });
 };

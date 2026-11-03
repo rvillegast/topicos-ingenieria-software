@@ -73,7 +73,8 @@ rules:
 | FF2 | ✅ implementada (paso 4) | regla `not-to-sdk-outside-adapter`; sobre el código previo al paso 4 detecta la violación (`StripeyGateway.js`); hoy 0. Demostración de fallo en `rules.test.js` |
 | FF2b | ✅ con ratchet (paso 4) | `ci/rules/provider-names.js`: lista legada en `ci/ratchets.json` (5 archivos tras el paso 8) que sólo puede encoger |
 | FF3 | ✅ implementada (paso 7) | `ci/rules/table-ownership.js` + `ci/ownership.json`: `payment_payments` estricta (0 accesos ajenos; antes 5); resto con ratchet en `ci/ratchets.json`. `rules.test.js` demuestra que falla ante acceso ajeno, ratchet que sube o tabla sin owner |
-| FF6, FF7, FF8 | diseñadas | paso 9 de E3 y cierre |
+| FF6 | ✅ implementada (paso 9) | `only-via-contract`, `payment-only-via-contract`, `payment-is-leaf` en `ci/dependency-cruiser.cjs` (vía `arch.js`); 0 violaciones; `rules.test.js` demuestra que fallan. Alcance: entre carpetas `modules/` y todo lo que toque a Payment; se amplía a medida que Customer, Request y Notification pasan a `modules/` |
+| FF7, FF8 | diseñadas | cierre |
 
 Ejecución local de todo lo disponible: `ci/run-rules.sh` (mismo orden que el pipeline). Las demostraciones de fallo corren con `node --test "ci/rules/*.test.js"`.
 

@@ -1,6 +1,5 @@
-// Monto a cobrar de una solicitud en CLP: descuento comercial y bono.
-// ATENCIÓN: esta regla pertenece al módulo Request (política comercial, ADR-001); vive aquí sólo hasta el paso 9
-// del plan de refactoring, donde Request pasa a calcular el monto y Payment lo recibe ya resuelto.
+// Precio de una solicitud: monto a cobrar en CLP con el descuento comercial por tier y el bono.
+// Es política de Request (ADR-001): Payment recibe el monto ya resuelto y no conoce estas reglas.
 const GOLD_BONUS_THRESHOLD = 1000000;
 const GOLD_BONUS = 5000;
 

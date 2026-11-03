@@ -1,13 +1,13 @@
-const db = require('../db');   // sólo para LEER requests/customers al validar el cobro (se corta en el paso 9)
-const repo = require('../modules/payment/persistence/payment-repository');
-const helpers = require('../utils/helpers');
-const providers = require('../modules/payment/providers');
-const paymentEvents = require('../modules/payment/contract/events');
-const lifecycle = require('../modules/payment/domain/payment-lifecycle');
-const { PaymentError } = require('../modules/payment/domain/errors');
-const fx = require('../modules/payment/domain/fx-policy');
-const { amountDue } = require('../modules/payment/domain/amount-due');
-const { chargeWithRetry } = require('../modules/payment/domain/charge-retry-policy');
+// Servicio interno de Payment. Nadie fuera del módulo lo importa: el resto usa `contract/index.js`.
+// Payment es una HOJA del grafo: recibe el monto ya resuelto en CLP y no lee ni escribe tablas de otros módulos.
+const repo = require('./persistence/payment-repository');
+const helpers = require('../../utils/helpers');
+const providers = require('./providers');
+const paymentEvents = require('./contract/events');
+const lifecycle = require('./domain/payment-lifecycle');
+const { PaymentError } = require('./domain/errors');
+const fx = require('./domain/fx-policy');
+const { chargeWithRetry } = require('./domain/charge-retry-policy');
 
 exports.get = (id) => {
   const p = repo.get(id);
@@ -17,24 +17,18 @@ exports.get = (id) => {
 exports.listForRequest = (rid) => repo.listForRequest(rid);
 exports.list = () => repo.list();
 
-// --- Contrato de consulta para otros módulos (nadie más toca payment_payments) ---
+// --- Consultas para otros módulos (nadie más toca payment_payments) ---
 exports.reassignCustomer = (fromId, toId) => repo.reassignCustomer(fromId, toId);
 exports.paidCountByCustomer = () => repo.paidCountByCustomer();
 exports.paidTotal = (currency) => repo.paidTotal(currency);
 exports.summaryRows = () => repo.summaryRows();
 exports.reportRows = (from, to) => repo.between(from || '0000', to || '9999');
+exports.toClp = (amount, currency) => fx.toClp(amount, currency);   // la conversión de moneda es secreto de Payment
 
-// --- Pasos de processPayment (cada uno con una sola razón de cambio) ---
+// --- Pasos de createPayment (cada uno con una sola razón de cambio) ---
 
-const loadPayable = (requestId, currency) => {
-  const request = db.prepare('SELECT * FROM requests WHERE id = ?').get(requestId);
-  const customer = request && db.prepare('SELECT * FROM customers WHERE id = ?').get(request.customer_id);
-  lifecycle.assertPayable({ request, customer, currency });
-  return { request, customer };
-};
-
-const insertPending = (request, customer, amount, currency, providerName) =>
-  repo.insertPending({ requestId: request.id, customerId: customer.id, amount, currency, provider: providerName, createdAt: helpers.now() });
+const insertPending = (cmd, amount, currency, providerName) =>
+  repo.insertPending({ requestId: cmd.requestId, customerId: cmd.customerId, amount, currency, provider: providerName, createdAt: helpers.now() });
 
 const recordOutcome = (pid, charge) =>
   repo.recordOutcome(pid, { status: lifecycle.statusFor(charge.status), providerRef: charge.providerRef, providerStatus: charge.providerStatus });
@@ -56,19 +50,21 @@ const publishOutcome = (base, charge) => {
   }
 };
 
-// Orquesta el cobro: validar -> calcular monto -> cobrar con reintentos -> registrar -> publicar evento -> avisar.
-exports.processPayment = async (requestId, token, currency) => {
-  currency = currency || 'CLP';
-  const { request, customer } = loadPayable(requestId, currency);
-  const amount = fx.round2(fx.fromClp(amountDue({ amount: request.amount, discount: request.discount, tier: customer.tier }), currency));
+// Cobra `cmd.amount` (CLP, ya con descuentos resueltos por quien lo pide) en la moneda indicada.
+//   cmd: { requestId, customerId, amount, currency?, token }
+// Orquesta: validar moneda -> convertir -> cobrar con reintentos -> registrar -> publicar el resultado.
+exports.createPayment = async (cmd) => {
+  const currency = cmd.currency || 'CLP';
+  lifecycle.assertCurrency(currency);
+  const amount = fx.round2(fx.fromClp(cmd.amount, currency));
 
   const provider = providers.active();
-  const pid = insertPending(request, customer, amount, currency, provider.name);
+  const pid = insertPending(cmd, amount, currency, provider.name);
   const { charge, attempts, lastError } = await chargeWithRetry(
-    provider, { amount, currency, token, metadata: { request_id: request.id, customer_id: customer.id } },
+    provider, { amount, currency, token: cmd.token, metadata: { request_id: cmd.requestId, customer_id: cmd.customerId } },
     (n) => helpers.log('reintento ' + provider.name + ' ' + n));
   repo.setAttempts(pid, attempts);
-  const base = { paymentId: pid, requestId: request.id, customerId: customer.id, amount, currency };
+  const base = { paymentId: pid, requestId: cmd.requestId, customerId: cmd.customerId, amount, currency };
   if (!charge) return failUnreachable(pid, base, provider.name, lastError);
 
   recordOutcome(pid, charge);
@@ -86,19 +82,21 @@ exports.refund = async (paymentId, amount) => {
   return exports.get(paymentId);
 };
 
-// Reintento de un cobro fallido (antes: SQL y reglas en el controller). Respeta los invariantes del ciclo de vida.
-exports.retryPayment = async (paymentId, token) => {
+// Primera mitad de un reintento: valida los invariantes y marca el pago anterior como reemplazado. Devuelve lo
+// que quien reintenta necesita para volver a cobrar (la solicitud y la moneda); el nuevo cobro lo pide Request.
+exports.beginRetry = (paymentId) => {
   const p = repo.get(paymentId);
   if (!p) throw new PaymentError('no existe', 404);
   if (!lifecycle.isRetryable(p)) throw new PaymentError('sólo pagos fallidos', 400);
   if (repo.countFailedForRequest(p.request_id) >= lifecycle.MAX_FAILED_PER_REQUEST) throw new PaymentError('máximo 3 reintentos', 429);
   repo.supersede(p.id);
-  return exports.processPayment(p.request_id, token, p.currency);
+  return { requestId: p.request_id, currency: p.currency };
 };
 
-// Confirmación tardía del proveedor (webhook): el adapter ya tradujo el evento al vocabulario del dominio.
-// Preserva el AS-IS: una confirmación tardía marca el pago y la solicitud, pero NO suma gasto ni factura (TD-011).
-exports.applyProviderEvent = async (evt) => {
+// Webhook entrante de un proveedor: el adapter traduce, Payment aplica. Preserva el AS-IS: una confirmación tardía
+// marca el pago y la solicitud, pero NO suma gasto ni factura (TD-011).
+exports.handleWebhook = async (providerName, body) => {
+  const evt = providers.byName(providerName).parseWebhook(body);
   const p = evt && repo.findByProviderRef(evt.providerRef);
   if (!p) return { ignored: true };
   if (evt.event === 'captured') {

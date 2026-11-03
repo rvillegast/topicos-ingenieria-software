@@ -90,7 +90,7 @@ Meta de cobertura (FF7): `paymentService`/futuro `modules/payment` ≥ 80 % lín
 | 6 ✅ | **SharedDataMutation → OwnershipBoundary (eventos)** | Payment publica `PaymentCaptured/Failed/Refunded`; **Request** marca `paid` y **Customer** actualiza `totalSpent`/tier por suscripción; Payment deja de escribir `requests`/`customers`. *Rompe el ciclo Request↔Payment* | — | **alto** | — |
 | 7 ✅ | **Ownership de tabla** | `PaymentRepository` única vía a `payment_payments` (renombre `payments` → `payment_payments`, `stripey_*` → `provider_*`); presentador HTTP de compatibilidad para los campos legacy | TD-010 | medio | **FF3** (ratchet: `payment_*`, `customer_*`) |
 | 8 ✅ | **Efectos laterales por eventos** | Notification e Integration suscritos al pago (aviso; factura ERP; evento CRM); se retiran las llamadas directas. *Rompe Payment↔Notification y Payment↔Integration* | TD-004 | medio | — |
-| 9 | **Orquestación en Request** | `Request.payRequest` descuenta, valida y llama `Payments.createPayment`; `paymentController` queda como adaptador HTTP delgado (sin SQL) | — | medio | FF6 (fronteras por `contract/`) |
+| 9 ✅ | **Orquestación en Request** | `Request.payRequest` descuenta, valida y llama `Payments.createPayment`; `paymentController` queda como adaptador HTTP delgado (sin SQL) | — | medio | FF6 (fronteras por `contract/`) |
 | 10 | **Romper Customer↔Notification** | bienvenida por `CustomerRegistered`; sync CRM sale de Customer (Integration lo hace con reintento) | TD-001 | medio | — |
 | 11 | **Romper Customer↔Request** | `open_requests` deja de calcularse en Customer: el gateway HTTP compone `CustomerDirectory.get` + `Requests.countOpen` (API composition). *Rompe los 2 ciclos restantes* | — | medio | **FF1** sobre todo el grafo |
 | 12 | **Reporting por proyecciones (alcance ampliado, si hay tiempo)** | `salesReport` lee `reporting_sales` alimentada por eventos; FX sale (usa `amountBase`) | TD-007 | medio | FF3 se amplía a `reporting_*` |
@@ -286,6 +286,30 @@ Ciclos restantes (3): `customerService ↔ notificationService`, `customerServic
 **Cambios de comportamiento observables de este paso:** (1) los textos de los avisos de pago sin nombre de proveedor (aprobado, ver arriba); (2) un fallo de Notification o del CRM ya no hace fallar el cobro (aislamiento del bus, TD-009). Todo lo demás es idéntico.
 
 **Hallazgo preservado (nuevo TD-012):** cuando el proveedor no responde, el cliente recibe el aviso "Pago pendiente — tu pago requiere una acción adicional", que no corresponde a una caída del proveedor.
+
+### 4.9. Resultado del paso 9 (medido)
+
+Payment pasa a ser una **hoja con contrato público** y Request pasa a ser quien decide si se paga y cuánto:
+
+- `modules/payment/contract/index.js` es la única puerta (más `contract/events` y el presentador HTTP de compatibilidad): `createPayment({ requestId, customerId, amount, currency?, token })`, `refund`, `beginRetry`, `handleWebhook`, consultas (`get`, `list`, `listForRequest`, `reportRows`, `paidTotal`…) y `toClp`. `paymentService` se movió a `modules/payment/service.js` (interno).
+- **`Request.payRequest`** (`services/requestService.js`) valida la solicitud (404/409/400, mismo orden que el AS-IS), consulta a Customer los datos mínimos (`pricingInfo`: estado y tier), calcula el monto con `modules/request/pricing.js` (descuento por tier y bono gold, TD-003) y le pide a Payment que cobre. `retryPayment` = `Payment.beginRetry` + `payRequest`.
+- Payment **ya no lee** `requests` ni `customers`, recibe el monto en CLP ya resuelto y sólo valida la moneda; la conversión FX sigue siendo suya.
+- `paymentController` es un adaptador HTTP sin SQL ni reglas: `POST /payments` delega en `Request.payRequest`.
+
+| Indicador | Antes (paso 8) | Después | Cómo se midió |
+|---|---|---|---|
+| Tablas ajenas que lee/escribe el módulo Payment | lecturas de `requests` y `customers` | **0** (sólo `payment_payments`, vía el repositorio) | `scripts/data-access.js` |
+| Archivos ajenos que tocan `customers` / `requests` (FF3, ratchet) | 11 / 4 | **10 / 3** (ratchet bajado) | `table-ownership.js` |
+| FF6 (fronteras por contrato) | no existía | **activa**: `only-via-contract` (entre módulos), `payment-only-via-contract` y `payment-is-leaf`; **0** violaciones; fallan ante un import a un interno o a `services/` | `arch.js`, `rules.test.js` |
+| Escenario S3 (cambiar modelo de Customer), heurística | 15 archivos / 7 áreas | **14 / 6** (Payment sale del radio) | `escenarios.csv` |
+| Escenario S1, heurística | 11 / 4 | 11 / 4 (sin cambio; falta el webhook y los reportes) | `escenarios.csv` |
+| SQL en `paymentController` y `modules/payment/service.js` | — | **0** | grep de sentencias |
+| Pruebas | 117 | **121** (contrato de Payment como hoja; pricing movido a Request) | `npm test` |
+| Suite de caracterización | 63 | 63 **sin modificar** (incluye el orden de validación 404/409/400) | `npm test` |
+
+**Sin cambios de comportamiento observables.** La política de precio (descuento y bono) se movió sin tocar sus fórmulas; las pruebas de caracterización de descuento y bono pasan intactas, y la prueba de `pricing` se movió de Payment a Request.
+
+**Lectura honesta:** FF6 es estricta para Payment y para las importaciones **entre carpetas `modules/`**; las dependencias entre los servicios legados (`services/`, `controllers/`) todavía no están bajo FF6 porque esos módulos no se han movido a `modules/` (Customer, Request, Notification). Los ciclos restantes (3) viven justamente ahí y se rompen en los pasos 10 y 11. Sigue habiendo SQL en otros controllers (`requestController`, `customerController`, `notificationController`, `integrationController`, `reportController`): fuera del slice de Payment.
 
 ## 5. Estimación y reparto (supuesto: 10–14 h del equipo, §16.3)
 

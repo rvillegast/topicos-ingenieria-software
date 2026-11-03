@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert');
-const { amountDue } = require('../../../../src/modules/payment/domain/amount-due');
+const { amountDue } = require('../../../src/modules/request/pricing');
 
 test('sin descuento ni bono el monto no cambia', () => assert.strictEqual(amountDue({ amount: 100000, discount: 0, tier: 'basic' }), 100000));
 test('aplica el descuento del tier', () => assert.strictEqual(amountDue({ amount: 100000, discount: 0.1, tier: 'silver' }), 90000));

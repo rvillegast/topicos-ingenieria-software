@@ -1,8 +1,7 @@
 const db = require('../db');
 const helpers = require('../utils/helpers');
 const config = require('../platform/config');
-const paymentService = require('./paymentService');
-const providers = require('../modules/payment/providers');
+const payments = require('../modules/payment/contract');
 
 // Vocabulario del CRM para el resultado de un pago (traducción desde el vocabulario neutro del dominio).
 const CRM_PAYMENT_TYPE = { captured: 'succeeded', declined: 'failed', action_required: 'requires_action', unknown: 'unknown' };
@@ -30,6 +29,6 @@ exports.handleCrmWebhook = (body) => {
 };
 
 // Webhook entrante del proveedor de pagos: el adapter traduce y Payment aplica (esta capa no toca sus tablas).
-exports.handleStripeyWebhook = (body) => paymentService.applyProviderEvent(providers.byName('stripey').parseWebhook(body));
+exports.handleStripeyWebhook = (body) => payments.handleWebhook('stripey', body);
 
 exports.logs = () => db.prepare('SELECT * FROM integration_logs ORDER BY id DESC LIMIT 100').all();

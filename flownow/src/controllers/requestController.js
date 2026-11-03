@@ -2,7 +2,7 @@ const db = require('../db');
 const helpers = require('../utils/helpers');
 const requestService = require('../services/requestService');
 const customerService = require('../services/customerService');
-const paymentService = require('../services/paymentService');
+const payments = require('../modules/payment/contract');
 const legacy = require('../modules/payment/http/legacy-presenter');
 
 exports.create = async (req, res) => {
@@ -38,8 +38,8 @@ exports.cancel = async (req, res) => {
   const r = db.prepare('SELECT * FROM requests WHERE id = ?').get(+req.params.id);
   if (!r) return res.status(404).json({ error: 'no existe' });
   if (r.status === 'done' || r.status === 'cancelled') return res.status(400).json({ error: 'no cancelable' });
-  const paid = paymentService.listForRequest(r.id).filter((p) => p.status === 'paid');
-  for (const p of paid) await paymentService.refund(p.id);
+  const paid = payments.listForRequest(r.id).filter((p) => p.status === 'paid');
+  for (const p of paid) await payments.refund(p.id);
   db.prepare("UPDATE requests SET status = 'cancelled' WHERE id = ?").run(r.id);
   db.prepare('UPDATE customers SET open_requests = open_requests - 1 WHERE id = ?').run(r.customer_id);
   await helpers.sendEmail(r.customer_id, 'Solicitud cancelada', 'Tu solicitud #' + r.id + ' fue cancelada.');

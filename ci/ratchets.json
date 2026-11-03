@@ -13,8 +13,8 @@
     "services/reportService.js"
   ],
   "tableForeignFiles": {
-    "customers": 11,
-    "requests": 4,
+    "customers": 10,
+    "requests": 3,
     "notifications": 3,
     "integration_logs": 1,
     "users": 0

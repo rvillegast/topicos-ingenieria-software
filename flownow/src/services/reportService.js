@@ -1,6 +1,5 @@
 const db = require('../db');
-const fx = require('../modules/payment/domain/fx-policy');
-const paymentService = require('./paymentService');
+const payments = require('../modules/payment/contract');
 const legacy = require('../modules/payment/http/legacy-presenter');
 const helpers = require('../utils/helpers');
 
@@ -9,7 +8,7 @@ const helpers = require('../utils/helpers');
 function salesRows(from, to) {
   const reqs = new Map(db.prepare('SELECT id, title, discount FROM requests').all().map((r) => [r.id, r]));
   const custs = new Map(db.prepare('SELECT id, name, tier, email FROM customers').all().map((c) => [c.id, c]));
-  return paymentService.reportRows(from, to)
+  return payments.reportRows(from, to)
     .filter((p) => reqs.has(p.request_id) && custs.has(p.customer_id))   // equivale al JOIN interno
     .map((p) => { const r = reqs.get(p.request_id); const c = custs.get(p.customer_id);
       return { ...legacy.reportRow(p), title: r.title, discount: r.discount, customer_id: c.id, customer: c.name, tier: c.tier, email: c.email }; });
@@ -23,12 +22,12 @@ exports.salesReport = (from, to, format) => {
   for (const x of rows) {
     if (x.status === 'paid' || x.status === 'refunded') {
       // TEMP(TD-007): convierte con la política de Payment; debe venir como monto base en el evento de pago (paso 12)
-      const clp = fx.toClp(x.amount, x.currency);
+      const clp = payments.toClp(x.amount, x.currency);
       total += clp; paidCount++;
       byTier[x.tier] = (byTier[x.tier] || 0) + clp;
       byProvider[x.provider] = (byProvider[x.provider] || 0) + clp;
       byCurrency[x.currency] = (byCurrency[x.currency] || 0) + x.amount;
-      refunded += fx.toClp(x.refunded_amount, x.currency);
+      refunded += payments.toClp(x.refunded_amount, x.currency);
     } else if (x.status === 'failed' || x.status === 'error') failedCount++;
   }
   if (format === 'csv') return helpers.toCsv(rows);
@@ -37,7 +36,7 @@ exports.salesReport = (from, to, format) => {
 
 // Reporte de clientes (casi copia del de ventas)
 exports.customersReport = (format) => {
-  const paidByCustomer = paymentService.paidCountByCustomer();
+  const paidByCustomer = payments.paidCountByCustomer();
   const rows = db.prepare(`SELECT c.id, c.name, c.email, c.tier, c.status, c.total_spent,
     (SELECT COUNT(*) FROM requests r WHERE r.customer_id = c.id) requests
     FROM customers c ORDER BY c.total_spent DESC`).all().map((c) => ({ ...c, paid_payments: paidByCustomer.get(c.id) || 0 }));

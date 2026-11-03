@@ -1,0 +1,7 @@
+file,line,tag,managed,ticket,text
+"flownow/src/modules/integration/subscriptions.js",24,TODO,yes,TD-004,"helpers.log('ERP caído, factura pendiente', 'erp'); // TODO(TD-004): cola de reintentos para facturas"
+"flownow/src/modules/payment/providers/index.js",9,TODO,yes,TD-005,"// Proveedor con el que se REEMBOLSA. TODO(TD-005): PayFast no implementa reembolsos; el AS-IS reembolsaba"
+"flownow/src/modules/payment/domain/fx-policy.js",4,TEMP,yes,TD-002,"// TEMP(TD-002): las tasas son valores fijos de configuración hasta integrar un servicio de FX."
+"flownow/src/modules/request/pricing.js",9,HACK,yes,TD-003,"if (tier === 'gold' && due > GOLD_BONUS_THRESHOLD) due = due - GOLD_BONUS; // HACK(TD-003): bono comercial acordado por teléfono con ventas"
+"flownow/src/services/customerService.js",22,FIXME,yes,TD-001,"helpers.log('falló sync hubcrm: ' + e.message, 'hubcrm'); // FIXME(TD-001): reintentar luego, hoy se pierde el contacto"
+"flownow/src/services/reportService.js",24,TEMP,yes,TD-007,"// TEMP(TD-007): convierte con la política de Payment; debe venir como monto base en el evento de pago (paso 12)"

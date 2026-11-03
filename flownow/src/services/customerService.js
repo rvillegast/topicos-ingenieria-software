@@ -42,6 +42,9 @@ exports.update = (id, data) => {
   return exports.get(id);
 };
 
+// Datos de elegibilidad y precio que Request necesita para cobrar (contrato de Customer; no expone la tabla).
+exports.pricingInfo = (id) => db.prepare('SELECT status, tier FROM customers WHERE id = ?').get(id);
+
 exports.isActive = (id) => { const c = db.prepare('SELECT status FROM customers WHERE id = ?').get(id); return !!c && c.status === 'active'; };
 
 function httpError(status, message) { return Object.assign(new Error(message), { status }); }

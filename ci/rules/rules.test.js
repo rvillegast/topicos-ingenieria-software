@@ -141,3 +141,36 @@ test('FF3: una tabla sin owner declarado es una violación', () => {
   const r = run('table-ownership.js', src, ...own(d, { customers: 0 }));
   assert.strictEqual(r.status, 1); assert.match(r.stderr, /huerfana.*sin owner/);
 });
+
+// ---- FF6: fronteras por contrato ----
+const mod = (d, rel, text) => write(d, 'src/' + rel, text);
+
+test('FF6 only-via-contract: pasa si un módulo importa el contract de otro; falla si importa un interno', () => {
+  const d = tmp();
+  mod(d, 'modules/payment/contract/events.js', 'exports.X = 1;');
+  mod(d, 'modules/payment/domain/rules.js', 'exports.y = 2;');
+  mod(d, 'modules/request/a.js', "module.exports = require('../payment/contract/events');");
+  assert.strictEqual(arch(d, 0).status, 0);
+  mod(d, 'modules/request/b.js', "module.exports = require('../payment/domain/rules');");
+  const r = arch(d, 0);
+  assert.strictEqual(r.status, 1); assert.match(r.stderr, /only-via-contract/);
+});
+test('FF6 payment-only-via-contract: desde services/ o controllers/ sólo se entra por contract/', () => {
+  const d = tmp();
+  mod(d, 'modules/payment/contract/index.js', 'exports.a = 1;');
+  mod(d, 'modules/payment/persistence/repo.js', 'exports.b = 1;');
+  mod(d, 'services/s.js', "module.exports = require('../modules/payment/contract');");
+  assert.strictEqual(arch(d, 0).status, 0);
+  mod(d, 'controllers/c.js', "module.exports = require('../modules/payment/persistence/repo');");
+  const r = arch(d, 0);
+  assert.strictEqual(r.status, 1); assert.match(r.stderr, /payment-only-via-contract/);
+});
+test('FF6 payment-is-leaf: Payment no puede depender de services/, controllers/ ni de otros módulos', () => {
+  const d = tmp();
+  mod(d, 'modules/payment/service.js', "module.exports = 1;");
+  assert.strictEqual(arch(d, 0).status, 0);
+  mod(d, 'services/requestService.js', 'module.exports = 1;');
+  mod(d, 'modules/payment/service.js', "module.exports = require('../../services/requestService');");
+  const r = arch(d, 0);
+  assert.strictEqual(r.status, 1); assert.match(r.stderr, /payment-is-leaf/);
+});
