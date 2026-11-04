@@ -11,8 +11,8 @@ Reglas de arquitectura y configuración del quality gate. Diseño completo en [`
 | FF4 | Sin SATD no gestionada | `scripts/satd-scan.sh --gate` + `rules/ledger-consistency.js` | `../scripts/`, `rules/ledger-consistency.js` | ✅ implementada |
 | FF5 | Sin URLs/secretos hard-coded | script portable (+ gitleaks para el historial, pendiente) | `rules/no-hardcoded.js` | ✅ implementada |
 | FF6 | Dependencias prohibidas / sólo vía `contract/` | dependency-cruiser vía `rules/arch.js` | `dependency-cruiser.cjs` | ✅ implementada (módulos y Payment) |
-| FF7 | Pruebas críticas y cobertura | `node:test` + `rules/coverage-threshold.js` | `rules/` | diseñada |
-| FF8 | La complejidad no aumenta | lizard + ratchet | `lizard-ratchet.json` | diseñada |
+| FF7 | Pruebas críticas y cobertura | `node:test` (lcov) + `rules/coverage-threshold.js` | `coverage-thresholds.json`, `ratchets.json` (`minTests`) | ✅ implementada (Payment ≥80 %, módulos ≥80 %, plataforma ≥80 %; no se pueden borrar pruebas) |
+| FF8 | La complejidad no aumenta | lizard 1.24.3 + ratchet | `rules/complexity-ratchet.js`, `ratchets.json` (`ccnLegacy`) | ✅ implementada (`modules/` y `platform/`: CCN ≤10 sin excepciones; legado: ratchet) |
 
 Ejecutar localmente: `ci/run-rules.sh` (reglas + pruebas). Quality gate del Anexo E: `ci/quality-gate.sh` (tabla de criterios, falla si alguno no se cumple). Demostración de fallo: `ci/prove-rules-fail.sh` (inyecta una violación por regla en una copia del código y exige que la regla falle; la copia limpia debe pasar) y `node --test "ci/rules/*.test.js"`.
 

@@ -174,3 +174,23 @@ test('FF6 payment-is-leaf: Payment no puede depender de services/, controllers/ 
   const r = arch(d, 0);
   assert.strictEqual(r.status, 1); assert.match(r.stderr, /payment-is-leaf/);
 });
+
+// ---- FF7 / FF8 (lógica pura) ----
+const cx = require('./complexity-ratchet');
+const cov = require('./coverage-threshold');
+
+test('FF8: una función nueva con CCN > 10 en el legado falla; en modules/ falla siempre; una que mejora obliga a fijar el avance', () => {
+  assert.deepStrictEqual(cx.evaluate([{ file: 'services/a.js', fn: 'f', ccn: 11 }], { ccnLegacy: {} }).length, 1);
+  assert.deepStrictEqual(cx.evaluate([{ file: 'modules/x/a.js', fn: 'f', ccn: 11 }], { ccnLegacy: { 'modules/x/a.js::f': 11 } }).length, 1);
+  assert.deepStrictEqual(cx.evaluate([{ file: 'services/a.js', fn: 'f', ccn: 12 }], { ccnLegacy: { 'services/a.js::f': 12 } }), []);
+  assert.deepStrictEqual(cx.evaluate([{ file: 'services/a.js', fn: 'f', ccn: 13 }], { ccnLegacy: { 'services/a.js::f': 12 } }).length, 1);
+  assert.match(cx.evaluate([{ file: 'services/a.js', fn: 'f', ccn: 9 }], { ccnLegacy: { 'services/a.js::f': 12 } })[0], /quitar de ccnLegacy/);
+});
+
+test('FF7: falla con cobertura bajo el umbral o con menos pruebas que el mínimo', () => {
+  const files = [{ file: 'modules/payment/s.js', lf: 100, lh: 79 }];
+  assert.strictEqual(cov.evaluate(files, 10, { 'modules/payment/': 80 }, 10).problems.length, 1);
+  assert.strictEqual(cov.evaluate([{ file: 'modules/payment/s.js', lf: 100, lh: 80 }], 10, { 'modules/payment/': 80 }, 10).problems.length, 0);
+  assert.strictEqual(cov.evaluate([{ file: 'modules/payment/s.js', lf: 100, lh: 100 }], 9, { 'modules/payment/': 80 }, 10).problems.length, 1);
+  assert.strictEqual(cov.parseLcov('SF:src/modules/payment/s.js\nLF:10\nLH:9\nend_of_record\n', '/repo/flownow/src')[0].file, 'modules/payment/s.js');
+});

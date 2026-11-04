@@ -31,6 +31,8 @@ RULES=(
   "FF2b|nombre de proveedor en archivo nuevo|services/menciona-proveedor.js|module.exports = 'cobrar con stripey';|node ci/rules/provider-names.js $S"
   "FF4|TODO sin ticket del ledger|services/deuda-oculta.js|// TODO: arreglar esto despues|scripts/satd-scan.sh --gate $S"
   "FF4|marcador que cita un TD inexistente|services/td-fantasma.js|// TODO(TD-999): no existe en el ledger|node ci/rules/ledger-consistency.js docs/E5-debt-ledger.md $S"
+  "FF8|función nueva con CCN > 10 (legado)|services/compleja.js|function f(a){ if(a===1) return 1; if(a===2) return 2; if(a===3) return 3; if(a===4) return 4; if(a===5) return 5; if(a===6) return 6; if(a===7) return 7; if(a===8) return 8; if(a===9) return 9; if(a===10) return 10; return 0; }\nmodule.exports = f;|node ci/rules/complexity-ratchet.js $S"
+  "FF8|función con CCN > 10 en el alcance intervenido|modules/request/compleja.js|function f(a){ if(a===1) return 1; if(a===2) return 2; if(a===3) return 3; if(a===4) return 4; if(a===5) return 5; if(a===6) return 6; if(a===7) return 7; if(a===8) return 8; if(a===9) return 9; if(a===10) return 10; return 0; }\nmodule.exports = f;|node ci/rules/complexity-ratchet.js $S"
   "FF5|URL hard-coded|services/url-fija.js|module.exports = 'https://api.ejemplo.com/v1/x';|node ci/rules/no-hardcoded.js $S"
   "FF5|clave sk_live en el código|services/clave.js|module.exports = 'sk_live_abc123';|node ci/rules/no-hardcoded.js $S"
 )
@@ -42,6 +44,7 @@ expect pass "FF3 ownership"                       node ci/rules/table-ownership.
 expect pass "FF2b nombres de proveedor"           node ci/rules/provider-names.js "$S"
 expect pass "FF4 SATD gate"                       scripts/satd-scan.sh --gate "$S"
 expect pass "FF5 hard-coded"                      node ci/rules/no-hardcoded.js "$S"
+expect pass "FF8 complejidad"                     node ci/rules/complexity-ratchet.js "$S"
 
 echo; echo "== Una violación por vez (cada regla debe FALLAR)"
 for spec in "${RULES[@]}"; do
@@ -52,6 +55,14 @@ for spec in "${RULES[@]}"; do
   # shellcheck disable=SC2086
   expect fail "$ff · $name" $cmd
 done
+
+# FF7: cobertura baja y pruebas eliminadas (lcov sintético; el umbral y el mínimo de pruebas son los reales)
+printf 'SF:src/modules/payment/service.js\nLF:100\nLH:20\nend_of_record\n' > "$WORK/bajo.lcov"
+printf 'SF:src/modules/payment/service.js\nLF:100\nLH:100\nend_of_record\nSF:src/modules/request/pricing.js\nLF:10\nLH:10\nend_of_record\nSF:src/platform/events.js\nLF:10\nLH:10\nend_of_record\n' > "$WORK/alto.lcov"
+MIN=$(node -p "require('./ci/ratchets.json').minTests")
+expect pass "FF7 cobertura suficiente y pruebas completas" node ci/rules/coverage-threshold.js --lcov "$WORK/alto.lcov" --tests "$MIN"
+expect fail "FF7 · cobertura de Payment bajo el 80 %"      node ci/rules/coverage-threshold.js --lcov "$WORK/bajo.lcov" --tests "$MIN"
+expect fail "FF7 · se eliminaron pruebas"                  node ci/rules/coverage-threshold.js --lcov "$WORK/alto.lcov" --tests "$((MIN-1))"
 
 echo
 if [[ $bad -eq 0 ]]; then echo "OK: todas las reglas pasan en limpio y fallan ante su violación"; else echo "FALLA: alguna regla no se comporta como se esperaba"; fi

@@ -18,5 +18,10 @@
     "notifications": 3,
     "integration_logs": 1,
     "users": 0
-  }
+  },
+  "ccnLegacy": {
+    "controllers/requestController.js::exports.bulkCreate": 12,
+    "services/reportService.js::exports.salesReport": 12
+  },
+  "minTests": 125
 }

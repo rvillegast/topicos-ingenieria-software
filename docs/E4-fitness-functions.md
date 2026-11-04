@@ -29,7 +29,7 @@ flowchart LR
 | **FF5** | Sin URLs/secretos/valores de ambiente hard-coded | ADR-005 | script portable `ci/rules/no-hardcoded.js` (regex; equivalente a una regla Semgrep, §12) + gitleaks para el historial (pendiente) | `ci/rules/no-hardcoded.js` ✅ **implementada** (paso 2) | **0** fuera de `platform/config` (defaults de desarrollo) y `test/`; gitleaks sobre el historial del PR | `const KEY = 'sk_live_…'` o `fetch('https://api.x.com')` |
 | **FF6** | Dependencias prohibidas bloquean el merge | ADR-004 | dependency-cruiser (`only-via-contract`, `payment-is-leaf`, `no-sql-in-http`) | `ci/dependency-cruiser.cjs` | entre módulos sólo se importa `modules/<m>/contract`; Payment no importa módulos; `http/` no importa `db`; **0** violaciones | `request` importa `payment/domain/PaymentLifecycle` |
 | **FF7** | Pruebas críticas y contratos siguen pasando | §11, E3 | `node:test` con cobertura + `ci/rules/coverage-threshold.js` | `ci/rules/` | caracterización + contrato verdes; cobertura de `modules/payment` ≥ 80 % líneas | borrar una prueba de Payment o romper un schema de evento |
-| **FF8** | La complejidad no aumenta | §8 | lizard 1.24.3 + ratchet | `ci/lizard-ratchet.json` | CCN máx. del alcance intervenido ≤ 10; en el resto no puede subir (AS-IS máx.: 26) | función nueva con CCN > 10 |
+| **FF8** | La complejidad no aumenta | §8 | lizard 1.24.3 + ratchet | `ci/rules/complexity-ratchet.js` + `ratchets.json` (`ccnLegacy`) | CCN máx. del alcance intervenido ≤ 10; en el resto no puede subir (AS-IS máx.: 26) | función nueva con CCN > 10 |
 
 Son **8 reglas automatizadas** (exigidas ≥3). FF1–FF4 cubren las cuatro de §12.2 de forma directa; FF5, FF6, FF7 y FF8 cubren las demás (valores de ambiente, dependencias prohibidas, contratos y pruebas, complejidad).
 
@@ -74,7 +74,8 @@ rules:
 | FF2b | ✅ con ratchet (paso 4) | `ci/rules/provider-names.js`: lista legada en `ci/ratchets.json` (5 archivos tras el paso 8) que sólo puede encoger |
 | FF3 | ✅ implementada (paso 7) | `ci/rules/table-ownership.js` + `ci/ownership.json`: `payment_payments` estricta (0 accesos ajenos; antes 5); resto con ratchet en `ci/ratchets.json`. `rules.test.js` demuestra que falla ante acceso ajeno, ratchet que sube o tabla sin owner |
 | FF6 | ✅ implementada (paso 9) | `only-via-contract`, `payment-only-via-contract`, `payment-is-leaf` en `ci/dependency-cruiser.cjs` (vía `arch.js`); 0 violaciones; `rules.test.js` demuestra que fallan. Alcance: entre carpetas `modules/` y todo lo que toque a Payment; se amplía a medida que Customer, Request y Notification pasan a `modules/` |
-| FF7, FF8 | diseñadas | cierre |
+| FF7 | ✅ implementada: `ci/rules/coverage-threshold.js` (Payment, `modules/` y `platform/` ≥80 % de líneas; `minTests` impide borrar pruebas) | medido hoy: 100 % / 99.6 % / 100 %; 125 pruebas |
+| FF8 | ✅ implementada: `ci/rules/complexity-ratchet.js` (`modules/` y `platform/`: CCN ≤10 sin excepciones; legado en ratchet) | 2 funciones legadas con CCN 12 (`bulkCreate`, `salesReport`); máx. AS-IS 26 → 12 |
 
 Ejecución local de todo lo disponible: `ci/run-rules.sh` (mismo orden que el pipeline). Las demostraciones de fallo corren con `node --test "ci/rules/*.test.js"`.
 
@@ -114,7 +115,7 @@ Los jobs de una misma etapa corren en paralelo; una etapa no arranca si la anter
 
 ### 3.1. Diseño del workflow
 
-> **Activo** en `.github/workflows/quality.yml` (versión ejecutable, con las reglas que existen hoy: FF1–FF6; el borrador de abajo conserva el diseño completo con FF7/FF8, Semgrep y gitleaks, que siguen pendientes). Lo verificado localmente es que cada paso corre con `ci/quality-gate.sh` y `ci/prove-rules-fail.sh`; la primera ejecución real en GitHub Actions aún no se ha observado.
+> **Activo** en `.github/workflows/quality.yml` (versión ejecutable, con las reglas que existen hoy: FF1–FF8; el borrador de abajo conserva el diseño completo con FF7/FF8, Semgrep y gitleaks, que siguen pendientes). Lo verificado localmente es que cada paso corre con `ci/quality-gate.sh` y `ci/prove-rules-fail.sh`; la primera ejecución real en GitHub Actions aún no se ha observado.
 
 ```yaml
 # .github/workflows/quality.yml  (se activa cuando FF1–FF8 existen; ver E3)

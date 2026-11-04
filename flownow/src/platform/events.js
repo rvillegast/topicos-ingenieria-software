@@ -44,22 +44,26 @@ function validate(type, version, payload) {
   }
 }
 
-exports.publish = async (type, payload, { schemaVersion = 1 } = {}) => {
+function validateArgs(type, payload, schemaVersion) {
   if (typeof type !== 'string' || !type) throw new TypeError('type debe ser un string no vacío');
   if (!Number.isInteger(schemaVersion) || schemaVersion < 1) throw new TypeError('schemaVersion debe ser un entero >= 1');
   if (payload === null || typeof payload !== 'object' || Array.isArray(payload)) throw new TypeError('payload debe ser un objeto');
   validate(type, schemaVersion, payload);
+}
 
+function recordFailure(event, name, e) {
+  failures.push({ eventId: event.id, type: event.type, handler: name, error: e && e.message ? e.message : String(e), at: event.occurredAt });
+  if (failures.length > MAX_FAILURES) failures.shift();
+  logger(`consumidor "${name}" falló con ${event.type}: ${e && e.message}`);
+}
+
+exports.publish = async (type, payload, { schemaVersion = 1 } = {}) => {
+  validateArgs(type, payload, schemaVersion);
   const event = Object.freeze({ id: `evt_${++counter}`, type, schemaVersion, occurredAt: new Date().toISOString(), payload });
   const result = { id: event.id, delivered: 0, failed: 0 };
   for (const { name, fn } of [...(handlers.get(type) || [])]) {   // copia: suscribirse durante la entrega no altera esta ronda
     try { await fn(event); result.delivered++; }
-    catch (e) {
-      result.failed++;
-      failures.push({ eventId: event.id, type, handler: name, error: e && e.message ? e.message : String(e), at: event.occurredAt });
-      if (failures.length > MAX_FAILURES) failures.shift();
-      logger(`consumidor "${name}" falló con ${type}: ${e && e.message}`);
-    }
+    catch (e) { result.failed++; recordFailure(event, name, e); }
   }
   return result;
 };

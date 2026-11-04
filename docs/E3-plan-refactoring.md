@@ -345,6 +345,13 @@ El alta de cliente deja de llamar al CRM y a Notification: **Customer publica `C
 
 **Sin cambios de comportamiento observables:** el JSON de los endpoints de cliente es idéntico (mismo campo, mismo valor). Lectura honesta: la métrica heurística de escenarios no se movió; el beneficio de este paso es estructural (gate "ciclos = 0" del Anexo E), no de radio de cambio. La columna `customers.open_requests` sigue existiendo y la escriben Request y el merge (ownership de `customers` todavía en ratchet).
 
+### 4.12. FF7 y FF8 (medido)
+
+- **`events.publish` se partió** (`validateArgs` + `recordFailure`) para bajar de CCN 12 a ≤10 sin cambiar su comportamiento (las 18 pruebas del bus siguen verdes). Con eso todo `modules/` y `platform/` cumple CCN ≤10.
+- **FF8:** funciones con CCN > 10: 3 → **2** (`requestController.bulkCreate` y `reportService.salesReport`, ambas 12 y fuera del slice; quedan en el ratchet `ccnLegacy`). Una función nueva sobre 10 o cualquier función de `modules/`/`platform/` sobre 10 rompe el build.
+- **FF7:** cobertura de líneas medida con el reporter `lcov` de `node:test`: `modules/payment/` 100 %, `modules/` 99.6 %, `platform/` 100 % (umbral 80 %); 125 pruebas (`minTests`). Lectura honesta: la cobertura de líneas es alta porque la suite de caracterización recorre el flujo completo; no mide calidad de las aserciones.
+- `ci/prove-rules-fail.sh` ahora demuestra 15 fallos (incluye FF7 por cobertura baja y por pruebas eliminadas, y FF8 en legado y en alcance intervenido).
+
 ## 5. Estimación y reparto (supuesto: 10–14 h del equipo, §16.3)
 
 ```mermaid

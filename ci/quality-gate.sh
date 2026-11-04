@@ -36,6 +36,12 @@ check "Ownership de tablas (FF3)" "ok" "$([[ $o -eq 0 ]] && echo ok || echo viol
 run node ci/rules/provider-names.js $SRC;                                p=$?; [[ $p -eq 0 ]] && rules_ok=$((rules_ok+1))
 check "Proveedor sólo en adapters (FF2b)" "ok" "$([[ $p -eq 0 ]] && echo ok || echo violado)" $p
 
+run node ci/rules/complexity-ratchet.js $SRC;                            c=$?; [[ $c -eq 0 ]] && rules_ok=$((rules_ok+1))
+check "Complejidad no aumenta (FF8)" "ok" "$([[ $c -eq 0 ]] && echo ok || echo sube)" $c
+
+run node ci/rules/coverage-threshold.js;                                 v=$?; [[ $v -eq 0 ]] && rules_ok=$((rules_ok+1))
+check "Cobertura crítica y pruebas (FF7)" "ok" "$([[ $v -eq 0 ]] && echo ok || echo baja)" $v
+
 check "Fitness functions que pasan" ">=3" "$rules_ok" $(( rules_ok < 3 ))
 
 adrs=$(ls docs/adr/ADR-[0-9]*.md 2>/dev/null | wc -l | tr -d ' ')

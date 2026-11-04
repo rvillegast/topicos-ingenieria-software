@@ -1,0 +1,4 @@
+{
+  "_nota": "FF7: cobertura mínima de líneas por alcance (rutas relativas a flownow/src). Sube con el tiempo, no se baja para hacer pasar un cambio.",
+  "lineas": { "modules/payment/": 80, "modules/": 80, "platform/": 80 }
+}

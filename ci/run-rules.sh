@@ -11,6 +11,8 @@ step "FF1/FF2 · ciclos (ratchet) y SDK sólo en su adapter" node ci/rules/arch.
 step "FF3 · ownership de tablas (enforced + ratchet)" node ci/rules/table-ownership.js flownow/src
 step "FF2b · nombres de proveedor sólo en adapters (ratchet)" node ci/rules/provider-names.js flownow/src
 step "FF5 · sin URLs/secretos/valores fijos"        node ci/rules/no-hardcoded.js flownow/src
+step "FF8 · la complejidad no aumenta (ratchet)"    node ci/rules/complexity-ratchet.js flownow/src
+step "FF7 · cobertura crítica y pruebas completas"   node ci/rules/coverage-threshold.js
 step "Reglas: demostración de fallo"                node --test "ci/rules/*.test.js"
 step "Pruebas de FlowNow (caracterización)"         bash -c 'cd flownow && npm test'
 echo; [[ $fail -eq 0 ]] && echo "OK: todas las reglas pasan" || echo "FALLA: alguna regla no pasa"
