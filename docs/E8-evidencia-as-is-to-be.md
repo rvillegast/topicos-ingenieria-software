@@ -72,7 +72,7 @@ Se creó una rama descartable, se agregó un proveedor nuevo con el mismo puerto
 | "Cada dato tiene un único owner" | 5 de 6 tablas con escritores múltiples | ADR-002 | `payment_payments` + repositorio | FF3 estricta sólo para Payment | ⚠ parcial: 1 de 6 tablas estricta; 4 en ratchet |
 | "El comportamiento se preservó" | cobertura de pagos 18,9 % | E3 (caracterización primero) | `test/characterization/*` | misma suite verde antes/después de cada paso (63 pruebas) | ✅ demostrado a nivel de API HTTP; ver cambios aprobados en E3 |
 | "La deuda está gestionada, no escondida" | 8 SATD sin ticket | ADR-005 | `E5-debt-ledger.md`, comentarios `TD-xxx` | FF4 = 0; ledger consistente | ✅ (TD-001/2/5/6/7 y 3 aún no cerradas, sólo gestionadas) |
-| "Un agente de IA no reintroduce el problema" | cambios locales por prompt sin frontera | ADR-005, E7 | intents + CI + CODEOWNERS | FF1–FF8 + `prove-rules-fail.sh` (15 casos) | ⚠ el diseño está, pero el workflow aún no corrió en GitHub y la branch protection no está configurada |
+| "Un agente de IA no reintroduce el problema" | cambios locales por prompt sin frontera | ADR-005, E7 | intents + CI + CODEOWNERS | FF1–FF8 + `prove-rules-fail.sh` (15 casos) | ✅ el workflow corrió en GitHub Actions (run 41811778099 sobre `main` (`dff4573`), 5 jobs en verde); ⚠ la branch protection no está configurada, así que hoy nada impide un push directo a `main` |
 
 ## Qué queda fuera o sin demostrar
 
@@ -81,7 +81,7 @@ Se creó una rama descartable, se agregó un proveedor nuevo con el mismo puerto
 3. **Ownership parcial** (ver matriz) y **fan-in de `db`/`helpers` sin mejorar**.
 4. **TD-006:** la clave `sk_live_…` sigue en el historial de git y de GitHub: hay que rotarla; FF5 no revisa historial (gitleaks pendiente).
 5. **ADRs en "Propuesto"** y reglas de negocio con duda abierta (TD-003, TD-011, TD-012).
-6. **El workflow de CI y la branch protection no se han ejercitado en GitHub.**
+6. **La branch protection no está configurada** (el workflow sí corrió en verde en `main`, pero ningún check es todavía requerido; no se observó cómo bloquea un PR).
 
 ## Conclusión (§16.1)
 

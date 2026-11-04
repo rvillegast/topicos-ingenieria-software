@@ -115,7 +115,7 @@ Los jobs de una misma etapa corren en paralelo; una etapa no arranca si la anter
 
 ### 3.1. Diseño del workflow
 
-> **Activo** en `.github/workflows/quality.yml` (versión ejecutable, con las reglas que existen hoy: FF1–FF8; el borrador de abajo conserva el diseño completo con FF7/FF8, Semgrep y gitleaks, que siguen pendientes). Lo verificado localmente es que cada paso corre con `ci/quality-gate.sh` y `ci/prove-rules-fail.sh`; la primera ejecución real en GitHub Actions aún no se ha observado.
+> **Activo** en `.github/workflows/quality.yml` (versión ejecutable, con las reglas que existen hoy: FF1–FF8; el borrador de abajo conserva el diseño completo con FF7/FF8, Semgrep y gitleaks, que siguen pendientes). Lo verificado localmente es que cada paso corre con `ci/quality-gate.sh` y `ci/prove-rules-fail.sh`; la primera ejecución real en GitHub Actions (run 41811778099 sobre `main` (`dff4573`), 5 jobs en verde) se observó el 2026-11-04. Falta ver el workflow bloqueando un PR, que requiere configurar la branch protection.
 
 ```yaml
 # .github/workflows/quality.yml  (se activa cuando FF1–FF8 existen; ver E3)

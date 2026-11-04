@@ -9,5 +9,5 @@ Consequences: Todo hack nuevo exige ticket; el costo de dejar deuda es visible. 
 Trade-offs: Fricción al escribir comentarios; se acepta porque es la finalidad de la regla.
 Evidence / fitness function: FF4 (`satd-scan.sh --gate`), FF5, `ci/quality-gate.sh`; E5 estado final `UnmanagedSATD = 0` en el alcance intervenido.
 Affected modules: todos (política transversal).
-Verificación (TO-BE medido): SATD no gestionada 8 → 0; quality gate del Anexo E APROBADO (`docs/baseline/to-be/quality-gate.md`); 15 casos de fallo demostrados. Limitaciones: el workflow de GitHub Actions aún no se ha ejecutado, la branch protection no está configurada y gitleaks sobre el historial está pendiente (TD-006).
+Verificación (TO-BE medido): SATD no gestionada 8 → 0; quality gate del Anexo E APROBADO (`docs/baseline/to-be/quality-gate.md`); 15 casos de fallo demostrados. Limitaciones: el workflow de GitHub Actions corrió en verde en `main` (2026-11-04) pero nunca se ha visto bloquear un PR, la branch protection no está configurada y gitleaks sobre el historial está pendiente (TD-006).
 Date: 2026-11-01 (aceptado 2026-11-04)

@@ -9,7 +9,7 @@
 | E1 | Diagnóstico AS-IS | [E1](E1-diagnostico-as-is.md) · [baseline](baseline/as-is/resumen.md) | Diagnóstico 10 % | **Medido** (C4 AS-IS, 5 escenarios, ciclos, ownership) |
 | E2 | Arquitectura TO-BE (Parnas) | [E2](E2-arquitectura-to-be.md) · [fichas](modules/) | Parnas 20 % · Cohesión/acoplamiento 15 % · Ownership/interoperabilidad 15 % | **Diseñado e implementado parcialmente** (C4 L1–L3, dinámico, despliegue; slice Payment) |
 | E3 | Plan e implementación | [E3](E3-plan-refactoring.md) | Refactoring y pruebas 15 % | **Pasos 1–11 ejecutados y medidos**; paso 12 (Reporting) no ejecutado |
-| E4 | Fitness functions + quality gate + CI/CD | [E4](E4-fitness-functions.md) · [ci/](../ci/README.md) | FF 10 % | **8 reglas activas**, `quality-gate.sh`, `prove-rules-fail.sh` y workflow (aún no ejecutado en GitHub) |
+| E4 | Fitness functions + quality gate + CI/CD | [E4](E4-fitness-functions.md) · [ci/](../ci/README.md) | FF 10 % | **8 reglas activas**, `quality-gate.sh`, `prove-rules-fail.sh` y workflow (ejecutado en verde en GitHub; falta la branch protection) |
 | E5 | Gestión de SATD | [E5](E5-debt-ledger.md) | SATD 10 % | Inventario real + 12 entradas revisadas (sólo TD-008 cerrada; `UnmanagedSATD = 0`) |
 | E6 | ADRs | [adr/](adr/) (006 redactados) | ADRs/Vibe Arch. 5 % | **Aceptados** (2026-11-04) con verificación medida; ADR-002/003/006 con alcance parcial declarado |
 | E7 | Architectural Intent | [E7](E7-architectural-intent.md) · [intents/](intents/) | ídem | Plantilla + 2 intents; experimento WhatsApp (S2) sin ejecutar |
