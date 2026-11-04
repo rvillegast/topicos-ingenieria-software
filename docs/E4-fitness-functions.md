@@ -112,7 +112,9 @@ flowchart LR
 
 Los jobs de una misma etapa corren en paralelo; una etapa no arranca si la anterior falla (feedback rápido y barato primero). **Cualquier fallo bloquea el merge** (branch protection con todos los checks requeridos).
 
-### 3.1. Diseño del workflow (borrador, no activo)
+### 3.1. Diseño del workflow
+
+> **Activo** en `.github/workflows/quality.yml` (versión ejecutable, con las reglas que existen hoy: FF1–FF6; el borrador de abajo conserva el diseño completo con FF7/FF8, Semgrep y gitleaks, que siguen pendientes). Lo verificado localmente es que cada paso corre con `ci/quality-gate.sh` y `ci/prove-rules-fail.sh`; la primera ejecución real en GitHub Actions aún no se ha observado.
 
 ```yaml
 # .github/workflows/quality.yml  (se activa cuando FF1–FF8 existen; ver E3)
@@ -170,7 +172,7 @@ jobs:
 
 ### 3.2. Quality gate (Anexo E) como script
 
-`ci/quality-gate.sh` lee los artefactos del pipeline y evalúa cada umbral; imprime la tabla y sale con código ≠ 0 si alguna falla. No hay umbrales escritos a mano en el workflow.
+`ci/quality-gate.sh` ejecuta las reglas y evalúa cada umbral del Anexo E (SATD 0, ciclos 0, dependencias prohibidas 0, hard-coded 0, FF ≥3, ADRs ≥5, escenarios ≥4, pruebas verdes); imprime la tabla y sale con código ≠ 0 si alguna falla. No hay umbrales escritos a mano en el workflow.
 
 | Regla (Anexo E) | Umbral | Cómo se evalúa | Resultado AS-IS (medido) | Resultado TO-BE |
 |---|---|---|---|---|

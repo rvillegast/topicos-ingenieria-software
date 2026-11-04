@@ -1,0 +1,58 @@
+# Pipeline de calidad (E4 §3). Etapas: static -> architecture -> satd -> tests -> quality-gate.
+# Cualquier fallo bloquea el merge (branch protection con estos checks requeridos).
+# Pendiente (ver E4): gitleaks sobre el historial (hasta rotar la clave de TD-006 fallaría siempre), FF7 (cobertura) y FF8 (complejidad).
+name: quality
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  static:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 24, cache: npm, cache-dependency-path: flownow/package-lock.json }
+      - run: cd flownow && npm ci && node --check src/server.js
+      - run: node ci/rules/no-hardcoded.js flownow/src                                   # FF5
+  architecture:
+    needs: static
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 24 }
+      - run: node ci/rules/arch.js flownow/src                                           # FF1, FF2, FF6 (dependency-cruiser 18.7.0)
+      - run: node ci/rules/table-ownership.js flownow/src                                # FF3
+      - run: node ci/rules/provider-names.js flownow/src                                 # FF2b
+  satd:
+    needs: architecture
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: scripts/satd-scan.sh --gate flownow/src flownow/test                        # FF4
+      - run: node ci/rules/ledger-consistency.js docs/E5-debt-ledger.md flownow/src flownow/test
+  tests:
+    needs: satd
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 24, cache: npm, cache-dependency-path: flownow/package-lock.json }
+      - run: cd flownow && npm ci && npm test                                            # caracterización + contratos
+      - run: node --test "ci/rules/*.test.js"                                            # las reglas fallan ante su violación
+  quality-gate:
+    needs: tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 24, cache: npm, cache-dependency-path: flownow/package-lock.json }
+      - run: cd flownow && npm ci
+      - run: ci/prove-rules-fail.sh                                                      # cada regla falla ante su violación (sobre una copia)
+      - run: ci/quality-gate.sh | tee quality-gate.md                                    # Anexo E
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with: { name: quality-gate, path: quality-gate.md }

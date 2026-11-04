@@ -1,0 +1,7 @@
+# Revisión obligatoria del rol A (Arquitectura) al tocar contratos, reglas, ADRs o el ledger (E4 §5).
+# Reemplazar @ROL-A-ARQUITECTURA por el usuario o equipo real de GitHub cuando se asignen los roles.
+/flownow/src/modules/*/contract/   @ROL-A-ARQUITECTURA
+/ci/                               @ROL-A-ARQUITECTURA
+/.github/                          @ROL-A-ARQUITECTURA
+/docs/adr/                         @ROL-A-ARQUITECTURA
+/docs/E5-debt-ledger.md            @ROL-A-ARQUITECTURA
