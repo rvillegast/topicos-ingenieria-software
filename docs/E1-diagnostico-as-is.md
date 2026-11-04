@@ -3,6 +3,8 @@
 > §17.1 · Máximo sugerido: 5 páginas más anexos automáticos.
 > Toda cifra proviene de `scripts/baseline.sh` → `docs/baseline/as-is/` (resumen en `resumen.md`). No se copian números a mano.
 
+**Largo (§17.1):** 1.508 palabras, 3 diagramas y 48 filas de tablas; renderizado a PDF A4 (Georgia 11 pt, márgenes 2 cm, diagramas de a lo más 7,5 cm de alto) ocupa **≈4,1 páginas**, bajo el máximo de 5. Sin limitar el alto de los diagramas llega a ≈5,6 páginas, así que al exportar hay que acotarlos.
+
 **Commit analizado:** ver `docs/baseline/as-is/meta.txt` · **Comando:** `scripts/baseline.sh flownow docs/baseline/as-is` · **Alcance medido:** `flownow/src` (22 archivos, 714 LOC) y `flownow/test`.
 
 ## 0. Resumen ejecutivo
