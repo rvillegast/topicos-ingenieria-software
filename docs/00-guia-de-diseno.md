@@ -70,7 +70,7 @@ flowchart LR
   F9 --> F10[Fase 10<br/>defensa]
 ```
 
-Hecho: diagnóstico, diseño, pasos 1–11 del refactoring, FF1–FF8 con CI, medición TO-BE y E8, ADRs aceptados y ledger revisado. Falta la Fase 10 (defensa) y lo que no depende del repositorio: rotar la clave, decisiones del negocio, roles, primer push y branch protection. Lo no logrado está declarado en E8 ("Qué queda fuera o sin demostrar").
+Hecho: diagnóstico, diseño, pasos 1–11 del refactoring, FF1–FF8 con CI, medición TO-BE y E8, ADRs aceptados y ledger revisado. Falta la Fase 10 (defensa) y lo que no depende del repositorio: rotar la clave, decisiones del negocio, roles y branch protection (`main` ya está publicado y el CI corrió en verde dos veces en GitHub). Lo no logrado está declarado en E8 ("Qué queda fuera o sin demostrar").
 
 ## 6. Borrador de respuestas para la defensa (§20)
 
