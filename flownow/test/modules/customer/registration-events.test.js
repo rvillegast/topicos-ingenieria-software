@@ -39,3 +39,11 @@ test('TD-001: CRM caído -> el alta NO falla, el cliente recibe bienvenida, el f
   await h.api('POST', '/integrations/crm/resync');
   assert.match((await h.api('GET', '/customers/' + c.id)).body.crm_id, /^crm_/);
 });
+
+test('paso 11: el gateway compone open_requests (Request lo calcula) en alta, consulta y actualización', async () => {
+  const c = await h.customer();
+  assert.strictEqual(c.open_requests, 0);
+  await h.request(c.id, 1000);
+  assert.strictEqual((await h.api('GET', '/customers/' + c.id)).body.open_requests, 1);
+  assert.strictEqual((await h.api('PUT', '/customers/' + c.id, { name: 'Otro nombre' })).body.open_requests, 1);
+});

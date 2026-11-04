@@ -1,15 +1,19 @@
 const db = require('../db');
 const helpers = require('../utils/helpers');
 const customerService = require('../services/customerService');
+const requestService = require('../services/requestService');
 const payments = require('../modules/payment/contract');
 
+// El gateway HTTP compone la vista del cliente: `open_requests` lo calcula Request, no Customer (rompe Customer<->Request).
+const view = (c) => ({ ...c, open_requests: requestService.countOpenFor(c.id) });
+
 exports.create = async (req, res) => {
-  try { res.status(201).json(await customerService.create(req.body)); }
+  try { res.status(201).json(view(await customerService.create(req.body))); }
   catch (e) { res.status(e.status || 500).json({ error: e.message }); }
 };
 exports.list = (req, res) => res.json(customerService.list());
-exports.get = (req, res) => { try { res.json(customerService.get(+req.params.id)); } catch (e) { res.status(e.status || 500).json({ error: e.message }); } };
-exports.update = (req, res) => { try { res.json(customerService.update(+req.params.id, req.body)); } catch (e) { res.status(e.status || 500).json({ error: e.message }); } };
+exports.get = (req, res) => { try { res.json(view(customerService.get(+req.params.id))); } catch (e) { res.status(e.status || 500).json({ error: e.message }); } };
+exports.update = (req, res) => { try { res.json(view(customerService.update(+req.params.id, req.body))); } catch (e) { res.status(e.status || 500).json({ error: e.message }); } };
 
 // Lógica de negocio directamente en el controller: fusionar clientes duplicados
 exports.merge = (req, res) => {
@@ -26,7 +30,7 @@ exports.merge = (req, res) => {
   db.prepare('UPDATE customers SET total_spent = ?, tier = ?, open_requests = open_requests + ? WHERE id = ?').run(spent, tier, rem.open_requests, keep_id);
   db.prepare("UPDATE customers SET status = 'merged' WHERE id = ?").run(remove_id);
   helpers.log('clientes fusionados ' + remove_id + ' -> ' + keep_id, 'hubcrm');
-  res.json(customerService.get(keep_id));
+  res.json(view(customerService.get(keep_id)));
 };
 
 // Exportación duplicada (misma lógica que reportService.customersReport, versión "rápida")

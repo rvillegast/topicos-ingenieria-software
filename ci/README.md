@@ -4,7 +4,7 @@ Reglas de arquitectura y configuración del quality gate. Diseño completo en [`
 
 | FF | Regla | Herramienta | Archivo | Estado |
 |---|---|---|---|---|
-| FF1 | Sin ciclos entre módulos | dependency-cruiser 18.7.0 vía `rules/arch.js` | `dependency-cruiser.cjs`, `ratchets.json` | ✅ con ratchet (5 → 0) |
+| FF1 | Sin ciclos entre módulos | dependency-cruiser 18.7.0 vía `rules/arch.js` | `dependency-cruiser.cjs`, `ratchets.json` | ✅ bloqueante en 0 (paso 11) |
 | FF2 | Tipos/SDK del proveedor no salen del adapter | dependency-cruiser | `dependency-cruiser.cjs` | ✅ implementada |
 | FF2b | Nombres de proveedor sólo en adapters | script portable con ratchet | `rules/provider-names.js`, `ratchets.json` | ✅ con ratchet (6 → 0) |
 | FF3 | Sólo el owner lee/escribe sus tablas | script Node + `ownership.json` | `rules/table-ownership.js`, `ownership.json`, `ratchets.json` | ✅ implementada (`payment_payments` estricta; resto con ratchet) |

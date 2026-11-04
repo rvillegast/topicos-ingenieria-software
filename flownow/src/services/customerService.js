@@ -1,6 +1,5 @@
 const db = require('../db');
 const helpers = require('../utils/helpers');
-const requestService = require('./requestService');
 const customerEvents = require('../modules/customer/contract/events');
 
 exports.create = async (data) => {
@@ -20,7 +19,6 @@ exports.create = async (data) => {
 exports.get = (id) => {
   const c = db.prepare('SELECT * FROM customers WHERE id = ?').get(id);
   if (!c) throw httpError(404, 'cliente no encontrado');
-  c.open_requests = requestService.countOpenFor(id);
   return c;
 };
 

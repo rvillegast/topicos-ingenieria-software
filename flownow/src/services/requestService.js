@@ -11,7 +11,7 @@ exports.countOpenFor = (customerId) =>
 exports.create = async (data) => {
   if (!customerService.isActive(data.customer_id)) throw customerService.httpError(400, 'cliente inactivo o inexistente');
   const c = customerService.get(data.customer_id);
-  if (c.open_requests >= 10) throw customerService.httpError(429, 'demasiadas solicitudes abiertas');
+  if (exports.countOpenFor(c.id) >= 10) throw customerService.httpError(429, 'demasiadas solicitudes abiertas');
   const amount = Number(data.amount);
   if (!(amount > 0)) throw customerService.httpError(400, 'monto inválido');
   const discount = helpers.tierDiscount(c.tier);

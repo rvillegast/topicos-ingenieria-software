@@ -331,6 +331,20 @@ El alta de cliente deja de llamar al CRM y a Notification: **Customer publica `C
 
 **Sin cambios de comportamiento observables.** Lectura honesta: se esperaba bajar de 3 a 2 ciclos y bajaron a 1, porque el ciclo de tres nodos pasaba por la arista `customerService → notificationService`, que desapareció. Queda el ciclo Customer↔Request (`open_requests`), que cierra el paso 11.
 
+### 4.11. Resultado del paso 11 (medido)
+
+`open_requests` deja de calcularlo Customer: **el gateway HTTP (`customerController`) compone la vista** `{...cliente, open_requests: Request.countOpenFor(id)}` para `POST/GET/PUT /customers` y `POST /customers/merge`. `requestService.create` usa `countOpenFor` directamente para el límite de 10. Con esto desaparece la arista `customerService → requestService`, última del único ciclo que quedaba.
+
+| Indicador | Antes (paso 10) | Después | Cómo se midió |
+|---|---|---|---|
+| Ciclos entre archivos | 1 | **0** (ratchet en 0 = FF1 bloqueante; AS-IS: 6) | `ci/rules/arch.js` |
+| Duplicación (jscpd) | 5.39 % | 5.05 % | `resumen.md` |
+| Escenarios S1/S2/S3/S4/S5, heurística | — | 11/5/14/10/12 archivos (sin cambio vs. paso 10) | `escenarios.csv` |
+| Pruebas | 124 | 125 (+1: composición de `open_requests`) | `npm test` |
+| Suite de caracterización | 63 | 63 **sin modificar** (incluye `open_requests` en alta, cancelación y reintento) | `npm test` |
+
+**Sin cambios de comportamiento observables:** el JSON de los endpoints de cliente es idéntico (mismo campo, mismo valor). Lectura honesta: la métrica heurística de escenarios no se movió; el beneficio de este paso es estructural (gate "ciclos = 0" del Anexo E), no de radio de cambio. La columna `customers.open_requests` sigue existiendo y la escriben Request y el merge (ownership de `customers` todavía en ratchet).
+
 ## 5. Estimación y reparto (supuesto: 10–14 h del equipo, §16.3)
 
 ```mermaid
