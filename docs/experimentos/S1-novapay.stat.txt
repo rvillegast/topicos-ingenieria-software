@@ -1,0 +1,5 @@
+ flownow/src/modules/payment/adapters/novapay/index.js  | 15 +
+ flownow/src/modules/payment/providers/index.js         |  4 +-
+ flownow/src/platform/config.js                         |  2 +
+ flownow/test/modules/payment/provider-contract.test.js |  2 +-
+ 4 files changed, 20 insertions(+), 3 deletions(-)

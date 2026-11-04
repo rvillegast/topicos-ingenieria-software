@@ -1,0 +1,71 @@
+diff --git a/flownow/src/modules/payment/adapters/novapay/index.js b/flownow/src/modules/payment/adapters/novapay/index.js
+new file mode 100644
+index 0000000..51357f3
+--- /dev/null
++++ b/flownow/src/modules/payment/adapters/novapay/index.js
+@@ -0,0 +1,15 @@
++// Adapter de NovaPay (proveedor ficticio del experimento S1). Mismo puerto que stripey/payfast.
++const config = require('../../../../platform/config');
++const helpers = require('../../../../utils/helpers');
++const { ProviderError } = require('../../providers/errors');
++
++exports.name = 'novapay';
++
++exports.charge = async ({ amount, currency, token }) => {
++  try {
++    await helpers.httpPost(config.providers.novapay.chargeUrl, { amount, currency, token });
++  } catch (e) { throw new ProviderError(e && e.message ? e.message : 'error del proveedor', { cause: e }); }
++  return { status: 'captured', providerRef: 'np_' + Date.now(), providerStatus: 'approved' };
++};
++exports.refund = async () => ({ ok: true });
++exports.parseWebhook = () => null;
+diff --git a/flownow/src/modules/payment/providers/index.js b/flownow/src/modules/payment/providers/index.js
+index b46f804..48523c1 100644
+--- a/flownow/src/modules/payment/providers/index.js
++++ b/flownow/src/modules/payment/providers/index.js
+@@ -1,10 +1,10 @@
+ // Selección del proveedor de pagos. No es una "factory genérica": existen DOS variantes reales (Stripey y el
+ // respaldo PayFast) y la elección es una decisión de configuración (flag), no de código de negocio.
+ const config = require('../../../platform/config');
+-const adapters = { stripey: require('../adapters/stripey'), payfast: require('../adapters/payfast') };
++const adapters = { stripey: require('../adapters/stripey'), payfast: require('../adapters/payfast'), novapay: require('../adapters/novapay') };
+ 
+ // Proveedor con el que se COBRA una operación nueva.
+-exports.active = () => (config.flags.useBackupProvider ? adapters.payfast : adapters.stripey);
++exports.active = () => (config.flags.paymentProvider ? exports.byName(config.flags.paymentProvider) : config.flags.useBackupProvider ? adapters.payfast : adapters.stripey);
+ 
+ // Proveedor con el que se REEMBOLSA. TODO(TD-005): PayFast no implementa reembolsos; el AS-IS reembolsaba
+ // siempre por Stripey y se preserva hasta decidir con el negocio qué hacer con los cobros de respaldo.
+diff --git a/flownow/src/platform/config.js b/flownow/src/platform/config.js
+index 6790f89..3f10af7 100644
+--- a/flownow/src/platform/config.js
++++ b/flownow/src/platform/config.js
+@@ -20,6 +20,7 @@ module.exports = {
+   // Flags: se leen al acceder (no al cargar), para poder cambiarlos en pruebas y en caliente.
+   flags: {
+     get enableSms() { return env.ENABLE_SMS === '1'; },
++    get paymentProvider() { return env.PAYMENT_PROVIDER || ''; },
+     get useBackupProvider() { return env.USE_BACKUP_PROVIDER === '1'; },
+     get useNewReports() { return env.USE_NEW_REPORTS !== '0'; },
+   },
+@@ -35,6 +36,7 @@ module.exports = {
+ 
+   providers: {
+     stripey: { get apiKey() { return secret('STRIPEY_API_KEY', 'sk_test_dev_placeholder'); } },
++    novapay: { get chargeUrl() { return text('NOVAPAY_CHARGE_URL', 'https://api.novapay.test/v1/charges'); } },
+     payfast: { get payUrl() { return text('PAYFAST_PAY_URL', 'https://api.payfast.cl/v1/pay'); } },
+     hubcrm: { get baseUrl() { return text('HUBCRM_BASE_URL', 'https://api.hubcrm.com/v2'); } },
+     erp: { get baseUrl() { return text('ERP_BASE_URL', 'https://erp.acme-internal.net/api'); } },
+diff --git a/flownow/test/modules/payment/provider-contract.test.js b/flownow/test/modules/payment/provider-contract.test.js
+index 7dc7390..888eced 100644
+--- a/flownow/test/modules/payment/provider-contract.test.js
++++ b/flownow/test/modules/payment/provider-contract.test.js
+@@ -7,7 +7,7 @@ const { ProviderError, ProviderUnavailableError } = require('../../../src/module
+ const helpers = require('../../../src/utils/helpers');
+ 
+ const STATUSES = ['captured', 'declined', 'action_required', 'unknown'];
+-const adapters = [providers.byName('stripey'), providers.byName('payfast')];
++const adapters = [providers.byName('stripey'), providers.byName('payfast'), providers.byName('novapay')];
+ 
+ for (const a of adapters) {
+   test(`[${a.name}] charge devuelve un resultado con el vocabulario del dominio`, async () => {
