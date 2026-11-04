@@ -11,7 +11,7 @@
 | E3 | Plan e implementación | [E3](E3-plan-refactoring.md) | Refactoring y pruebas 15 % | Plan **diseñado**; implementación pendiente |
 | E4 | Fitness functions + quality gate + CI/CD | [E4](E4-fitness-functions.md) · [ci/](../ci/README.md) | FF 10 % | 8 reglas **diseñadas** (FF1 y FF4 con base ejecutable) |
 | E5 | Gestión de SATD | [E5](E5-debt-ledger.md) | SATD 10 % | Inventario real + 10 entradas propuestas |
-| E6 | ADRs | [adr/](adr/) (006 redactados) | ADRs/Vibe Arch. 5 % | **Redactados** (estado "Propuesto") |
+| E6 | ADRs | [adr/](adr/) (006 redactados) | ADRs/Vibe Arch. 5 % | **Aceptados** (2026-11-04) con verificación medida; ADR-002/003/006 con alcance parcial declarado |
 | E7 | Architectural Intent | [E7](E7-architectural-intent.md) · [intents/](intents/) | ídem | Plantilla + 2 intents |
 | E8 | Informe AS-IS/TO-BE | [E8](E8-evidencia-as-is-to-be.md) | transversal (§19) | AS-IS medido; TO-BE por medir |
 

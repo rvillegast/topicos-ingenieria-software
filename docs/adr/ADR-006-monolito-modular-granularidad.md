@@ -1,6 +1,6 @@
 # ADR-006: Monolito modular y granularidad (7 módulos + platform)
 
-Status: Propuesto
+Status: Aceptado (2026-11-04). Implementado como monolito modular: módulos `payment`, `request` (pricing), `customer`, `integration`, `notification` y `platform` con código propio; Reporting e Identity permanecen como código legado (sin módulo físico).
 Context: Hay que decidir cuántos módulos y qué unidad de despliegue (§5): `C_total = C_internal + C_coordination`. El sistema mide ~700 LOC, un equipo de 3–4 personas, 2 semanas.
 Architectural concern: Bounded Complexity; no premiar "más microservicios, más interfaces, más capas".
 Decision: Un único despliegue (monolito modular) con 7 módulos de negocio (Identity, Customer, Request, Payment, Notification, Reporting, Integration) + `platform` mínimo. Las fronteras se imponen en código y CI, no en red. Un módulo existe si oculta una decisión volátil, posee datos propios y se prueba por su contrato.
@@ -9,4 +9,5 @@ Consequences: Bajo costo operativo; evolución posible hacia extracción (p. ej.
 Trade-offs: Un despliegue implica un solo fallo conjunto y una BD física compartida (separación lógica).
 Evidence / fitness function: grafo TO-BE acíclico (FF1), conteo de aristas y fan-in/out de `dependencias.json`, complejidad por módulo (lizard).
 Affected modules: todos.
-Date: 2026-11-01
+Verificación (TO-BE medido): grafo acíclico; archivos 22 → 39, LOC 714 → 1231, aristas 67 → 115 (costo de coordinación visible en E8); fan-in de `db.js`/`helpers.js` subió (14 → 16, 14 → 15), por lo que la meta de aislarlos NO se cumplió.
+Date: 2026-11-01 (aceptado 2026-11-04)
