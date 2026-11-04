@@ -1,19 +1,19 @@
 # Guía de diseño: qué hay que hacer y cómo se cumple el caso
 
-> Índice de todo el diseño del Caso DecidArch / FlowNow. Cada afirmación remite a su documento. Las cifras AS-IS salen de `scripts/baseline.sh`; las del TO-BE son **metas** hasta medirlas.
+> Índice de todo el diseño del Caso DecidArch / FlowNow. Cada afirmación remite a su documento. Las cifras AS-IS y TO-BE salen de `scripts/baseline.sh` (`docs/baseline/as-is/` y `to-be/`); el análisis honesto de lo logrado y lo no logrado está en E8.
 
 ## 1. Mapa de entregables (§17) y de la rúbrica (§18)
 
 | ID | Entregable | Documento | Peso rúbrica | Estado |
 |---|---|---|---|---|
 | E1 | Diagnóstico AS-IS | [E1](E1-diagnostico-as-is.md) · [baseline](baseline/as-is/resumen.md) | Diagnóstico 10 % | **Medido** (C4 AS-IS, 5 escenarios, ciclos, ownership) |
-| E2 | Arquitectura TO-BE (Parnas) | [E2](E2-arquitectura-to-be.md) · [fichas](modules/) | Parnas 20 % · Cohesión/acoplamiento 15 % · Ownership/interoperabilidad 15 % | **Diseñado** (C4 L1–L3, dinámico, despliegue) |
-| E3 | Plan e implementación | [E3](E3-plan-refactoring.md) | Refactoring y pruebas 15 % | Plan **diseñado**; implementación pendiente |
-| E4 | Fitness functions + quality gate + CI/CD | [E4](E4-fitness-functions.md) · [ci/](../ci/README.md) | FF 10 % | 8 reglas **diseñadas** (FF1 y FF4 con base ejecutable) |
-| E5 | Gestión de SATD | [E5](E5-debt-ledger.md) | SATD 10 % | Inventario real + 10 entradas propuestas |
+| E2 | Arquitectura TO-BE (Parnas) | [E2](E2-arquitectura-to-be.md) · [fichas](modules/) | Parnas 20 % · Cohesión/acoplamiento 15 % · Ownership/interoperabilidad 15 % | **Diseñado e implementado parcialmente** (C4 L1–L3, dinámico, despliegue; slice Payment) |
+| E3 | Plan e implementación | [E3](E3-plan-refactoring.md) | Refactoring y pruebas 15 % | **Pasos 1–11 ejecutados y medidos**; paso 12 (Reporting) no ejecutado |
+| E4 | Fitness functions + quality gate + CI/CD | [E4](E4-fitness-functions.md) · [ci/](../ci/README.md) | FF 10 % | **8 reglas activas**, `quality-gate.sh`, `prove-rules-fail.sh` y workflow (aún no ejecutado en GitHub) |
+| E5 | Gestión de SATD | [E5](E5-debt-ledger.md) | SATD 10 % | Inventario real + 12 entradas revisadas (sólo TD-008 cerrada; `UnmanagedSATD = 0`) |
 | E6 | ADRs | [adr/](adr/) (006 redactados) | ADRs/Vibe Arch. 5 % | **Aceptados** (2026-11-04) con verificación medida; ADR-002/003/006 con alcance parcial declarado |
-| E7 | Architectural Intent | [E7](E7-architectural-intent.md) · [intents/](intents/) | ídem | Plantilla + 2 intents |
-| E8 | Informe AS-IS/TO-BE | [E8](E8-evidencia-as-is-to-be.md) | transversal (§19) | AS-IS medido; TO-BE por medir |
+| E7 | Architectural Intent | [E7](E7-architectural-intent.md) · [intents/](intents/) | ídem | Plantilla + 2 intents; experimento WhatsApp (S2) sin ejecutar |
+| E8 | Informe AS-IS/TO-BE | [E8](E8-evidencia-as-is-to-be.md) | transversal (§19) | **AS-IS y TO-BE medidos**, con experimento S1 (NovaPay) y límites declarados |
 
 ## 2. Cumplimiento de las condiciones obligatorias (§16.2)
 
@@ -32,16 +32,19 @@
 
 ## 3. Quality gate del ejercicio (Anexo E)
 
-| Regla | Umbral | AS-IS medido | Cómo se alcanza |
-|---|---|---|---|
-| SATD no gestionada | 0 | 8 | E5 + FF4 |
-| Ciclos | 0 | 6 | pasos 6, 8, 10, 11 de E3 + FF1 |
-| Dependencias prohibidas | 0 | sin regla | FF2 + FF6 |
-| Hard-coded secretos/URLs | 0 | 9 + 7 líneas | paso 2 + FF5 |
-| Fitness functions | ≥ 3 | 0 | 8 diseñadas |
-| ADRs | ≥ 5 | 0 | 6 |
-| Escenarios | ≥ 4 | 5 medidos | E1 §7, E8 |
-| Pruebas críticas | verdes antes y después | 5 verdes (sin pagos) | paso 1 de E3 |
+| Regla | Umbral | AS-IS medido | TO-BE medido | Cómo se alcanza |
+|---|---|---|---|---|
+| SATD no gestionada | 0 | 8 | **0** | E5 + FF4 |
+| Ciclos | 0 | 6 | **0** | pasos 6, 8, 10, 11 de E3 + FF1 |
+| Dependencias prohibidas | 0 | sin regla | **0** | FF2 + FF6 |
+| Hard-coded secretos/URLs | 0 | 9 + 7 líneas | **0** violaciones\*\* (5 + 5 líneas son defaults en `platform/config.js`) | paso 2 + FF5 |
+| Fitness functions | ≥ 3 | 0 | **8** | `ci/` |
+| ADRs | ≥ 5 | 0 | **6** (aceptados) | `adr/` |
+| Escenarios | ≥ 4 | 5 medidos | 5 | E1 §7, E8 |
+| Pruebas críticas | verdes antes y después | 5 verdes (sin pagos) | **125** verdes (63 de caracterización) | paso 1 de E3 |
+
+Resultado del gate sobre el TO-BE: `ci/quality-gate.sh` → **APROBADO** (`baseline/to-be/quality-gate.md`).
+\*\* La clave `sk_live_…` sigue en el historial de git (TD-006): FF5 no revisa historial.
 
 ## 4. Cadena de trazabilidad (problema → decisión → artefacto → regla → escenario)
 
@@ -60,14 +63,14 @@ flowchart LR
 flowchart LR
   F1[Fase 1<br/>línea base ✅] --> F2[Fase 2<br/>escenarios ✅ medidos]
   F2 --> F3[Fases 3–5<br/>Parnas, contratos, plan<br/>✅ diseñados]
-  F3 --> F6[Fase 6<br/>slice: pasos 1–11 de E3]
-  F6 --> F7[Fase 7<br/>FF1–FF8 + CI]
-  F7 --> F8[Fase 8<br/>E5 final]
-  F8 --> F9[Fase 9<br/>baseline TO-BE + E8]
+  F3 --> F6[Fase 6<br/>slice: pasos 1–11 de E3 ✅]
+  F6 --> F7[Fase 7<br/>FF1–FF8 + CI ✅]
+  F7 --> F8[Fase 8<br/>E5 final ✅]
+  F8 --> F9[Fase 9<br/>baseline TO-BE + E8 ✅]
   F9 --> F10[Fase 10<br/>defensa]
 ```
 
-Lo que ya está hecho es **diseño y diagnóstico**. Lo que sigue (Fases 6–9) es implementación y medición; hasta entonces, ninguna meta del TO-BE es evidencia.
+Hecho: diagnóstico, diseño, pasos 1–11 del refactoring, FF1–FF8 con CI, medición TO-BE y E8, ADRs aceptados y ledger revisado. Falta la Fase 10 (defensa) y lo que no depende del repositorio: rotar la clave, decisiones del negocio, roles, primer push y branch protection. Lo no logrado está declarado en E8 ("Qué queda fuera o sin demostrar").
 
 ## 6. Borrador de respuestas para la defensa (§20)
 
@@ -79,13 +82,15 @@ Lo que ya está hecho es **diseño y diagnóstico**. Lo que sigue (Fases 6–9) 
 6. **Patrón rechazado:** Factory abstracta de proveedores, CQRS/Event Sourcing, saga distribuida (E2 §15).
 7. **Cómo sabemos que se preservó el comportamiento:** suite de caracterización black-box idéntica y verde antes y después (E3 §3, §7).
 8. **FF que protege la decisión más importante:** FF2/FF2b para ocultar el proveedor; FF1 para el grafo; FF3 para ownership.
-9. **Si cambia el modelo de Customer:** se modifica Customer y, a lo sumo, el DTO `v1`→`v2`; S3 pasa de 13 archivos/7 áreas a 1 módulo (meta; se mide).
+9. **Si cambia el modelo de Customer:** se modifica Customer y, a lo sumo, el DTO `v1`→`v2`; Customer se desacopló sólo parcialmente (pasos 10–11), así que S3 **no** se demostró: la heurística pasó de 13 a 14 archivos y no se hizo el experimento (E8).
 10. **Cómo evitar que un agente reintroduzca el problema:** intent versionado + hooks locales + CI bloqueante + CODEOWNERS + `prove-rules-fail` (E4 §6–7).
 
 ## 7. Cómo regenerar la evidencia
 
 ```bash
 scripts/baseline.sh flownow docs/baseline/as-is    # AS-IS (hecho)
-scripts/baseline.sh flownow docs/baseline/to-be    # TO-BE (tras implementar)
+scripts/baseline.sh flownow docs/baseline/to-be    # TO-BE (hecho)
+ci/quality-gate.sh                                 # Anexo E
+ci/prove-rules-fail.sh                             # cada regla falla ante su violación
 npx --yes @mermaid-js/mermaid-cli@11 -i docs/E2-arquitectura-to-be.md -o /tmp/E2.md   # validar diagramas
 ```

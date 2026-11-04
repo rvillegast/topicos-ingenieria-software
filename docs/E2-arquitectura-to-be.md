@@ -2,7 +2,7 @@
 
 > §17.2 · Cada módulo se define por la **decisión volátil que oculta**, no por capa técnica.
 > Un Module Contract por módulo en [`modules/`](modules/) (plantilla Anexo A).
-> **Estado:** diseño propuesto, aún no implementado. Las cifras del AS-IS vienen de `docs/baseline/as-is/resumen.md`; las del TO-BE son **metas** hasta que `scripts/baseline.sh` las mida (E8).
+> **Estado:** diseño **implementado parcialmente** (slice Payment y sus fronteras con Customer, Request, Integration y Notification; ver E3). Reporting e Identity no tienen módulo físico todavía. Las cifras de AS-IS y TO-BE salen de `docs/baseline/as-is/` y `docs/baseline/to-be/` (comparación y límites en E8); las "metas" que aparecen más abajo son las de diseño y no equivalen a lo logrado.
 
 ## 1. Drivers y de dónde sale cada decisión (§14.4)
 

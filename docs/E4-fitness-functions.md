@@ -181,7 +181,7 @@ jobs:
 | Ciclos entre módulos TO-BE | 0 | `dependencias.json` (FF1) | 6 | *se mide* |
 | Dependencias prohibidas | 0 | FF2 + FF6 | no existe la regla | *se mide* |
 | Hard-coded de secretos/URLs de ambiente | 0 | FF5 (Semgrep + gitleaks) | 9 líneas URL · 7 líneas posibles secretos | *se mide* |
-| Fitness functions automatizadas | ≥ 3 | cuenta de reglas activas y verdes en `ci/` | 0 | 8 diseñadas |
+| Fitness functions automatizadas | ≥ 3 | cuenta de reglas activas y verdes en `ci/` | 0 | **8 activas** (`ci/quality-gate.sh` mide ≥3 verdes) |
 | ADRs | ≥ 5 | `docs/adr/ADR-*.md` completos (sin campos vacíos) | 0 completos | 6 redactados |
 | Escenarios de cambio comparados | ≥ 4 | `escenarios.csv` AS-IS y TO-BE | 5 medidos | *se mide* |
 | Pruebas críticas | pasan antes y después | `npm test` en AS-IS (commit base) y TO-BE | 5 pasan (no cubren pagos) | *se mide* |

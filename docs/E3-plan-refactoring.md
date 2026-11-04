@@ -2,7 +2,7 @@
 
 > §17.3, §11, §15 pasos 7–8 · Sin reescritura. Ciclo por paso:
 > `CharacterizationTests → SmallRefactoring → Tests → ArchitectureCheck → Commit`
-> **Estado:** plan de diseño. Las columnas "Commit/PR" y "Resultado" se completan al ejecutar; ninguna cifra de resultado se anticipa aquí.
+> **Estado:** pasos 1–11 **ejecutados y medidos** (secciones 4.1–4.11 más 4.12 con FF7/FF8); el paso 12 (opcional) no se ejecutó. Las cifras de resultado salen de `docs/baseline/pasoN/` y `docs/baseline/to-be/`; las predicciones de diseño que quedan en este documento están rotuladas como tales.
 
 **Slice elegido:** Payment **y los ciclos que lo rodean**. **Justificación:** (1) S1 (cambio de proveedor) es el escenario con mayor radio (12 archivos); (2) concentra 5 de las 8 deudas SATD y el método más complejo (`processPayment`, CCN 26); (3) 3 de los 6 ciclos pasan por `paymentService`; (4) permite demostrar adapter, ownership y eventos en un solo recorrido; (5) los 3 ciclos restantes (Customer↔Notification, Customer↔Request y el de 3 nodos) se rompen con la misma técnica y son necesarios para el gate "ciclos = 0".
 
@@ -91,15 +91,16 @@ Meta de cobertura (FF7): `paymentService`/futuro `modules/payment` ≥ 80 % lín
 | 7 ✅ | **Ownership de tabla** | `PaymentRepository` única vía a `payment_payments` (renombre `payments` → `payment_payments`, `stripey_*` → `provider_*`); presentador HTTP de compatibilidad para los campos legacy | TD-010 | medio | **FF3** (ratchet: `payment_*`, `customer_*`) |
 | 8 ✅ | **Efectos laterales por eventos** | Notification e Integration suscritos al pago (aviso; factura ERP; evento CRM); se retiran las llamadas directas. *Rompe Payment↔Notification y Payment↔Integration* | TD-004 | medio | — |
 | 9 ✅ | **Orquestación en Request** | `Request.payRequest` descuenta, valida y llama `Payments.createPayment`; `paymentController` queda como adaptador HTTP delgado (sin SQL) | — | medio | FF6 (fronteras por `contract/`) |
-| 10 | **Romper Customer↔Notification** | bienvenida por `CustomerRegistered`; sync CRM sale de Customer (Integration lo hace con reintento) | TD-001 | medio | — |
-| 11 | **Romper Customer↔Request** | `open_requests` deja de calcularse en Customer: el gateway HTTP compone `CustomerDirectory.get` + `Requests.countOpen` (API composition). *Rompe los 2 ciclos restantes* | — | medio | **FF1** sobre todo el grafo |
-| 12 | **Reporting por proyecciones (alcance ampliado, si hay tiempo)** | `salesReport` lee `reporting_sales` alimentada por eventos; FX sale (usa `amountBase`) | TD-007 | medio | FF3 se amplía a `reporting_*` |
+| 10 ✅ | **Romper Customer↔Notification** | bienvenida por `CustomerRegistered`; sync CRM sale de Customer (Integration lo hace con reintento) | TD-001 | medio | — |
+| 11 ✅ | **Romper Customer↔Request** | `open_requests` deja de calcularse en Customer: el gateway HTTP compone `CustomerDirectory.get` + `Requests.countOpen` (API composition). *Rompe los 2 ciclos restantes* | — | medio | **FF1** sobre todo el grafo |
+| 12 ⏸ | **Reporting por proyecciones (alcance ampliado; NO ejecutado)** | `salesReport` lee `reporting_sales` alimentada por eventos; FX sale (usa `amountBase`) | TD-007 | medio | FF3 se amplía a `reporting_*` |
 
 **Predicción de ciclos por paso** (hipótesis de diseño; cada valor se verifica con FF1/`dependencias.json` al ejecutar el paso):
 
 | Tras el paso | 0 | 6 | 8 | 10 | 11 |
 |---|---|---|---|---|---|
-| Ciclos | 6 | 5 | 3 | 2 | **0** |
+| Ciclos (predicción) | 6 | 5 | 3 | 2 | **0** |
+| Ciclos (**medido**) | 6 | 5 | 3 | **1** | **0** |
 | Ciclo que desaparece | — | Request↔Payment | Payment↔Notification, Payment↔Integration | Customer↔Notification | Customer↔Request y el de 3 nodos |
 
 ### 4.1. Antes y después del slice Payment
@@ -197,7 +198,7 @@ Efecto de comportamiento: ninguno con la configuración por defecto (la suite de
 | Duplicación | 7,68 % | **6,69 %** | jscpd |
 | Pruebas | 72 | **92** verdes (20 unitarias de dominio, sin base ni red) | `npm test` |
 
-\* `events.publish` (CCN 12) es código nuevo del paso 3 con validaciones de argumentos; FF8 exigirá ≤ 10 en el alcance intervenido, así que queda como ajuste pendiente de ese paso (partir `publish` en `validate` + `deliver`).
+\* `events.publish` (CCN 12) es código nuevo del paso 3 con validaciones de argumentos; FF8 exigirá ≤ 10 en el alcance intervenido, así que se resolvió después: `publish` se partió en `validateArgs` + `recordFailure` (ver 4.12; hoy CCN ≤ 10).
 
 **Sin cambio de comportamiento:** la suite de caracterización (63 pruebas del flujo HTTP) pasa **sin modificaciones**. Se preservaron el orden de validación, el orden de las escrituras y el log de reintentos (que también se emite tras el último intento fallido).
 

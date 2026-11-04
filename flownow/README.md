@@ -1,4 +1,6 @@
-# FlowNow (estado AS-IS)
+# FlowNow
+
+> **Estado actual:** AS-IS refactorizado parcialmente (slice Payment y sus fronteras; pasos 1–11 de `docs/E3-plan-refactoring.md`). El estado AS-IS original, medido en `docs/baseline/as-is/`, corresponde al commit `7b63efc`. Los síntomas de §14.2 descritos abajo son los del AS-IS; varios ya se corrigieron (ver E8). Variable adicional: `PAYMENT_PROVIDER` selecciona el adapter de pagos.
 
 Aplicación de ejemplo para el Caso DecidArch (§14): plataforma de clientes, solicitudes, pagos, notificaciones, integraciones y reportes. **Está deteriorada a propósito** para ser diagnosticada y recuperada sin reescribirla. No "arreglar" nada fuera del flujo de refactoring del caso.
 

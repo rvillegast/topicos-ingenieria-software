@@ -75,11 +75,13 @@ Descomposición por Parnas **20 %** · Cohesión/acoplamiento/complejidad 15 % �
 
 - `PLAN.md`: plan de trabajo por fases.
 - `flownow/`: código del caso (AS-IS sintético en Node/Express; reemplazable por el repo del docente).
-- `docs/E1…E8-*.md`: entregables. `docs/modules/`: una ficha de módulo por módulo (Anexo A). `docs/adr/`: ADR-001 a 006. `docs/00-guia-de-diseno.md`: índice del diseño completo (C4, TO-BE, CI/CD, trazabilidad). `docs/escenarios/`: definición de los escenarios de cambio. `docs/intents/`: intents y prompts usados con IA, para la trazabilidad.
+- `docs/E1…E8-*.md`: entregables (E6 = `docs/adr/`). `docs/modules/`: una ficha de módulo por módulo (Anexo A). `docs/adr/`: ADR-001 a 006. `docs/00-guia-de-diseno.md`: índice del diseño completo (C4, TO-BE, CI/CD, trazabilidad). `docs/escenarios/`: definición de los escenarios de cambio. `docs/intents/`: intents y prompts usados con IA, para la trazabilidad.
 - `docs/baseline/{as-is,to-be}/`: salida de los scripts. No se edita a mano.
-- `scripts/baseline.sh <código> <salida>`: genera la línea base. Los pasos 4–7 (dependencias, complejidad, acceso a datos, cobertura) quedan por completar según el stack.
+- `scripts/baseline.sh <código> <salida>`: genera la línea base (estructura, dependencias, complejidad, duplicación, acceso a datos, SATD, proveedores, escenarios, cobertura). Ya se corrió para AS-IS, cada paso (`docs/baseline/pasoN/`) y TO-BE.
 - `scripts/satd-scan.sh [--gate] <ruta>`: genera el CSV de deuda autoadmitida. Con `--gate` falla si encuentra alguna sin gestionar (FF4).
-- `ci/`: reglas de arquitectura. `.github/PULL_REQUEST_TEMPLATE.md`: checklist del Anexo D.
+- `ci/`: FF1–FF8 (`ci/rules/`, ratchets en `ci/ratchets.json`), `ci/run-rules.sh` (todas las reglas), `ci/quality-gate.sh` (Anexo E), `ci/prove-rules-fail.sh` (cada regla falla ante su violación). `.github/workflows/quality.yml` (pipeline), `.github/CODEOWNERS`, `.github/PULL_REQUEST_TEMPLATE.md` (checklist del Anexo D). `docs/experimentos/`: diff del experimento S1 (NovaPay).
+
+**Estado (2026-11-04):** refactoring pasos 1–11 hechos (slice Payment), FF1–FF8 activas, TO-BE medido y E8 escrito, ADRs aceptados, ledger revisado. Antes de tocar código leer `docs/E8-evidencia-as-is-to-be.md` (qué se logró y qué no) y correr `ci/run-rules.sh`. Los ratchets sólo pueden bajar: nunca subirlos para hacer pasar un cambio.
 
 **Convención de deuda autoadmitida:** un comentario cuenta como gestionado cuando referencia su entrada en el Debt Ledger, por ejemplo `// TODO(TD-004): …`.
 

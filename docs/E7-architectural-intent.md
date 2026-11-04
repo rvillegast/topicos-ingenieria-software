@@ -83,4 +83,4 @@ Intent listo para entregar a un agente: [`intents/ejemplo-notification-whatsapp.
 
 ## Ejemplo de validación
 
-**Pendiente de ejecución.** Cuando el TO-BE exista, se entrega este intent a otro agente (sin contexto previo) y se registra: archivos tocados, módulos afectados (meta: 1), resultado de FF1–FF8 y el diff. Ese registro va a E8 como evidencia del escenario S2. Mientras tanto, la validación de diseño es el cuadro anterior: cada restricción tiene una regla que la hace cumplir.
+**Pendiente de ejecución** (el TO-BE parcial existe, pero Notification no se refactorizó como slice, así que este experimento S2 no se ejecutó; ver E8). Si se hace, se entrega este intent a otro agente (sin contexto previo) y se registra: archivos tocados, módulos afectados (meta: 1), resultado de FF1–FF8 y el diff. Ese registro va a E8 como evidencia del escenario S2. Mientras tanto, la validación de diseño es el cuadro anterior: cada restricción tiene una regla que la hace cumplir.
