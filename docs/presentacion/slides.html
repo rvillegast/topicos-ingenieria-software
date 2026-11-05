@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FlowNow — De Vibe Coding a Vibe Architecting</title>
+<style>
+  :root{--bg:#0f1420;--panel:#171e2e;--ink:#e8ecf4;--mute:#9aa6bd;--acc:#5eb0ff;--ok:#4ade80;--warn:#fbbf24;--bad:#f87171;--line:#2a3550}
+  @media (prefers-color-scheme: light){:root{--bg:#f6f7fb;--panel:#fff;--ink:#141a28;--mute:#5a6580;--acc:#1d6fd6;--ok:#15803d;--warn:#b45309;--bad:#b91c1c;--line:#d6dbe8}}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:20px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+  .slide{display:none;min-height:100vh;padding:5vh 6vw 9vh;flex-direction:column;justify-content:center;gap:1.1rem}
+  .slide.on{display:flex}
+  h1{font-size:2.6rem;line-height:1.15;margin:0}
+  h2{font-size:1.9rem;margin:0;line-height:1.2}
+  .tag{color:var(--acc);font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;font-weight:700}
+  .sub{color:var(--mute);font-size:1.05rem}
+  .q{border-left:4px solid var(--acc);padding:.4rem 1rem;font-size:1.35rem;background:var(--panel);border-radius:0 8px 8px 0}
+  .grid{display:grid;gap:.9rem}
+  .g2{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:.8rem 1rem}
+  .big{font-size:2.3rem;font-weight:800;line-height:1}
+  .card small{color:var(--mute);display:block;margin-top:.3rem;font-size:.82rem}
+  .bad{color:var(--bad)}.ok{color:var(--ok)}.warn{color:var(--warn)}.acc{color:var(--acc)}
+  table{border-collapse:collapse;width:100%;font-size:.88rem}
+  th,td{border-bottom:1px solid var(--line);padding:.4rem .6rem;text-align:left;vertical-align:top}
+  th{color:var(--mute);font-weight:600;font-size:.78rem;text-transform:uppercase;letter-spacing:.06em}
+  code{font:.85em ui-monospace,Menlo,monospace;background:var(--panel);padding:.05em .35em;border-radius:4px}
+  ul{margin:.2rem 0;padding-left:1.2rem}li{margin:.25rem 0}
+  svg text{fill:var(--ink);font:13px system-ui}
+  .node{fill:var(--panel);stroke:var(--acc);stroke-width:1.5}.leaf{stroke:var(--ok)}
+  .edge{stroke:var(--mute);stroke-width:1.4;fill:none}.ev{stroke-dasharray:5 4}
+  .nav{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:space-between;align-items:center;padding:.5rem 1.2rem;font-size:.8rem;color:var(--mute);background:linear-gradient(transparent,var(--bg) 60%)}
+  .bar{height:3px;background:var(--acc);position:fixed;top:0;left:0;transition:width .2s}
+  .rub{font-size:.75rem;color:var(--mute)}
+  @media (max-width:800px){.g3,.g4,.g2{grid-template-columns:1fr}h1{font-size:1.9rem}}
+  @media print{.slide{display:flex!important;page-break-after:always;min-height:auto;height:100vh}.nav,.bar{display:none}}
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+
+<!-- 1 -->
+<section class="slide">
+  <div class="tag">Tópicos de Ingeniería de Software · Caso DecidArch</div>
+  <h1>FlowNow: de Vibe Coding a Vibe Architecting</h1>
+  <div class="q">¿Qué evidencia demuestra que el sistema ahora puede cambiar sin propagar innecesariamente el impacto de ese cambio?</div>
+  <p class="sub">Recuperar la arquitectura sin reescribir · preservando comportamiento · con evidencia AS-IS / TO-BE (§16.1)</p>
+  <p class="sub">Equipo: [nombres] · Fecha: [fecha]</p>
+</section>
+
+<!-- 2 -->
+<section class="slide">
+  <div class="tag">1 · Diagnóstico AS-IS <span class="rub">· rúbrica 10 %</span></div>
+  <h2>El problema no es el tamaño: es el radio de cambio</h2>
+  <div class="grid g4">
+    <div class="card"><div class="big bad">12</div>archivos en 5 áreas para cambiar el proveedor de pagos<small>S1 · <code>change-impact.js</code></small></div>
+    <div class="card"><div class="big bad">6</div>ciclos entre servicios<small>dependency-cruiser</small></div>
+    <div class="card"><div class="big bad">5 / 6</div>tablas con escritores múltiples<small>sin dueño único</small></div>
+    <div class="card"><div class="big bad">18,9 %</div>cobertura de <code>paymentService</code><small>0 % de funciones</small></div>
+    <div class="card"><div class="big bad">26</div>CCN de <code>processPayment</code><small>8 responsabilidades, 71 NLOC</small></div>
+    <div class="card"><div class="big bad">8</div>SATD sin ticket<small>TODO / HACK / TEMP</small></div>
+    <div class="card"><div class="big bad">14 / 14</div>fan-in de <code>db.js</code> / <code>helpers.js</code><small>todo depende de todo</small></div>
+    <div class="card"><div class="big bad">9 + 7</div>líneas con URLs / posibles secretos<small>incluye <code>sk_live_…</code></small></div>
+  </div>
+  <p class="sub">Baseline reproducible: <code>scripts/baseline.sh flownow docs/baseline/as-is</code> · 5 escenarios de cambio medidos (E1 §7)</p>
+</section>
+
+<!-- 3 -->
+<section class="slide">
+  <div class="tag">2 · Descomposición por Parnas <span class="rub">· rúbrica 20 %</span></div>
+  <h2>Módulos por la decisión volátil que ocultan, no por capa técnica</h2>
+  <table>
+    <tr><th>Módulo</th><th>Secreto (lo que puede cambiar sin avisar a nadie)</th></tr>
+    <tr><td><b>Payment</b></td><td>proveedor, tokenización, reintentos, FX, estados de transacción</td></tr>
+    <tr><td><b>Customer</b></td><td>modelo de datos del cliente, política de tiers, reglas de fusión</td></tr>
+    <tr><td><b>Request</b></td><td>máquina de estados, precio/descuento, prioridad</td></tr>
+    <tr><td><b>Notification</b></td><td>canales, proveedores de entrega, plantillas</td></tr>
+    <tr><td><b>Reporting</b></td><td>almacén de lectura (proyecciones) y formatos</td></tr>
+    <tr><td><b>Integration</b></td><td>protocolos y mapeos de CRM / ERP</td></tr>
+    <tr><td><b>Identity</b></td><td>esquema de credenciales y firma del token</td></tr>
+  </table>
+  <p class="sub">Desaparece <code>utils/helpers</code>: cada función va donde vive su secreto. Rechazado: un módulo "Stripey" aparte (el proveedor es secreto <i>de Payment</i>).</p>
+</section>
+
+<!-- 4 -->
+<section class="slide">
+  <div class="tag">3 · Cohesión, acoplamiento, granularidad <span class="rub">· rúbrica 15 %</span></div>
+  <h2>Grafo TO-BE sin ciclos: todas las flechas apuntan a contratos</h2>
+  <svg viewBox="0 0 760 270" width="100%" role="img" aria-label="Grafo de dependencias TO-BE">
+    <defs><marker id="a" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L8 4L0 8z" fill="var(--mute)"/></marker></defs>
+    <g class="edge" marker-end="url(#a)">
+      <path d="M590 55 L470 55" marker-end="url(#a)"/>
+      <path d="M590 130 L470 70" marker-end="url(#a)"/>
+      <path d="M590 205 L470 80" marker-end="url(#a)"/>
+      <path d="M380 55 L250 55" marker-end="url(#a)"/>
+      <path d="M380 70 L250 125" marker-end="url(#a)" class="ev"/>
+      <path d="M335 90 L335 150 L250 150" marker-end="url(#a)"/>
+      <path d="M200 90 L200 120" marker-end="url(#a)" class="ev"/>
+    </g>
+    <rect class="node" x="590" y="35" width="130" height="40" rx="8"/><text x="655" y="60" text-anchor="middle">Notification</text>
+    <rect class="node" x="590" y="110" width="130" height="40" rx="8"/><text x="655" y="135" text-anchor="middle">Integration</text>
+    <rect class="node" x="590" y="185" width="130" height="40" rx="8"/><text x="655" y="210" text-anchor="middle">Reporting</text>
+    <rect class="node" x="380" y="35" width="90" height="40" rx="8"/><text x="425" y="60" text-anchor="middle">Request</text>
+    <rect class="node" x="160" y="35" width="90" height="40" rx="8"/><text x="205" y="60" text-anchor="middle">Customer</text>
+    <rect class="node leaf" x="160" y="130" width="90" height="40" rx="8"/><text x="205" y="155" text-anchor="middle">Payment</text>
+    <rect class="node leaf" x="20" y="35" width="90" height="40" rx="8"/><text x="65" y="60" text-anchor="middle">Identity</text>
+    <text x="20" y="250" style="fill:var(--mute)">Continua = llamada vía contrato · punteada = evento versionado · verde = hoja (no depende de nadie)</text>
+  </svg>
+  <div class="grid g3">
+    <div class="card"><b class="ok">0 ciclos</b> (AS-IS: 6)<small>FF1 bloqueante</small></div>
+    <div class="card"><b>Orden topológico</b><small>Payment → Customer → Request → {Notification, Integration, Reporting}</small></div>
+    <div class="card"><b>Granularidad</b><small>monolito modular, no microservicios: C_coordination acotado (ADR-006). Costo real: 22→39 archivos, 67→115 aristas</small></div>
+  </div>
+</section>
+
+<!-- 5 -->
+<section class="slide">
+  <div class="tag">4 · Data ownership e interoperabilidad <span class="rub">· rúbrica 15 %</span></div>
+  <h2>Un único owner por dato; se integra por contrato</h2>
+  <div class="grid g2">
+    <div class="card"><b>Ownership</b>
+      <ul><li>Cada tabla lleva el prefijo de su dueño: <code>payment_payments</code>, <code>customer_customers</code>…</li>
+      <li>Nadie fuera de <code>modules/&lt;owner&gt;/</code> la menciona (FF3)</li>
+      <li>Tabla estricta hoy: <code>payment_payments</code> (1 archivo escritor). El resto, en <i>ratchet</i></li></ul></div>
+    <div class="card"><b>Contratos</b>
+      <ul><li>API pública: <code>modules/&lt;m&gt;/contract</code></li>
+      <li>Eventos versionados: <code>PaymentCaptured</code> v1, lector tolerante, v2 convive con v1</li>
+      <li>El proveedor entra por un puerto neutro (<code>ProviderPort</code>) con ACL en el adapter</li></ul></div>
+  </div>
+  <p class="sub">Escribir una tabla ajena o importar un interno de otro módulo rompe el CI (FF3, FF6).</p>
+</section>
+
+<!-- 6 -->
+<section class="slide">
+  <div class="tag">5 · Refactoring y pruebas <span class="rub">· rúbrica 15 %</span></div>
+  <h2>Incremental, nunca reescritura: caracterización primero</h2>
+  <div class="grid g2">
+    <div class="card"><b>Secuencia (E3)</b><br>Caracterización → refactor pequeño → tests → ArchitectureCheck → commit. Strangler interno, un seam por vez, pasos 1–11 sobre el slice <b>Payment</b>.</div>
+    <div class="card"><b>Comportamiento preservado</b><br>63 pruebas de caracterización black-box (HTTP) escritas <i>antes</i> de refactorizar; la misma suite verde tras cada paso. Una sola modificación aprobada: PayFast <code>attempts</code> 0→1 (conteo inconsistente del AS-IS).</div>
+  </div>
+  <div class="grid g3">
+    <div class="card"><div class="big ok">125</div>pruebas pasando (AS-IS: 5, sin pagos)</div>
+    <div class="card"><div class="big ok">100 %</div>cobertura de <code>modules/payment</code> (AS-IS 18,9 %)</div>
+    <div class="card"><div class="big ok">12</div>CCN máx. (AS-IS 26)</div>
+  </div>
+  <p class="sub">Alcance honesto: es un <b>slice</b> representativo (§15 paso 8), no todo el sistema.</p>
+</section>
+
+<!-- 7 -->
+<section class="slide">
+  <div class="tag">6 · Fitness functions y quality gate <span class="rub">· rúbrica 10 %</span></div>
+  <h2>Las decisiones viven en CI: 8 reglas, cada una demostrada fallando</h2>
+  <table>
+    <tr><th>FF</th><th>Protege</th><th>Herramienta</th></tr>
+    <tr><td>FF1</td><td>0 ciclos entre módulos (ADR-004)</td><td>dependency-cruiser</td></tr>
+    <tr><td>FF2 / FF2b</td><td>Proveedor confinado a su adapter (ADR-003)</td><td>dependency-cruiser + script</td></tr>
+    <tr><td>FF3</td><td>Solo el owner toca sus tablas (ADR-002)</td><td>script Node + ownership.json</td></tr>
+    <tr><td>FF4</td><td>SATD no gestionada = 0 (ADR-005)</td><td>satd-scan.sh --gate</td></tr>
+    <tr><td>FF5</td><td>Sin URLs / secretos hard-coded</td><td>script regex</td></tr>
+    <tr><td>FF6</td><td>Solo vía contrato; Payment es hoja</td><td>dependency-cruiser</td></tr>
+    <tr><td>FF7 / FF8</td><td>Cobertura crítica ≥ 80 % · complejidad no sube</td><td>node:test · lizard</td></tr>
+  </table>
+  <p class="sub"><code>ci/prove-rules-fail.sh</code>: 15 violaciones intencionales, las 15 son detectadas · Workflow en GitHub Actions: 5 jobs en verde · Anexo E: <b class="ok">APROBADO</b></p>
+</section>
+
+<!-- 8 -->
+<section class="slide">
+  <div class="tag">7 · SATD <span class="rub">· rúbrica 10 %</span></div>
+  <h2>Deuda gestionada, no escondida: UnmanagedSATD = 0</h2>
+  <div class="grid g3">
+    <div class="card"><div class="big bad">8</div>SATD sin ticket (AS-IS)</div>
+    <div class="card"><div class="big ok">0</div>sin gestionar (TO-BE) · 5 marcadores, todos con <code>TD-xxx</code></div>
+    <div class="card"><div class="big acc">12</div>entradas en el Debt Ledger</div>
+  </div>
+  <ul>
+    <li>Cada deuda: <code>Issue → Owner → Rationale → DueDate → Verification</code>; FF4 exige que el <code>TD-xxx</code> citado exista en el ledger.</li>
+    <li><b>Aceptadas conscientemente:</b> TD-003 (bono gold), TD-004 (cola ERP), TD-009 (eventos en proceso), TD-010 (campos legacy <code>stripey_*</code>).</li>
+    <li><b>Lectura honesta:</b> solo TD-008 está <i>cerrada</i>; el resto está gestionada. TD-006 (clave en el historial de git) exige rotarla: no se resuelve desde el repo.</li>
+  </ul>
+</section>
+
+<!-- 9 -->
+<section class="slide">
+  <div class="tag">8 · ADRs y Vibe Architecting <span class="rub">· rúbrica 5 %</span></div>
+  <h2>Decisiones trazables e instrucciones que un agente puede seguir</h2>
+  <div class="grid g2">
+    <div class="card"><b>6 ADRs aceptados</b>
+      <ul><li>001 Límite de Payment</li><li>002 Propiedad de Customer</li><li>003 Proveedores externos (adapter / ACL)</li><li>004 Integración entre módulos (API + eventos)</li><li>005 Política de SATD y quality gates</li><li>006 Monolito modular / granularidad</li></ul></div>
+    <div class="card"><b>Cómo se controla a la IA</b>
+      <ul><li>E7: Architectural Intent reutilizable (módulo, deps permitidas/prohibidas, datos, contrato, calidad)</li>
+      <li>Prompts guardados en <code>docs/intents/</code> (trazabilidad)</li>
+      <li>Si el agente viola una frontera, <b>falla el CI</b>: ese es el control, no el prompt</li>
+      <li>CODEOWNERS + checklist de PR (Anexo D)</li></ul></div>
+  </div>
+</section>
+
+<!-- 10 -->
+<section class="slide">
+  <div class="tag">9 · Evidencia AS-IS / TO-BE <span class="rub">· responde §16.1 y §19</span></div>
+  <h2>Cambiar de proveedor de pagos: de 12 archivos a 4, en 1 módulo</h2>
+  <table>
+    <tr><th>Indicador</th><th>AS-IS</th><th>TO-BE</th></tr>
+    <tr><td>SATD no gestionada</td><td class="bad">8</td><td class="ok">0</td></tr>
+    <tr><td>Ciclos entre módulos</td><td class="bad">6</td><td class="ok">0</td></tr>
+    <tr><td>Cobertura crítica (Payment)</td><td class="bad">18,9 %</td><td class="ok">100 %</td></tr>
+    <tr><td>Complejidad máx. (CCN)</td><td class="bad">26</td><td class="ok">12</td></tr>
+    <tr><td>Duplicación</td><td>7,87 %</td><td class="ok">5,04 %</td></tr>
+    <tr><td>Fitness functions · ADRs</td><td class="bad">0 · 0</td><td class="ok">8 · 6</td></tr>
+    <tr><td>Agregar un proveedor (experimento NovaPay)</td><td class="bad">12 archivos · 5 áreas</td><td class="ok">4 archivos · 1 módulo · 0 legados</td></tr>
+  </table>
+  <p class="sub">Triangulación (§19): modelo (ADR-001/003/004) + código (<code>payment/adapters/</code>) + evidencia automática (FF2, FF2b, FF5, suite verde).</p>
+</section>
+
+<!-- 11 -->
+<section class="slide">
+  <div class="tag">10 · Límites y cierre</div>
+  <h2>Lo que demostramos… y lo que no</h2>
+  <div class="grid g2">
+    <div class="card"><b class="ok">Demostrado</b>
+      <ul><li>El radio de cambio de la decisión más volátil (proveedor de pagos) quedó confinado y protegido por reglas ejecutables</li><li>0 ciclos, 0 SATD sin gestionar, comportamiento preservado</li></ul></div>
+    <div class="card"><b class="warn">No demostrado / costo</b>
+      <ul><li>Solo S1 tiene experimento real; S2–S5 planificados, no ejecutados</li><li>Ownership estricto en 1 de 6 tablas; fan-in de <code>db</code>/<code>helpers</code> subió (14→16 / 14→15)</li><li>Con NovaPay fallan 24 de 127 pruebas: la suite valida el vocabulario de Stripey</li><li>Más archivos (22→39) y aristas (67→115)</li><li>Pendientes: rotar clave (TD-006) y branch protection</li></ul></div>
+  </div>
+  <div class="q">Dependencia más riesgosa: <code>Customer ⇢ Payment</code> por evento (totalSpent/tier), mitigada con contrato v1 y flecha de un solo sentido.</div>
+</section>
+
+<div class="nav"><span>FlowNow · DecidArch</span><span id="n">1</span><span>← → / espacio · F para pantalla completa</span></div>
+<script>
+  const s=[...document.querySelectorAll('.slide')];let i=0;
+  try{const h=parseInt(location.hash.slice(1));if(h>=1&&h<=s.length)i=h-1}catch(e){}
+  function show(k){i=Math.max(0,Math.min(s.length-1,k));s.forEach((e,j)=>e.classList.toggle('on',j===i));
+    document.getElementById('n').textContent=(i+1)+' / '+s.length;
+    document.getElementById('bar').style.width=((i+1)/s.length*100)+'%';
+    try{history.replaceState(null,'','#'+(i+1))}catch(e){}}
+  addEventListener('keydown',e=>{
+    if(['ArrowRight','PageDown',' ','Enter'].includes(e.key)){e.preventDefault();show(i+1)}
+    else if(['ArrowLeft','PageUp','Backspace'].includes(e.key)){e.preventDefault();show(i-1)}
+    else if(e.key==='Home')show(0);else if(e.key==='End')show(s.length-1);
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}});
+  addEventListener('click',e=>{if(e.target.closest('a'))return;show(e.clientX>innerWidth/3?i+1:i-1)});
+  show(i);
+</script>
+</body>
+</html>
